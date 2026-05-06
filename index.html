@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aria - Assistente Vocale</title>
+    <title>Aria - Assistente Naturale</title>
     <style>
         :root { --bg: #0f172a; --accent: #38bdf8; --text: #f1f5f9; --card: #1e293b; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
@@ -19,7 +19,6 @@
         .api-input { background: var(--card); border: 1px solid #444; color: white; padding: 15px; border-radius: 12px; width: 100%; box-sizing: border-box; margin-bottom: 20px; }
         #transcript { margin-top: 20px; padding: 20px; border-radius: 15px; background: rgba(255,255,255,0.05); min-height: 80px; text-align: left; line-height: 1.5; }
         #debug-log { font-family: monospace; font-size: 11px; color: #94a3b8; margin-top: 30px; text-align: left; width: 100%; max-height: 120px; overflow-y: auto; background: #000; padding: 15px; border-radius: 10px; border: 1px solid #334155; }
-        .error-msg { color: #f87171; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -45,12 +44,12 @@
     </div>
 
     <script>
-        const systemPrompt = "Sei Aria, un'assistente vocale empatica esperta in pedagogia. Aiuti i bambini con i compiti. Non dare risposte pronte, usa il metodo socratico (fai domande). Sii incoraggiante e simpatica.";
+        // PROMPT OTTIMIZZATO PER ITALIANO NATURALE
+        const systemPrompt = "Sei Aria, un'assistente vocale dal tono umano, caldo e naturale. Parli un italiano perfetto e colloquiale. EVITA traduzioni letterali dall'inglese come 'grazie per chiedere' (usa invece 'grazie per avermelo chiesto' o 'che gentile!'). Sei esperta in pedagogia e aiuti i bambini con i compiti usando il metodo socratico: non dare mai la soluzione, ma guida il bambino con domande intelligenti. Sii simpatica, usa espressioni italiane comuni.";
 
         function log(msg, isError = false) {
             const l = document.getElementById('debug-log');
-            const colorClass = isError ? 'class="error-msg"' : '';
-            l.innerHTML += `<div ${colorClass}>> ${msg}</div>`;
+            l.innerHTML += `<div>> ${msg}</div>`;
             l.scrollTop = l.scrollHeight;
         }
 
@@ -66,23 +65,18 @@
             document.getElementById('setup').classList.add('hidden');
             document.getElementById('app').classList.remove('hidden');
             document.getElementById('display-avatar').innerText = localStorage.getItem('aria_avatar');
-            log("Aria pronta. Cerco voci migliori...");
-            // Pre-carica le voci
             window.speechSynthesis.getVoices();
         }
 
-        // --- Logica Vocale (Riconoscimento) ---
         const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
         if(Speech) {
             const rec = new Speech();
             rec.lang = 'it-IT';
             document.getElementById('aria-btn').onclick = () => {
-                window.speechSynthesis.cancel(); // Ferma Aria se stava parlando
-                try { 
-                    rec.start(); 
-                    document.getElementById('aria-btn').classList.add('listening');
-                    document.getElementById('status').innerText = "Ti ascolto...";
-                } catch(e) { log("Errore microfono: " + e.message, true); }
+                window.speechSynthesis.cancel();
+                rec.start(); 
+                document.getElementById('aria-btn').classList.add('listening');
+                document.getElementById('status').innerText = "Ti ascolto...";
             };
 
             rec.onresult = (e) => {
@@ -93,23 +87,22 @@
             };
         }
 
-        // --- Funzione Voce Migliorata ---
         function speakNative(text) {
+            // Piccola correzione "al volo" se l'IA sbaglia ancora
+            let fixedText = text.replace(/grazie per chiedere/gi, "grazie per avermelo chiesto");
+            fixedText = fixedText.replace(/sono felice di vederti/gi, "mi fa piacere sentirti");
+
             const synth = window.speechSynthesis;
-            const utter = new SpeechSynthesisUtterance(text);
+            const utter = new SpeechSynthesisUtterance(fixedText);
             const voices = synth.getVoices();
 
-            // Cerchiamo una voce italiana che non sia quella base
-            // Preferenza: Google o voci con "Natural" nel nome
-            const preferredVoice = voices.find(v => v.lang.startsWith('it') && v.name.includes('Google')) || 
-                                  voices.find(v => v.lang.startsWith('it') && v.name.includes('Natural')) ||
-                                  voices.find(v => v.lang.startsWith('it'));
-
+            // Cerchiamo la voce migliore disponibile
+            const preferredVoice = voices.find(v => v.lang.startsWith('it') && (v.name.includes('Google') || v.name.includes('Natural')));
             if (preferredVoice) utter.voice = preferredVoice;
             
             utter.lang = 'it-IT';
-            utter.pitch = 1.1; // Leggermente più acuta (più umana)
-            utter.rate = 1.0;  // Velocità normale
+            utter.pitch = 1.0; // Tono normale, più umano
+            utter.rate = 0.95; // Leggermente più lenta per essere meno robotica
             
             synth.speak(utter);
         }
@@ -128,13 +121,11 @@
                     body: JSON.stringify({
                         model: "llama-3.1-8b-instant",
                         messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userInput }],
-                        temperature: 0.7
+                        temperature: 0.8 // Un po' più di creatività la rende meno rigida
                     })
                 });
 
                 const data = await response.json();
-                if (!response.ok) throw new Error(data.error ? data.error.message : "Errore");
-
                 const reply = data.choices[0].message.content;
                 document.getElementById('transcript').innerText = "Aria: " + reply;
                 document.getElementById('status').innerText = "Tocca per parlare";
@@ -142,8 +133,7 @@
                 speakNative(reply);
 
             } catch(e) {
-                log("ERRORE: " + e.message, true);
-                document.getElementById('status').innerText = "Errore. Riprova.";
+                log("ERRORE: " + e.message);
             }
         }
 

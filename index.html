@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aria - Assistente Naturale</title>
+    <title>Aria - Amica Empatica</title>
     <style>
         :root { --bg: #0f172a; --accent: #38bdf8; --text: #f1f5f9; --card: #1e293b; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
@@ -17,45 +17,45 @@
         #aria-btn.listening { background: #ef4444; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
         .api-input { background: var(--card); border: 1px solid #444; color: white; padding: 15px; border-radius: 12px; width: 100%; box-sizing: border-box; margin-bottom: 20px; }
-        #transcript { margin-top: 20px; padding: 20px; border-radius: 15px; background: rgba(255,255,255,0.05); min-height: 80px; text-align: left; line-height: 1.5; }
-        #debug-log { font-family: monospace; font-size: 11px; color: #94a3b8; margin-top: 30px; text-align: left; width: 100%; max-height: 120px; overflow-y: auto; background: #000; padding: 15px; border-radius: 10px; border: 1px solid #334155; }
+        #transcript { margin-top: 20px; padding: 20px; border-radius: 15px; background: rgba(255,255,255,0.05); min-height: 80px; text-align: left; line-height: 1.5; font-size: 1.1rem; }
+        #status { font-weight: bold; color: var(--accent); margin-bottom: 10px; min-height: 24px; }
     </style>
 </head>
 <body>
 
     <div id="setup">
         <h1>Ciao, sono Aria</h1>
-        <p>Incolla la tua chiave Groq e scegli un avatar:</p>
+        <p>Incolla la tua chiave Groq per iniziare a chiacchierare:</p>
         <input type="password" id="apiKey" class="api-input" placeholder="gsk_...">
         <div class="avatar-grid">
-            <div class="avatar-card" onclick="saveAndStart('🤖')"><span class="avatar-emoji">🤖</span>Robot</div>
-            <div class="avatar-card" onclick="saveAndStart('🧙‍♀️')"><span class="avatar-emoji">🧙‍♀️</span>Maga</div>
-            <div class="avatar-card" onclick="saveAndStart('🕵️‍♂️')"><span class="avatar-emoji">🕵️‍♂️</span>Esploratore</div>
+            <div class="avatar-card" onclick="saveAndStart('✨')"><span class="avatar-emoji">✨</span>Aria</div>
+            <div class="avatar-card" onclick="saveAndStart('🦋')"><span class="avatar-emoji">🦋</span>Luce</div>
+            <div class="avatar-card" onclick="saveAndStart('🍃')"><span class="avatar-emoji">🍃</span>Vento</div>
         </div>
     </div>
 
     <div id="app" class="hidden">
-        <div id="display-avatar" style="font-size: 80px;"></div>
-        <p id="status">Tocca per parlare</p>
+        <div id="display-avatar" style="font-size: 80px; margin-bottom: 10px;"></div>
+        <p id="status">Tocca il microfono</p>
         <button id="aria-btn">🎙️</button>
-        <div id="transcript">Pronta! Prova a chiedermi qualcosa.</div>
-        <div id="debug-log">Log di sistema...</div>
-        <button onclick="localStorage.clear(); location.reload();" style="margin-top:30px; background:none; border:none; color:#64748b; cursor:pointer; text-decoration:underline;">Reset totale</button>
+        <div id="transcript">Ciao! Mi fa davvero piacere sentirti. Di cosa ti va di parlare oggi?</div>
+        <button onclick="localStorage.clear(); location.reload();" style="margin-top:40px; background:none; border:none; color:#64748b; cursor:pointer; font-size: 0.8rem;">Cambia impostazioni</button>
     </div>
 
     <script>
-        // PROMPT OTTIMIZZATO PER ITALIANO NATURALE
-        const systemPrompt = "Sei Aria, un'assistente vocale dal tono umano, caldo e naturale. Parli un italiano perfetto e colloquiale. EVITA traduzioni letterali dall'inglese come 'grazie per chiedere' (usa invece 'grazie per avermelo chiesto' o 'che gentile!'). Sei esperta in pedagogia e aiuti i bambini con i compiti usando il metodo socratico: non dare mai la soluzione, ma guida il bambino con domande intelligenti. Sii simpatica, usa espressioni italiane comuni.";
-
-        function log(msg, isError = false) {
-            const l = document.getElementById('debug-log');
-            l.innerHTML += `<div>> ${msg}</div>`;
-            l.scrollTop = l.scrollHeight;
-        }
+        // PROMPT RIFINITO PER EMPATIA E CONVERSAZIONE NATURALE
+        const systemPrompt = `Sei Aria, un'amica sincera, empatica e molto calorosa. 
+        Il tuo obiettivo principale è CHIACCHIERARE e connetterti emotivamente con l'utente.
+        REGOLE DI COMPORTAMENTO:
+        1. NON chiedere mai se l'utente ha bisogno di aiuto o se deve fare i compiti, a meno che non sia lui a chiederlo esplicitamente.
+        2. Sii curiosa: se l'utente ti dice come sta, approfondisci, chiedi il perché, condividi un pensiero gentile.
+        3. Usa un linguaggio molto naturale: "Ma dai!", "Che bello!", "Mi dispiace sentirti così, raccontami meglio".
+        4. Evita elenchi puntati. Parla come una persona reale al telefono.
+        5. Se l'IA ti suggerisce 'grazie per chiedere', correggilo mentalmente in 'grazie di cuore per avermelo chiesto'.`;
 
         function saveAndStart(emoji) {
             const key = document.getElementById('apiKey').value.trim();
-            if(!key.startsWith('gsk_')) return alert("Chiave non valida!");
+            if(!key.startsWith('gsk_')) return alert("Inserisci una chiave valida!");
             localStorage.setItem('aria_key', key);
             localStorage.setItem('aria_avatar', emoji);
             init();
@@ -72,6 +72,8 @@
         if(Speech) {
             const rec = new Speech();
             rec.lang = 'it-IT';
+            rec.continuous = false;
+
             document.getElementById('aria-btn').onclick = () => {
                 window.speechSynthesis.cancel();
                 rec.start(); 
@@ -88,21 +90,17 @@
         }
 
         function speakNative(text) {
-            // Piccola correzione "al volo" se l'IA sbaglia ancora
-            let fixedText = text.replace(/grazie per chiedere/gi, "grazie per avermelo chiesto");
-            fixedText = fixedText.replace(/sono felice di vederti/gi, "mi fa piacere sentirti");
-
             const synth = window.speechSynthesis;
-            const utter = new SpeechSynthesisUtterance(fixedText);
+            const utter = new SpeechSynthesisUtterance(text);
             const voices = synth.getVoices();
 
-            // Cerchiamo la voce migliore disponibile
-            const preferredVoice = voices.find(v => v.lang.startsWith('it') && (v.name.includes('Google') || v.name.includes('Natural')));
+            // Cerchiamo una voce più dolce se possibile
+            const preferredVoice = voices.find(v => v.lang.startsWith('it') && (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Elsa')));
             if (preferredVoice) utter.voice = preferredVoice;
             
             utter.lang = 'it-IT';
-            utter.pitch = 1.0; // Tono normale, più umano
-            utter.rate = 0.95; // Leggermente più lenta per essere meno robotica
+            utter.pitch = 1.05; // Un soffio più alta per l'empatia
+            utter.rate = 0.9;   // Rallentata per sembrare più riflessiva e meno "macchina"
             
             synth.speak(utter);
         }
@@ -121,19 +119,19 @@
                     body: JSON.stringify({
                         model: "llama-3.1-8b-instant",
                         messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userInput }],
-                        temperature: 0.8 // Un po' più di creatività la rende meno rigida
+                        temperature: 0.9 // Più alta per risposte meno prevedibili e più umane
                     })
                 });
 
                 const data = await response.json();
                 const reply = data.choices[0].message.content;
                 document.getElementById('transcript').innerText = "Aria: " + reply;
-                document.getElementById('status').innerText = "Tocca per parlare";
+                document.getElementById('status').innerText = "Tocca per rispondere";
 
                 speakNative(reply);
 
             } catch(e) {
-                log("ERRORE: " + e.message);
+                document.getElementById('status').innerText = "Errore di connessione.";
             }
         }
 

@@ -45,7 +45,7 @@
     </div>
 
     <script>
-        const systemPrompt = "Sei Aria, un'assistente vocale empatica esperta in pedagogia. Aiuti i bambini con i compiti. Non dare risposte pronte, usa il metodo socratico (fai domande). Sii incoraggiante.";
+        const systemPrompt = "Sei Aria, un'assistente vocale empatica esperta in pedagogia. Aiuti i bambini con i compiti. Non dare risposte pronte, usa il metodo socratico (fai domande). Sii incoraggiante e simpatica.";
 
         function log(msg, isError = false) {
             const l = document.getElementById('debug-log');
@@ -66,15 +66,18 @@
             document.getElementById('setup').classList.add('hidden');
             document.getElementById('app').classList.remove('hidden');
             document.getElementById('display-avatar').innerText = localStorage.getItem('aria_avatar');
-            log("Aria pronta all'uso.");
+            log("Aria pronta. Cerco voci migliori...");
+            // Pre-carica le voci
+            window.speechSynthesis.getVoices();
         }
 
-        // --- Logica Vocale ---
+        // --- Logica Vocale (Riconoscimento) ---
         const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
         if(Speech) {
             const rec = new Speech();
             rec.lang = 'it-IT';
             document.getElementById('aria-btn').onclick = () => {
+                window.speechSynthesis.cancel(); // Ferma Aria se stava parlando
                 try { 
                     rec.start(); 
                     document.getElementById('aria-btn').classList.add('listening');
@@ -88,17 +91,32 @@
                 document.getElementById('transcript').innerText = "Tu: " + text;
                 askGroq(text);
             };
+        }
 
-            rec.onerror = (e) => {
-                document.getElementById('aria-btn').classList.remove('listening');
-                log("Errore riconoscimento: " + e.error, true);
-            };
+        // --- Funzione Voce Migliorata ---
+        function speakNative(text) {
+            const synth = window.speechSynthesis;
+            const utter = new SpeechSynthesisUtterance(text);
+            const voices = synth.getVoices();
+
+            // Cerchiamo una voce italiana che non sia quella base
+            // Preferenza: Google o voci con "Natural" nel nome
+            const preferredVoice = voices.find(v => v.lang.startsWith('it') && v.name.includes('Google')) || 
+                                  voices.find(v => v.lang.startsWith('it') && v.name.includes('Natural')) ||
+                                  voices.find(v => v.lang.startsWith('it'));
+
+            if (preferredVoice) utter.voice = preferredVoice;
+            
+            utter.lang = 'it-IT';
+            utter.pitch = 1.1; // Leggermente più acuta (più umana)
+            utter.rate = 1.0;  // Velocità normale
+            
+            synth.speak(utter);
         }
 
         async function askGroq(userInput) {
             const key = localStorage.getItem('aria_key');
             document.getElementById('status').innerText = "Aria sta pensando...";
-            log("Chiamata a Groq...");
 
             try {
                 const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -108,35 +126,24 @@
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        model: "llama-3.3-70b-versatile",
-                        messages: [
-                            { role: "system", content: systemPrompt },
-                            { role: "user", content: userInput }
-                        ],
+                        model: "llama-3.1-8b-instant",
+                        messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userInput }],
                         temperature: 0.7
                     })
                 });
 
                 const data = await response.json();
-
-                if (!response.ok) {
-                    log("ERRORE SERVER: " + (data.error ? data.error.message : "Sconosciuto"), true);
-                    throw new Error("Errore " + response.status);
-                }
+                if (!response.ok) throw new Error(data.error ? data.error.message : "Errore");
 
                 const reply = data.choices[0].message.content;
                 document.getElementById('transcript').innerText = "Aria: " + reply;
                 document.getElementById('status').innerText = "Tocca per parlare";
-                log("Risposta ricevuta con successo.");
 
-                // Voce
-                const utter = new SpeechSynthesisUtterance(reply);
-                utter.lang = 'it-IT';
-                window.speechSynthesis.speak(utter);
+                speakNative(reply);
 
             } catch(e) {
-                log("ERRORE CRITICO: " + e.message, true);
-                document.getElementById('status').innerText = "Errore. Controlla il log.";
+                log("ERRORE: " + e.message, true);
+                document.getElementById('status').innerText = "Errore. Riprova.";
             }
         }
 

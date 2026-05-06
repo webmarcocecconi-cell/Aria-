@@ -3,68 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aria - Amica Empatica</title>
+    <title>Aria - Conversazione Naturale</title>
     <style>
         :root { --bg: #0f172a; --accent: #38bdf8; --text: #f1f5f9; --card: #1e293b; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-        #setup, #app { text-align: center; width: 100%; max-width: 500px; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
+        #app { text-align: center; width: 100%; max-width: 500px; }
         .hidden { display: none !important; }
-        .avatar-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin: 25px 0; }
-        .avatar-card { cursor: pointer; padding: 20px; border-radius: 20px; background: var(--card); transition: 0.3s; border: 2px solid transparent; }
-        .avatar-card:hover { transform: translateY(-5px); border-color: var(--accent); }
-        .avatar-emoji { font-size: 50px; display: block; }
-        #aria-btn { width: 130px; height: 130px; border-radius: 50%; border: none; background: var(--accent); cursor: pointer; font-size: 50px; color: white; box-shadow: 0 0 20px rgba(56, 189, 248, 0.3); margin: 20px 0; }
-        #aria-btn.listening { background: #ef4444; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
-        .api-input { background: var(--card); border: 1px solid #444; color: white; padding: 15px; border-radius: 12px; width: 100%; box-sizing: border-box; margin-bottom: 20px; }
-        #transcript { margin-top: 20px; padding: 20px; border-radius: 15px; background: rgba(255,255,255,0.05); min-height: 80px; text-align: left; line-height: 1.5; font-size: 1.1rem; }
-        #status { font-weight: bold; color: var(--accent); margin-bottom: 10px; min-height: 24px; }
+        #aria-btn { width: 120px; height: 120px; border-radius: 50%; border: none; background: var(--accent); cursor: pointer; font-size: 50px; color: white; box-shadow: 0 0 20px rgba(56, 189, 248, 0.3); margin: 20px 0; transition: 0.3s; }
+        #aria-btn.listening { background: #ef4444; transform: scale(1.1); box-shadow: 0 0 30px rgba(239, 68, 68, 0.5); }
+        #transcript { margin-top: 20px; padding: 20px; border-radius: 15px; background: rgba(255,255,255,0.05); min-height: 60px; line-height: 1.4; font-size: 1.1rem; }
+        .api-input { background: var(--card); border: 1px solid #444; color: white; padding: 15px; border-radius: 12px; width: 100%; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
     <div id="setup">
-        <h1>Ciao, sono Aria</h1>
-        <p>Incolla la tua chiave Groq per iniziare a chiacchierare:</p>
-        <input type="password" id="apiKey" class="api-input" placeholder="gsk_...">
-        <div class="avatar-grid">
-            <div class="avatar-card" onclick="saveAndStart('✨')"><span class="avatar-emoji">✨</span>Aria</div>
-            <div class="avatar-card" onclick="saveAndStart('🦋')"><span class="avatar-emoji">🦋</span>Luce</div>
-            <div class="avatar-card" onclick="saveAndStart('🍃')"><span class="avatar-emoji">🍃</span>Vento</div>
-        </div>
+        <h1>Aria</h1>
+        <input type="password" id="apiKey" class="api-input" placeholder="Incolla chiave Groq...">
+        <button onclick="saveAndStart()" style="padding: 10px 20px; border-radius: 10px; border: none; background: var(--accent); color: white; cursor: pointer;">Inizia</button>
     </div>
 
     <div id="app" class="hidden">
-        <div id="display-avatar" style="font-size: 80px; margin-bottom: 10px;"></div>
-        <p id="status">Tocca il microfono</p>
+        <div id="avatar" style="font-size: 80px;">✨</div>
+        <p id="status" style="color: var(--accent); font-weight: bold;">Tocca per parlare</p>
         <button id="aria-btn">🎙️</button>
-        <div id="transcript">Ciao! Mi fa davvero piacere sentirti. Di cosa ti va di parlare oggi?</div>
-        <button onclick="localStorage.clear(); location.reload();" style="margin-top:40px; background:none; border:none; color:#64748b; cursor:pointer; font-size: 0.8rem;">Cambia impostazioni</button>
+        <div id="transcript">Ciao! Sono qui se ti va di fare due chiacchiere.</div>
     </div>
 
     <script>
-        // PROMPT RIFINITO PER EMPATIA E CONVERSAZIONE NATURALE
-        const systemPrompt = `Sei Aria, un'amica sincera, empatica e molto calorosa. 
-        Il tuo obiettivo principale è CHIACCHIERARE e connetterti emotivamente con l'utente.
-        REGOLE DI COMPORTAMENTO:
-        1. NON chiedere mai se l'utente ha bisogno di aiuto o se deve fare i compiti, a meno che non sia lui a chiederlo esplicitamente.
-        2. Sii curiosa: se l'utente ti dice come sta, approfondisci, chiedi il perché, condividi un pensiero gentile.
-        3. Usa un linguaggio molto naturale: "Ma dai!", "Che bello!", "Mi dispiace sentirti così, raccontami meglio".
-        4. Evita elenchi puntati. Parla come una persona reale al telefono.
-        5. Se l'IA ti suggerisce 'grazie per chiedere', correggilo mentalmente in 'grazie di cuore per avermelo chiesto'.`;
+        const systemPrompt = "Sei Aria, un'amica vera. Parla in modo molto colloquiale e sintetico. Usa frasi brevi. Non essere mai formale. Se l'utente sta male, sii empatica. Se è felice, festeggia con lui. NON menzionare compiti o studio a meno che non lo faccia l'utente. Rispondi come se fossi in una nota vocale su WhatsApp: amichevole, calda e diretta.";
 
-        function saveAndStart(emoji) {
+        function saveAndStart() {
             const key = document.getElementById('apiKey').value.trim();
-            if(!key.startsWith('gsk_')) return alert("Inserisci una chiave valida!");
+            if(!key) return alert("Inserisci la chiave!");
             localStorage.setItem('aria_key', key);
-            localStorage.setItem('aria_avatar', emoji);
             init();
         }
 
         function init() {
             document.getElementById('setup').classList.add('hidden');
             document.getElementById('app').classList.remove('hidden');
-            document.getElementById('display-avatar').innerText = localStorage.getItem('aria_avatar');
             window.speechSynthesis.getVoices();
         }
 
@@ -72,67 +50,54 @@
         if(Speech) {
             const rec = new Speech();
             rec.lang = 'it-IT';
-            rec.continuous = false;
-
             document.getElementById('aria-btn').onclick = () => {
                 window.speechSynthesis.cancel();
-                rec.start(); 
+                rec.start();
                 document.getElementById('aria-btn').classList.add('listening');
-                document.getElementById('status').innerText = "Ti ascolto...";
             };
-
             rec.onresult = (e) => {
                 document.getElementById('aria-btn').classList.remove('listening');
-                const text = e.results[0][0].transcript;
-                document.getElementById('transcript').innerText = "Tu: " + text;
-                askGroq(text);
+                askGroq(e.results[0][0].transcript);
             };
         }
 
-        function speakNative(text) {
+        function speak(text) {
             const synth = window.speechSynthesis;
-            const utter = new SpeechSynthesisUtterance(text);
-            const voices = synth.getVoices();
-
-            // Cerchiamo una voce più dolce se possibile
-            const preferredVoice = voices.find(v => v.lang.startsWith('it') && (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Elsa')));
-            if (preferredVoice) utter.voice = preferredVoice;
+            // Aggiungiamo delle virgole per creare pause naturali nel parlato
+            const naturalText = text.replace(/([.!?])\s+/g, "$1, ");
+            const utter = new SpeechSynthesisUtterance(naturalText);
             
+            const voices = synth.getVoices();
+            const bestVoice = voices.find(v => v.lang.startsWith('it') && v.name.includes('Google')) || voices.find(v => v.lang.startsWith('it'));
+            
+            if (bestVoice) utter.voice = bestVoice;
             utter.lang = 'it-IT';
-            utter.pitch = 1.05; // Un soffio più alta per l'empatia
-            utter.rate = 0.9;   // Rallentata per sembrare più riflessiva e meno "macchina"
+            utter.pitch = 1.0; 
+            utter.rate = 1.0; // Velocità standard per evitare l'effetto trascinato
             
             synth.speak(utter);
         }
 
-        async function askGroq(userInput) {
-            const key = localStorage.getItem('aria_key');
+        async function askGroq(input) {
+            document.getElementById('transcript').innerText = "Tu: " + input;
             document.getElementById('status').innerText = "Aria sta pensando...";
-
+            
             try {
                 const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
-                    headers: { 
-                        "Authorization": "Bearer " + key,
-                        "Content-Type": "application/json"
-                    },
+                    headers: { "Authorization": "Bearer " + localStorage.getItem('aria_key'), "Content-Type": "application/json" },
                     body: JSON.stringify({
                         model: "llama-3.1-8b-instant",
-                        messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userInput }],
-                        temperature: 0.9 // Più alta per risposte meno prevedibili e più umane
+                        messages: [{ role: "system", content: systemPrompt }, { role: "user", content: input }],
+                        temperature: 0.9
                     })
                 });
-
                 const data = await response.json();
                 const reply = data.choices[0].message.content;
                 document.getElementById('transcript').innerText = "Aria: " + reply;
                 document.getElementById('status').innerText = "Tocca per rispondere";
-
-                speakNative(reply);
-
-            } catch(e) {
-                document.getElementById('status').innerText = "Errore di connessione.";
-            }
+                speak(reply);
+            } catch(e) { document.getElementById('status').innerText = "Errore!"; }
         }
 
         if(localStorage.getItem('aria_key')) init();

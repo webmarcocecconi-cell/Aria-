@@ -12,32 +12,37 @@
         #aria-btn { width: 140px; height: 140px; border-radius: 50%; border: none; background: var(--accent); cursor: pointer; font-size: 60px; color: white; box-shadow: 0 0 30px rgba(56, 189, 248, 0.4); margin: 30px 0; transition: 0.3s; }
         #aria-btn.listening { background: #ef4444; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
-        #status { background: var(--card); padding: 20px; border-radius: 15px; min-height: 40px; border-bottom: 3px solid var(--accent); }
-        .api-input { background: var(--card); border: 2px solid #334155; color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
+        #status { background: var(--card); padding: 20px; border-radius: 15px; min-height: 40px; border-bottom: 3px solid var(--accent); margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
     <div id="setup">
         <h1>Aria ✨</h1>
-        <p>Modello: Gemini 2.5 TTS (Solo Audio)</p>
-        <input type="password" id="geminiKey" class="api-input" placeholder="Incolla la tua API Key">
-        <button onclick="saveAndStart()" style="background: var(--accent); color: white; border: none; padding: 15px; border-radius: 10px; width: 100%; cursor: pointer; font-weight: bold;">ATTIVA</button>
+        <input type="password" id="geminiKey" style="padding: 12px; border-radius: 10px; border: none; width: 80%; margin-bottom: 10px;" placeholder="API Key">
+        <button onclick="saveAndStart()" style="background: var(--accent); border: none; padding: 15px 30px; border-radius: 10px; color: white; cursor: pointer; font-weight: bold;">ATTIVA</button>
     </div>
 
     <div id="app" class="hidden">
-        <div style="font-size: 60px;">🎙️</div>
         <div id="status">Tocca il cerchio e parla</div>
         <button id="aria-btn">🔵</button>
-        <p style="font-size: 0.8rem; opacity: 0.5;">Nota: Questo modello risponde solo a voce.</p>
+        <div id="user-text" style="margin-top: 20px; font-style: italic; opacity: 0.7;"></div>
     </div>
 
+    <audio id="aria-voice" style="display:none;"></audio>
+
     <script>
-        const systemPrompt = "Sei Aria, un'amica empatica. Rispondi in modo solare, dolce e molto breve (max 2 frasi). Parla in italiano.";
+        const systemPrompt = "Sei Aria, un'amica empatica. Rispondi in italiano in modo molto breve e dolce.";
+        const audioEl = document.getElementById('aria-voice');
 
         function saveAndStart() {
             const key = document.getElementById('geminiKey').value.trim();
-            if(key) { localStorage.setItem('gemini_key', key); init(); }
+            if(key) { 
+                localStorage.setItem('gemini_key', key); 
+                // Sblocca l'audio su mobile/browser con un'azione utente
+                audioEl.play().catch(() => {}); 
+                init(); 
+            }
         }
 
         function init() {
@@ -61,7 +66,8 @@
             rec.onresult = (e) => {
                 document.getElementById('aria-btn').classList.remove('listening');
                 const text = e.results[0][0].transcript;
-                document.getElementById('status').innerText = "Aria sta preparando la voce...";
+                document.getElementById('user-text').innerText = "Tu: " + text;
+                document.getElementById('status').innerText = "Aria sta pensando...";
                 askGemini(text);
             };
         }
@@ -73,9 +79,8 @@
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: systemPrompt + "\n\nUtente: " + input }] }],
+                        contents: [{ parts: [{ text: systemPrompt + "\n\n" + input }] }],
                         generationConfig: {
-                            // RICHIESTA SOLO AUDIO PER EVITARE ERRORE 400
                             response_modalities: ["AUDIO"], 
                             speech_config: { voice_config: { prebuilt_voice_config: { voice_name: "Aoede" } } }
                         }
@@ -83,28 +88,43 @@
                 });
 
                 const data = await response.json();
-                if (data.error) throw new Error(data.error.message);
-
-                const audioPart = data.candidates[0].content.parts.find(p => p.inline_data);
-                if (audioPart) {
-                    playAudio(audioPart.inline_data.data);
-                    document.getElementById('status').innerText = "Aria sta parlando...";
+                const audioData = data.candidates[0].content.parts.find(p => p.inline_data);
+                
+                if (audioData) {
+                    playVoice(audioData.inline_data.data);
+                } else {
+                    document.getElementById('status').innerText = "Errore: Niente audio ricevuto.";
                 }
 
             } catch(e) { 
-                alert("Errore: " + e.message);
-                document.getElementById('status').innerText = "Errore tecnico.";
+                document.getElementById('status').innerText = "Errore di connessione.";
             }
         }
 
-        function playAudio(base64) {
-            const bin = atob(base64);
+        function playVoice(base64) {
+            const blob = b64ToBlob(base64, 'audio/wav');
+            const url = URL.createObjectURL(blob);
+            
+            audioEl.src = url;
+            document.getElementById('status').innerText = "Aria sta parlando...";
+            
+            audioEl.play().catch(err => {
+                console.error("Errore riproduzione:", err);
+                document.getElementById('status').innerText = "Clicca qui per sentire l'audio!";
+                document.getElementById('status').onclick = () => audioEl.play();
+            });
+
+            audioEl.onended = () => {
+                document.getElementById('status').innerText = "Tocca per parlare ancora";
+                document.getElementById('status').onclick = null;
+            };
+        }
+
+        function b64ToBlob(b64, type) {
+            const bin = atob(b64);
             const array = new Uint8Array(bin.length);
             for (let i = 0; i < bin.length; i++) array[i] = bin.charCodeAt(i);
-            const blob = new Blob([array], {type: 'audio/wav'});
-            const audio = new Audio(URL.createObjectURL(blob));
-            audio.onended = () => { document.getElementById('status').innerText = "Tocca per parlare ancora"; };
-            audio.play();
+            return new Blob([array], {type: type});
         }
 
         if(localStorage.getItem('gemini_key')) init();

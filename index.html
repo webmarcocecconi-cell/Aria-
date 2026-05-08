@@ -32,14 +32,14 @@
     <audio id="aria-voice" style="display:none;"></audio>
 
     <script>
-        const systemPrompt = "Sei Aria, un'amica empatica. Rispondi in italiano in modo molto breve e dolce.";
+        // Prompt modificato per essere ancora più drastico: ordiniamo di non generare testo
+        const systemPrompt = "RISPONDI SOLO IN AUDIO. NON GENERARE TESTO. Sei Aria, un'amica empatica. Rispondi in italiano in modo molto breve (massimo 10 parole).";
         const audioEl = document.getElementById('aria-voice');
 
         function saveAndStart() {
             const key = document.getElementById('geminiKey').value.trim();
             if(key) { 
                 localStorage.setItem('gemini_key', key); 
-                // Sblocca l'audio su mobile/browser con un'azione utente
                 audioEl.play().catch(() => {}); 
                 init(); 
             }
@@ -67,7 +67,7 @@
                 document.getElementById('aria-btn').classList.remove('listening');
                 const text = e.results[0][0].transcript;
                 document.getElementById('user-text').innerText = "Tu: " + text;
-                document.getElementById('status').innerText = "Aria sta pensando...";
+                document.getElementById('status').innerText = "Aria sta preparando la voce...";
                 askGemini(text);
             };
         }
@@ -79,15 +79,26 @@
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: systemPrompt + "\n\n" + input }] }],
+                        contents: [{ 
+                            role: "user", 
+                            parts: [{ text: systemPrompt + "\n\nMessaggio dell'utente: " + input }] 
+                        }],
                         generationConfig: {
-                            response_modalities: ["AUDIO"], 
-                            speech_config: { voice_config: { prebuilt_voice_config: { voice_name: "Aoede" } } }
+                            response_modalities: ["AUDIO"], // Obbligatorio per questo modello
+                            speech_config: { 
+                                voice_config: { 
+                                    prebuilt_voice_config: { voice_name: "Aoede" } 
+                                } 
+                            }
                         }
                     })
                 });
 
                 const data = await response.json();
+                
+                // Gestione dell'errore specifico "Model tried to generate text"
+                if (data.error) throw new Error(data.error.message);
+
                 const audioData = data.candidates[0].content.parts.find(p => p.inline_data);
                 
                 if (audioData) {
@@ -97,34 +108,25 @@
                 }
 
             } catch(e) { 
-                document.getElementById('status').innerText = "Errore di connessione.";
+                alert("Aria ha avuto un piccolo intoppo: " + e.message);
+                document.getElementById('status').innerText = "Tocca per riprovare.";
             }
         }
 
         function playVoice(base64) {
-            const blob = b64ToBlob(base64, 'audio/wav');
+            const bin = atob(base64);
+            const array = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) array[i] = bin.charCodeAt(i);
+            const blob = new Blob([array], {type: 'audio/wav'});
             const url = URL.createObjectURL(blob);
             
             audioEl.src = url;
             document.getElementById('status').innerText = "Aria sta parlando...";
-            
-            audioEl.play().catch(err => {
-                console.error("Errore riproduzione:", err);
-                document.getElementById('status').innerText = "Clicca qui per sentire l'audio!";
-                document.getElementById('status').onclick = () => audioEl.play();
-            });
+            audioEl.play();
 
             audioEl.onended = () => {
                 document.getElementById('status').innerText = "Tocca per parlare ancora";
-                document.getElementById('status').onclick = null;
             };
-        }
-
-        function b64ToBlob(b64, type) {
-            const bin = atob(b64);
-            const array = new Uint8Array(bin.length);
-            for (let i = 0; i < bin.length; i++) array[i] = bin.charCodeAt(i);
-            return new Blob([array], {type: type});
         }
 
         if(localStorage.getItem('gemini_key')) init();

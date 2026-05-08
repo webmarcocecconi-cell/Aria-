@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="it"><head>
+<!DOCTYPE html>
+<html lang="it">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aria - Gemini Real Voice</title>
@@ -14,25 +16,26 @@
         .api-input { background: var(--card); border: 2px solid #334155; color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
         .loading-dots:after { content: ' .'; animation: dots 1.5s steps(5, end) infinite; }
         @keyframes dots { 0%, 20% { content: ' .'; } 40% { content: ' ..'; } 60% { content: ' ...'; } 80%, 100% { content: ''; } }
-    </style></head><body>
+    </style>
+</head>
+<body>
 
     <div id="setup">
         <h1>Aria: Voce Reale ✨</h1>
         <p>Configurazione Gemini AI</p>
         <input type="password" id="geminiKey" class="api-input" placeholder="Incolla Gemini API Key">
         <button onclick="saveAndStart()" style="background: var(--accent); color: white; border: none; padding: 15px; border-radius: 10px; width: 100%; cursor: pointer; font-weight: bold;">ATTIVA ARIA</button>
-        <p style="font-size: 0.8rem; opacity: 0.6; margin-top: 20px;">Usa il modello Gemini 1.5 Flash (Gratuito)</p>
+        <p style="font-size: 0.8rem; opacity: 0.6; margin-top: 20px;">Utilizza l'endpoint v1beta per Audio nativo</p>
     </div>
 
     <div id="app" class="hidden">
         <div style="font-size: 80px; margin-bottom: 10px;">✨</div>
         <p id="status">Tocca per parlare con Aria</p>
         <button id="aria-btn">🎙️</button>
-        <div id="transcript">Ciao! Sono Aria. Adesso posso parlarti con la mia vera voce. Prova a chiedermi qualcosa!</div>
+        <div id="transcript">Ciao! Sono Aria. Se vedi questo messaggio, la configurazione è pronta.</div>
     </div>
 
     <script>
-        // Prompt per definire la personalità di Aria
         const systemPrompt = "Sei Aria, un'amica empatica, solare e calda. Parla in modo naturale, come in una chiacchierata tra amici. Usa frasi brevi (max 2). Sii dolce e incoraggiante. Rispondi sempre in italiano.";
 
         function saveAndStart() {
@@ -48,7 +51,6 @@
             document.getElementById('app').classList.remove('hidden');
         }
 
-        // --- ASCOLTO (Web Speech API) ---
         const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
         if(Speech) {
             const rec = new Speech();
@@ -71,7 +73,6 @@
             };
         }
 
-        // --- CERVELLO E VOCE (Gemini Multimodal API) ---
         async function askGemini(input) {
             document.getElementById('transcript').innerHTML = `<em>Tu: ${input}</em>`;
             const apiKey = localStorage.getItem('gemini_key');
@@ -81,14 +82,13 @@
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: `${systemPrompt}\n\nUtente: ${input}` }] }],
+                        contents: [{ parts: [{ text: systemPrompt + "\n\nUtente: " + input }] }],
                         generationConfig: {
-                            // Chiediamo a Gemini di rispondere ANCHE con audio
                             response_modalities: ["TEXT", "AUDIO"],
                             speech_config: {
                                 voice_config: {
                                     prebuilt_voice_config: { 
-                                        voice_name: "Puck" // Puck è una voce femminile, giovane e amichevole
+                                        voice_name: "Aoede" 
                                     }
                                 }
                             }
@@ -97,23 +97,27 @@
                 });
 
                 const data = await response.json();
-                
-                // Estraiamo il testo e l'audio dalla risposta
-                const textReply = data.candidates[0].content.parts.find(p => p.text).text;
-                const audioData = data.candidates[0].content.parts.find(p => p.inline_data).inline_data.data;
 
-                // Aggiorniamo l'interfaccia
+                if (data.error) {
+                    throw new Error(data.error.message);
+                }
+
+                const candidate = data.candidates[0];
+                const textReply = candidate.content.parts.find(p => p.text).text;
+                const audioPart = candidate.content.parts.find(p => p.inline_data);
+
                 document.getElementById('status').classList.remove('loading-dots');
                 document.getElementById('status').innerText = "In riproduzione...";
                 document.getElementById('transcript').innerText = textReply;
 
-                // Riproduciamo l'audio
-                playAudio(audioData);
+                if (audioPart) {
+                    playAudio(audioPart.inline_data.data);
+                }
 
             } catch(e) { 
                 console.error(e);
                 document.getElementById('status').innerText = "Errore! Riprova.";
-                alert("Errore durante la chiamata a Gemini. Controlla la tua API Key o la connessione."); 
+                alert("Errore: " + e.message); 
             }
         }
 
@@ -137,4 +141,5 @@
 
         if(localStorage.getItem('gemini_key')) init();
     </script>
-</body></html>
+</body>
+</html>

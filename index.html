@@ -29,7 +29,7 @@
         <div style="font-size: 80px; margin-bottom: 10px;">✨</div>
         <p id="status">Tocca per parlare con Aria</p>
         <button id="aria-btn">🎙️</button>
-        <div id="transcript">Ciao! Sono pronta.</div>
+        <div id="transcript">Ciao! Proviamo questa nuova voce.</div>
     </div>
 
     <script>
@@ -52,7 +52,9 @@
         if(Speech) {
             const rec = new Speech();
             rec.lang = 'it-IT';
-            document.getElementById('aria-btn').onclick = () => { rec.start(); document.getElementById('aria-btn').classList.add('listening'); };
+            document.getElementById('aria-btn').onclick = () => { 
+                try { rec.start(); document.getElementById('aria-btn').classList.add('listening'); } catch(e) {}
+            };
             rec.onresult = (e) => {
                 document.getElementById('aria-btn').classList.remove('listening');
                 askGemini(e.results[0][0].transcript);
@@ -64,8 +66,8 @@
             const apiKey = localStorage.getItem('gemini_key');
             
             try {
-                // Modello aggiornato a gemini-1.5-flash-8b che è il più compatibile con v1beta audio
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent?key=${apiKey}`, {
+                // Utilizzo del modello 'gemini-1.5-flash-latest' che è più stabile per v1beta
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -80,26 +82,26 @@
                 const data = await response.json();
                 if (data.error) throw new Error(data.error.message);
 
-                const textReply = data.candidates[0].content.parts.find(p => p.text).text;
+                const textPart = data.candidates[0].content.parts.find(p => p.text);
                 const audioPart = data.candidates[0].content.parts.find(p => p.inline_data);
 
-                document.getElementById('transcript').innerText = textReply;
+                if (textPart) document.getElementById('transcript').innerText = textPart.text;
                 if (audioPart) playAudio(audioPart.inline_data.data);
 
-            } catch(e) { alert("Errore: " + e.message); }
+            } catch(e) { 
+                alert("Errore: " + e.message); 
+                console.error(e);
+            }
         }
 
         function playAudio(base64) {
-            const blob = b64ToBlob(base64, 'audio/wav');
-            const url = URL.createObjectURL(blob);
-            new Audio(url).play();
-        }
-
-        function b64ToBlob(b64, type) {
-            const bin = atob(b64);
+            const bin = atob(base64);
             const array = new Uint8Array(bin.length);
             for (let i = 0; i < bin.length; i++) array[i] = bin.charCodeAt(i);
-            return new Blob([array], {type: type});
+            const blob = new Blob([array], {type: 'audio/wav'});
+            const url = URL.createObjectURL(blob);
+            const audio = new Audio(url);
+            audio.play();
         }
 
         if(localStorage.getItem('gemini_key')) init();

@@ -198,6 +198,7 @@
 </head>
 <body>
 
+<!-- SBLOCCO AUDIO -->
 <div class="modal-overlay" id="audioUnlockOverlay" style="z-index:200;">
   <div class="modal-box" style="text-align:center;">
     <div style="font-size:3rem;margin-bottom:12px;">🔊</div>
@@ -207,6 +208,7 @@
   </div>
 </div>
 
+<!-- ONBOARDING -->
 <div class="modal-overlay hidden" id="onboardingOverlay" style="z-index:190;">
   <div class="onboarding-box">
     <div class="ob-logo">ARIA</div>
@@ -252,6 +254,7 @@
   </div>
 </div>
 
+<!-- MODAL CONFIGURAZIONE -->
 <div class="modal-overlay hidden" id="modalOverlay">
   <div class="modal-box">
     <div class="modal-title">⚙️ CONFIGURA ARIA</div>
@@ -270,6 +273,7 @@
   </div>
 </div>
 
+<!-- MODAL VOCE -->
 <div class="modal-overlay hidden" id="voiceModal">
   <div class="modal-box">
     <div class="modal-title">🔊 SCEGLI LA VOCE</div>
@@ -289,7 +293,6 @@
 <div class="settings-menu" id="settingsMenu">
   <div class="settings-item" onclick="openVoiceModal();closeSettingsMenu();">
     <div class="settings-icon" style="background:rgba(52,211,153,0.12);">🔊</div>
-    <div class="settings-label"><div class="settings-title">Scegli Voce</div><div class="settings-sub">Cambia timbro e lingua</div></div>
     <div class="settings-arrow">›</div>
   </div>
   <div class="settings-item" onclick="exportMemory();closeSettingsMenu();">
@@ -304,11 +307,9 @@
   </div>
   <div class="settings-item" onclick="openModal();closeSettingsMenu();">
     <div class="settings-icon" style="background:rgba(124,109,250,0.12);">🔑</div>
-    <div class="settings-label"><div class="settings-title">Chiavi API</div><div class="settings-sub">Gestisci Groq, Gemini, YT</div></div>
     <div class="settings-arrow">›</div>
   </div>
 </div>
-
 <div class="face-container" id="face">
   <div class="listen-ring"></div>
   <div class="think-ring"></div>
@@ -319,503 +320,1179 @@
       <radialGradient id="afg" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="#2a2020"/><stop offset="100%" stop-color="#060404"/></radialGradient>
       <radialGradient id="ang" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#fde0c8"/><stop offset="60%" stop-color="#f0bc90"/><stop offset="100%" stop-color="#d8986a"/></radialGradient>
       <radialGradient id="abL" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#f4a0b0" stop-opacity="0.45"/><stop offset="100%" stop-color="#f4a0b0" stop-opacity="0"/></radialGradient>
-      <radialGradient id="aiL" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#7c6dfa"/><stop offset="100%" stop-color="#4c1d95"/></radialGradient>
+      <radialGradient id="aiL" cx="35%" cy="30%" r="60%"><stop offset="0%" stop-color="#a0724a"/><stop offset="50%" stop-color="#6b3a18"/><stop offset="100%" stop-color="#2a0e05"/></radialGradient>
+      <radialGradient id="aiR" cx="35%" cy="30%" r="60%"><stop offset="0%" stop-color="#a0724a"/><stop offset="50%" stop-color="#6b3a18"/><stop offset="100%" stop-color="#2a0e05"/></radialGradient>
+      <filter id="asb"><feGaussianBlur stdDeviation="1.5"/></filter>
     </defs>
-    <path d="M40 85 Q130 55 220 85 Q235 180 130 230 Q25 180 40 85" fill="url(#asg)"/>
-    <path d="M48 95 Q130 70 212 95 Q222 175 130 218 Q38 175 48 95" fill="none" stroke="#f0bc90" stroke-width="1.5" opacity="0.6"/>
-    <g id="svgEyeL" transform="translate(85, 125)">
-       <ellipse cx="0" cy="0" rx="18" ry="22" fill="#fff"/>
-       <ellipse class="iris" cx="0" cy="0" rx="11" ry="11" fill="url(#aiL)"/>
-       <ellipse class="pupil" cx="0" cy="0" rx="5" ry="5" fill="#000"/>
-       <circle class="refl1" cx="-4" cy="-4" r="2.5" fill="#fff" opacity="0.8"/>
-       <circle class="refl2" cx="4" cy="4" r="1.5" fill="#fff" opacity="0.5"/>
+    <!-- Capelli fondo piatto -->
+    <path d="M28,168 C26,130 36,88 58,62 C74,42 96,28 130,25 C164,28 186,42 202,62 C224,88 234,130 232,168 L232,284 L28,284 Z" fill="url(#ahg)"/>
+    <!-- Collo trapezoidale morbido sopra i capelli -->
+    <path d="M104,228 C102,240 100,258 100,278 L160,278 C160,258 158,240 156,228 C150,234 142,238 130,238 C118,238 110,234 104,228 Z" fill="url(#ang)"/>
+    <path d="M104,230 C102,244 100,260 100,278 L106,278 C106,260 106,244 106,232 Z" fill="#b87848" opacity="0.15"/>
+    <!-- Viso ellisse sopra tutto -->
+    <ellipse cx="130" cy="158" rx="62" ry="80" fill="url(#asg)"/>
+    <path d="M68,158 C68,120 82,90 104,76 C84,90 72,122 72,158 C72,184 78,208 90,226 Z" fill="#d8956a" opacity="0.09"/>
+    <!-- Guance -->
+    <ellipse cx="80" cy="174" rx="20" ry="13" fill="url(#abL)" filter="url(#asb)"/>
+    <ellipse cx="180" cy="174" rx="20" ry="13" fill="url(#abL)" filter="url(#asb)"/>
+    <!-- Sopracciglia -->
+    <path d="M92,122 C98,116 110,113 122,115" fill="none" stroke="#1a0808" stroke-width="3" stroke-linecap="round"/>
+    <path d="M138,115 C150,113 162,116 168,122" fill="none" stroke="#1a0808" stroke-width="3" stroke-linecap="round"/>
+    <!-- Occhio sinistro -->
+    <g id="svgEyeL">
+      <ellipse cx="109" cy="140" rx="18" ry="16" fill="white"/>
+      <circle id="irisL_svg" cx="109" cy="141" r="12" fill="url(#aiL)"/>
+      <circle id="pupilL_svg" cx="109" cy="141" r="6" fill="#140805"/>
+      <circle id="refL1_svg" cx="104" cy="136" r="4" fill="white" opacity="0.88"/>
+      <circle id="refL2_svg" cx="114" cy="146" r="2" fill="white" opacity="0.4"/>
+      <path d="M91,133 C98,121 120,121 127,133" fill="none" stroke="#0e0606" stroke-width="4" stroke-linecap="round"/>
+      <path d="M91,133 C87,126 85,119 84,113" fill="none" stroke="#0e0606" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M95,130 C92,123 91,116 91,110" fill="none" stroke="#0e0606" stroke-width="2" stroke-linecap="round"/>
     </g>
-    <g id="svgEyeR" transform="translate(175, 125)">
-       <ellipse cx="0" cy="0" rx="18" ry="22" fill="#fff"/>
-       <ellipse class="iris" cx="0" cy="0" rx="11" ry="11" fill="url(#aiL)"/>
-       <ellipse class="pupil" cx="0" cy="0" rx="5" ry="5" fill="#000"/>
-       <circle class="refl1" cx="-4" cy="-4" r="2.5" fill="#fff" opacity="0.8"/>
-       <circle class="refl2" cx="4" cy="4" r="1.5" fill="#fff" opacity="0.5"/>
+    <!-- Occhio destro -->
+    <g id="svgEyeR">
+      <ellipse cx="151" cy="140" rx="18" ry="16" fill="white"/>
+      <circle id="irisR_svg" cx="151" cy="141" r="12" fill="url(#aiR)"/>
+      <circle id="pupilR_svg" cx="151" cy="141" r="6" fill="#140805"/>
+      <circle id="refR1_svg" cx="146" cy="136" r="4" fill="white" opacity="0.88"/>
+      <circle id="refR2_svg" cx="156" cy="146" r="2" fill="white" opacity="0.4"/>
+      <path d="M133,133 C140,121 162,121 169,133" fill="none" stroke="#0e0606" stroke-width="4" stroke-linecap="round"/>
+      <path d="M169,133 C173,126 175,119 176,113" fill="none" stroke="#0e0606" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M165,130 C168,123 169,116 169,110" fill="none" stroke="#0e0606" stroke-width="2" stroke-linecap="round"/>
     </g>
-    <g transform="translate(130, 160)">
-      <ellipse cx="-6" cy="0" rx="3.5" ry="2.5" fill="rgba(124,109,250,0.5)"/>
-      <ellipse cx="6" cy="0" rx="3.5" ry="2.5" fill="rgba(124,109,250,0.5)"/>
+    <!-- Naso -->
+    <path d="M126,178 C126,182 130,184 134,181" fill="none" stroke="#c8845a" stroke-width="2" stroke-linecap="round"/>
+    <!-- Bocca -->
+    <g id="svgMouth">
+      <ellipse id="mouthInner" cx="130" cy="204" rx="16" ry="8" fill="#3a0e18" opacity="0"/>
+      <rect id="teeth" x="117" y="198" width="26" height="8" rx="4" fill="#fffef5" opacity="0"/>
+      <path id="lipTop" d="M110,200 Q118,195 130,196 Q142,195 150,200 Q142,198 130,198 Q118,198 110,200 Z" fill="#d4607a"/>
+      <path id="lipBot" d="M110,200 Q118,208 130,209 Q142,208 150,200 Q142,205 130,206 Q118,205 110,200 Z" fill="#e87090"/>
+      <path id="mouthPath" d="M110,200 Q130,208 150,200" fill="none" stroke="none" stroke-width="0"/>
     </g>
-    <path id="svgMouth" d="M105 185 Q130 195 155 185" fill="none" stroke="#e07a8a" stroke-width="3" stroke-linecap="round"/>
+    <!-- Frangetta solida -->
+    <path d="M68,128 L68,98 C72,86 78,75 88,66 C98,56 112,49 124,46 C127,45 129,44 130,44 C131,44 133,45 136,46 C148,49 162,56 172,66 C182,75 188,86 192,98 L192,128 C182,122 168,117 154,114 C145,112 138,111 130,111 C122,111 115,112 106,114 C92,117 78,122 68,128 Z" fill="url(#afg)"/>
+    <!-- Highlight capelli -->
+    <path d="M100,48 C96,64 94,82 96,100 C102,84 104,66 106,52 Z" fill="#6060a0" opacity="0.13"/>
+    <path d="M156,46 C162,62 164,80 162,98 C156,82 154,64 152,50 Z" fill="#6060a0" opacity="0.11"/>
+    <!-- Orecchini -->
+    <circle cx="68" cy="168" r="4" fill="#fbbf24"/><circle cx="68" cy="168" r="2.5" fill="#f59e0b"/><circle cx="67" cy="166" r="1.2" fill="white" opacity="0.7"/>
+    <circle cx="192" cy="168" r="4" fill="#fbbf24"/><circle cx="192" cy="168" r="2.5" fill="#f59e0b"/><circle cx="191" cy="166" r="1.2" fill="white" opacity="0.7"/>
   </svg>
+  <div class="eye left" id="eyeL" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;"><div class="iris" id="irisL"><div class="pupil"></div></div><div class="reflection"></div></div>
+  <div class="eye right" id="eyeR" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;"><div class="iris" id="irisR"><div class="pupil"></div></div><div class="reflection"></div></div>
 </div>
-
+<!-- MIC VISUALIZER: 14 barre, alimentato dal VAD loop -->
 <div class="mic-viz" id="micViz">
-  <div class="mic-viz-bar"></div><div class="mic-viz-bar"></div><div class="mic-viz-bar"></div>
-  <div class="mic-viz-bar"></div><div class="mic-viz-bar"></div><div class="mic-viz-bar"></div>
-  <div class="mic-viz-bar"></div><div class="mic-viz-bar"></div><div class="mic-viz-bar"></div>
-  <div class="mic-viz-bar"></div><div class="mic-viz-bar"></div><div class="mic-viz-bar"></div>
+  <div class="mic-viz-bar" id="mvb0"></div>
+  <div class="mic-viz-bar" id="mvb1"></div>
+  <div class="mic-viz-bar" id="mvb2"></div>
+  <div class="mic-viz-bar" id="mvb3"></div>
+  <div class="mic-viz-bar" id="mvb4"></div>
+  <div class="mic-viz-bar" id="mvb5"></div>
+  <div class="mic-viz-bar" id="mvb6"></div>
+  <div class="mic-viz-bar" id="mvb7"></div>
+  <div class="mic-viz-bar" id="mvb8"></div>
+  <div class="mic-viz-bar" id="mvb9"></div>
+  <div class="mic-viz-bar" id="mvb10"></div>
+  <div class="mic-viz-bar" id="mvb11"></div>
+  <div class="mic-viz-bar" id="mvb12"></div>
+  <div class="mic-viz-bar" id="mvb13"></div>
 </div>
-</div>
+</div><!-- fine face-col -->
+
+<div class="chat-col"><div class="chat-area" id="chatArea"></div></div>
 
 <div class="subtitle-area">
-  <div class="subtitle-box" id="subBox">
+  <div class="subtitle-box" id="subtitleBox">
     <div class="sub-label" id="subLabel">ARIA</div>
-    <div id="subText">Inizia a parlare con ARIA...</div>
-  </div>
-</div>
-
-<div class="countdown-ring" id="countdownRing" style="display:none;">
-  <svg width="60" height="60"><circle cx="30" cy="30" r="26" fill="none" stroke="rgba(124,109,250,0.15)" stroke-width="4"/><circle id="cdCircle" cx="30" cy="30" r="26" fill="none" stroke="var(--accent)" stroke-width="4" stroke-dasharray="163.36" stroke-dashoffset="0" stroke-linecap="round"/></svg>
-  <span id="cdText">3</span>
-</div>
-
-<div class="yt-player" id="ytPlayer">
-  <div id="ytIframe"></div>
-  <div class="yt-player-bar">
-    <div class="yt-player-title" id="ytTitle">Caricamento video...</div>
-    <button class="yt-close-btn" onclick="closeYoutubePlayer()">✕</button>
+    <div id="subText"></div>
   </div>
 </div>
 
 <div class="input-area">
-  <input type="text" class="text-input" id="textInput" placeholder="Scrivi un messaggio..." onkeydown="if(event.key==='Enter')sendMessage()">
-  <button class="btn btn-mic" id="micBtn" onclick="toggleMic()">🎤</button>
-  <button class="btn btn-send" onclick="sendMessage()">➤</button>
+  <input type="text" class="text-input" id="textInput" placeholder="Scrivi un messaggio..." />
+  <button class="btn btn-mic" id="btnMic" onclick="toggleMic()">🎤</button>
+  <button class="btn btn-send" id="btnSend" onclick="sendText()">➤</button>
+  <button class="btn btn-stop" id="btnStop" onclick="stopSpeaking()">⏹</button>
+</div>
+
+<div class="yt-player" id="ytPlayer">
+  <div class="yt-player-bar">
+    <span style="font-size:1rem;">🎵</span>
+    <span class="yt-player-title" id="ytTitle">—</span>
+    <button class="yt-close-btn" onclick="closeYoutube()">✕</button>
+  </div>
+</div>
+
+<div class="wake-banner" id="saveBanner">
+  <button class="wake-btn" style="border-color:rgba(251,191,36,0.5);color:#fbbf24;" onclick="saveAndClose()">
+    <span class="wake-icon">💾</span><span>Salva la memoria prima di uscire</span>
+  </button>
+</div>
+
+<div class="wake-banner" id="wakeBanner">
+  <button class="wake-btn" onclick="wakeUp(false)">
+    <span class="wake-icon">✨</span><span>Toccami per svegliarmi</span>
+  </button>
+</div>
+
+<div class="countdown-ring" id="countdownRing" style="display:none;">
+  <svg viewBox="0 0 60 60" width="60" height="60">
+    <circle cx="30" cy="30" r="26" fill="none" stroke="rgba(124,109,250,0.2)" stroke-width="4"/>
+    <circle id="countdownArc" cx="30" cy="30" r="26" fill="none" stroke="#7c6dfa"
+      stroke-width="4" stroke-linecap="round" stroke-dasharray="163.4" stroke-dashoffset="0" transform="rotate(-90 30 30)"/>
+  </svg>
+  <span id="countdownNum">10</span>
 </div>
 
 <script>
-let GROQ_KEY = localStorage.getItem('groq_key') || "";
-let GROQ_KEY2 = localStorage.getItem('groq_key2') || "";
-let GEMINI_KEY = localStorage.getItem('gemini_key') || "";
-let YOUTUBE_KEY = localStorage.getItem('youtube_key') || "";
-let CHAT_HISTORY = JSON.parse(localStorage.getItem('aria_history')) || [];
-let USER_DATA = JSON.parse(localStorage.getItem('aria_user')) || null;
-let currentGroqKey = GROQ_KEY;
+// ═══════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════
+var GROQ_KEYS = (localStorage.getItem('aria_groq_keys')||localStorage.getItem('aria_groq_key')||'').split(',').filter(function(k){return k.trim();});
+var GROQ_KEY = GROQ_KEYS[0]||'';
+var groqKeyIndex = 0;
+var YOUTUBE_KEY = localStorage.getItem('aria_youtube_key')||'';
+var MEMORY_MAX = 50;
+var ariaMemory = JSON.parse(localStorage.getItem('aria_memory')||'[]');
+var memoryExtracted = false;
+var lastProviderUsed = 'groq';
+var currentAudio = null;
+var audioCtx = null;
+var conversationHistory = [];
+var userProfile = {
+  name: localStorage.getItem('aria_name')||'',
+  age: parseInt(localStorage.getItem('aria_age'))||0,
+  gender: localStorage.getItem('aria_gender')||'',
+  done: localStorage.getItem('aria_onboarding_done')==='true'
+};
 
-let recognition, isRecording = false, synth = window.speechSynthesis, voices = [];
-let isAriaSpeaking = false, countdownInterval, countdownActive = false;
-let audioContext, analyser, dataArray, source, animationId;
-let ytPlayer = null;
-
-const face = document.getElementById('face');
-const stateLabel = document.getElementById('stateLabel');
-const stateLabelText = document.getElementById('stateLabelText');
-const subBox = document.getElementById('subBox');
-const subText = document.getElementById('subText');
-const subLabel = document.getElementById('subLabel');
-const micBtn = document.getElementById('micBtn');
-
-function unlockAudio() {
-  const silent = new SpeechSynthesisUtterance("");
-  synth.speak(silent);
-  document.getElementById('audioUnlockOverlay').classList.add('hidden');
-  initApp();
+// ─── MEMORIA ───
+function saveMemory(){localStorage.setItem('aria_memory',JSON.stringify(ariaMemory));}
+function addMemoryFact(text,weight){
+  var now=new Date().toISOString();
+  if(ariaMemory.some(function(m){return m.text.toLowerCase().indexOf(text.toLowerCase().substring(0,20))>=0;}))return;
+  if(ariaMemory.length>=MEMORY_MAX){
+    var mi=0,ms=ariaMemory[0].weight*1000+new Date(ariaMemory[0].date).getTime()/1e12;
+    for(var i=1;i<ariaMemory.length;i++){var s=ariaMemory[i].weight*1000+new Date(ariaMemory[i].date).getTime()/1e12;if(s<ms){ms=s;mi=i;}}
+    ariaMemory[mi]={text:text,weight:weight,date:now};
+  }else{ariaMemory.push({text:text,weight:weight,date:now});}
+  saveMemory();
+}
+function getMemoryContext(){
+  if(!ariaMemory.length)return'';
+  var top=ariaMemory.slice().sort(function(a,b){return b.weight-a.weight;}).slice(0,20);
+  return'COSA RICORDO DI TE (da conversazioni precedenti):\n'+top.map(function(m){return'- '+m.text;}).join('\n')+'\n\nUsa questi ricordi in modo naturale.\n\n';
+}
+async function extractMemoryFromSession(){
+  if(memoryExtracted||conversationHistory.length<2)return;
+  memoryExtracted=true;if(!GROQ_KEYS.length)return;
+  var transcript=conversationHistory.map(function(m){return(m.role==='user'?'Utente: ':'ARIA: ')+m.content;}).join('\n');
+  var prompt='Analizza questa conversazione ed estrai i fatti importanti da ricordare sulla persona. Peso: 3=molto importante (nomi familiari, lavoro, salute), 2=medio, 1=basso. Rispondi SOLO con array JSON: [{"text":"fatto","weight":3}] Max 5 fatti. Se nessuno: []\n\nCONVERSAZIONE:\n'+transcript;
+  try{
+    var res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEYS[groqKeyIndex%GROQ_KEYS.length]},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:300,temperature:0.3})});
+    var data=await res.json();if(data.error)return;
+    var match=data.choices[0].message.content.trim().match(/\[[\s\S]*\]/);if(!match)return;
+    JSON.parse(match[0]).forEach(function(f){if(f.text&&f.weight)addMemoryFact(f.text,f.weight);});
+  }catch(e){}
 }
 
-function initApp() {
-  if(!GROQ_KEY) { openModal(); return; }
-  if(!USER_DATA) { openOnboarding(); return; }
-  initRecognition();
-  loadVoices();
+function getAgeProfile(){var a=userProfile.age;if(a>=4&&a<=12)return'bambino';if(a>=13&&a<=17)return'adolescente';if(a>=65)return'anziano';return'adulto';}
+var _cachedPrompt='', _cachedPromptTime=0;
+function buildSystemPrompt(){
+  var now=Date.now();
+  if(_cachedPrompt && now-_cachedPromptTime<60000) return _cachedPrompt;
+  _cachedPromptTime=now;
+  _cachedPrompt=_buildSystemPromptFull();
+  return _cachedPrompt;
+}
+function _buildSystemPromptFull(){
+  var name=userProfile.name||'amico',gender=userProfile.gender||'N',profile=getAgeProfile();
+  var gw=gender==='F'?'ragazza/donna':gender==='M'?'ragazzo/uomo':'persona';
+  var pi={bambino:'Parli con un bambino. Usa parole semplici e frasi corte. Sei giocosa, entusiasta e incoraggiante.',adolescente:'Parli con un adolescente. Sei diretta e autentica, senza paternalismi. Trattalo/a da pari.',adulto:'Parli con un adulto. Sei naturale, colta, ironica al punto giusto.',anziano:'Parli con una persona anziana. Sei rispettosa, chiara, paziente e affettuosa.'};
+  var now=new Date(),giorni=['domenica','lunedi','martedi','mercoledi','giovedi','venerdi','sabato'],mesi=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+  return getMemoryContext()+"Sei ARIA, un'amica vera con personalità genuinamente umana: calorosa, curiosa, a tratti ironica, sempre empatica. Parli come una persona vera, non come un'AI.\n\nSTAI PARLANDO CON: "+name+", "+gw+" di "+(userProfile.age||"eta non specificata")+" anni.\n\n"+pi[profile]+"\n\nUSA IL NOME: Ogni tanto chiama l'utente per nome ("+name+") in modo naturale.\n\nCOME PARLI:\n- Italiano colloquiale e naturale\n- Espressioni come sai, guarda, ti dico una cosa\n- Piccole pause con ...\n- Curiosita genuina\n- Non proponi mai argomenti o categorie\n\nDATA E ORA: "+giorni[now.getDay()]+' '+now.getDate()+' '+mesi[now.getMonth()]+' '+now.getFullYear()+', ore '+now.getHours()+':'+String(now.getMinutes()).padStart(2,'0')+"\n\nNON INVENTARE MAI nomi, luoghi, eventi non menzionati dall'utente.\n\nLINGUA: Rispondi SEMPRE in italiano.\n\nEMOZIONE TAG: Alla fine aggiungi uno di: [EMO:felice] [EMO:pensierosa] [EMO:sorpresa] [EMO:empatica] [EMO:neutra]\n\nLUNGHEZZA: Risposte brevi 2-4 frasi.";
 }
 
-function openModal() { document.getElementById('modalOverlay').classList.remove('hidden'); }
-function confirmSetup() {
-  GROQ_KEY = document.getElementById('modalGroqKey').value.trim();
-  GROQ_KEY2 = document.getElementById('modalGroqKey2').value.trim();
-  GEMINI_KEY = document.getElementById('modalGeminiKey').value.trim();
-  YOUTUBE_KEY = document.getElementById('modalYoutubeKey').value.trim();
-  if(!GROQ_KEY) return alert("Inserisci almeno la chiave Groq 1!");
-  localStorage.setItem('groq_key', GROQ_KEY);
-  localStorage.setItem('groq_key2', GROQ_KEY2);
-  localStorage.setItem('gemini_key', GEMINI_KEY);
-  localStorage.setItem('youtube_key', YOUTUBE_KEY);
-  document.getElementById('modalOverlay').classList.add('hidden');
-  currentGroqKey = GROQ_KEY;
-  if(!USER_DATA) openOnboarding(); else initRecognition();
-}
-
-function openOnboarding() { document.getElementById('onboardingOverlay').classList.remove('hidden'); }
-function obNext(step) {
-  if(step===1) {
-    const val = document.getElementById('obName').value.trim();
-    if(!val) return;
-    document.getElementById('ob1Input').style.display='none';
-    document.getElementById('ob1Answer').innerText=val;
-    document.getElementById('ob1Answer').style.display='block';
-    document.getElementById('obNum1').classList.remove('active');
-    document.getElementById('obNum1').classList.add('done');
-    document.getElementById('obNum2').classList.add('active');
-    document.getElementById('ob2Inactive').style.display='none';
-    document.getElementById('ob2Content').style.display='block';
-  } else if(step===2) {
-    const val = document.getElementById('obAge').value.trim();
-    if(!val) return;
-    document.getElementById('ob2Input').style.display='none';
-    document.getElementById('ob2Answer').innerText=val + " anni";
-    document.getElementById('ob2Answer').style.display='block';
-    document.getElementById('obNum2').classList.remove('active');
-    document.getElementById('obNum2').classList.add('done');
-    document.getElementById('obNum3').classList.add('active');
-    document.getElementById('ob3Inactive').style.display='none';
-    document.getElementById('ob3Content').style.display='block';
+// ─── ONBOARDING ───
+var obSelectedGender='';
+function obNext(step){
+  if(step===1){
+    if(document.getElementById('obNum1').classList.contains('done'))return;
+    var n=document.getElementById('obName').value.trim();if(!n){document.getElementById('obName').focus();return;}
+    document.getElementById('obNum1').className='ob-num done';document.getElementById('obNum1').textContent='✓';
+    document.getElementById('ob1Input').style.display='none';document.getElementById('ob1Answer').style.display='block';document.getElementById('ob1Answer').textContent=n;
+    document.getElementById('obNum2').className='ob-num active';document.getElementById('ob2Inactive').style.display='none';document.getElementById('ob2Content').style.display='flex';
+    setTimeout(function(){document.getElementById('obAge').focus();},100);
+  }else if(step===2){
+    if(document.getElementById('obNum2').classList.contains('done'))return;
+    var a=parseInt(document.getElementById('obAge').value);if(!a||a<4||a>110){document.getElementById('obAge').focus();return;}
+    document.getElementById('obNum2').className='ob-num done';document.getElementById('obNum2').textContent='✓';
+    document.getElementById('ob2Input').style.display='none';document.getElementById('ob2Answer').style.display='block';document.getElementById('ob2Answer').textContent=a+' anni';
+    document.getElementById('obNum3').className='ob-num active';document.getElementById('ob3Inactive').style.display='none';document.getElementById('ob3Content').style.display='flex';
   }
 }
-let tempGender = "";
-function obSelectGender(g) {
-  tempGender = g;
-  document.querySelectorAll('.ob-chip').forEach(c => c.classList.remove('selected'));
+function obSelectGender(code){
+  obSelectedGender=code;
+  document.querySelectorAll('.ob-chip').forEach(function(c){c.classList.remove('selected');});
   event.target.classList.add('selected');
   document.getElementById('obConfirmBtn').style.display='block';
 }
-function obConfirm() {
-  USER_DATA = { name: document.getElementById('obName').value.trim(), age: document.getElementById('obAge').value.trim(), gender: tempGender };
-  localStorage.setItem('aria_user', JSON.stringify(USER_DATA));
+function obConfirm(){
+  var name=document.getElementById('ob1Answer').textContent;
+  var age=parseInt(document.getElementById('ob2Answer').textContent);
+  if(!name||!age||!obSelectedGender)return;
+  localStorage.setItem('aria_name',name);localStorage.setItem('aria_age',age);localStorage.setItem('aria_gender',obSelectedGender);localStorage.setItem('aria_onboarding_done','true');
+  userProfile.name=name;userProfile.age=age;userProfile.gender=obSelectedGender;userProfile.done=true;
+  document.getElementById('obNum3').className='ob-num done';document.getElementById('obNum3').textContent='✓';
   document.getElementById('onboardingOverlay').classList.add('hidden');
-  initRecognition();
+  _cachedPrompt=""; startAriaAfterOnboarding(true);
 }
 
-function initRecognition() {
-  const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!Speech) return alert("Browser non supportato per il riconoscimento vocale.");
-  recognition = new Speech();
-  recognition.lang = 'it-IT';
-  recognition.continuous = false;
-  recognition.interimResults = true;
-  recognition.onstart = () => { isRecording = true; setAriaState('listening'); updateMicBtn(); };
-  recognition.onresult = (e) => {
-    let t = ""; for(let i=e.resultIndex; i<e.results.length; i++) t += e.results[i][0].transcript;
-    showSubtitle(t, true);
-    if(e.results[0].isFinal) processInput(t);
+function startAriaAfterOnboarding(isNew){
+  updateProviderBadge();
+  var name=userProfile.name||'amica',pronoun=userProfile.gender==='F'?'a':'o';
+  var greeting=isNew?'Ciao '+name+'! Sono ARIA, sono felice di conoscerti! 💜':'Bentornat'+pronoun+' '+name+'! 💜';
+  addBubble('aria',greeting);setEmotion('felice');showSubtitle('aria',greeting);
+  initSpeechRecognition();updateStateLabel();setState('speaking');
+  playShortTTS(greeting,function(){startListening();});
+}
+
+function unlockAudio(){
+  try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();var buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.1,audioCtx.sampleRate);var src=audioCtx.createBufferSource();src.buffer=buf;src.connect(audioCtx.destination);src.start();}catch(e){}
+  document.getElementById('audioUnlockOverlay').classList.add('hidden');
+  if(!GROQ_KEYS||!GROQ_KEYS.length){openModal();return;}
+  if(!userProfile.done){document.getElementById('onboardingOverlay').classList.remove('hidden');setTimeout(function(){document.getElementById('obName').focus();},300);}
+  else{startAriaAfterOnboarding(false);}
+}
+
+function confirmSetup(){
+  var g1=document.getElementById('modalGroqKey').value.trim(),g2=document.getElementById('modalGroqKey2').value.trim();
+  if(!g1){document.getElementById('modalGroqKey').style.borderColor='#ef4444';return;}
+  GROQ_KEYS=[g1,g2].filter(function(k){return k.length>0;});GROQ_KEY=GROQ_KEYS[0];groqKeyIndex=0;
+  YOUTUBE_KEY=document.getElementById('modalYoutubeKey').value.trim();
+  localStorage.setItem('aria_groq_keys',GROQ_KEYS.join(','));
+  var gk=document.getElementById('modalGeminiKey');if(gk)localStorage.setItem('aria_gemini_key',gk.value.trim());
+  if(YOUTUBE_KEY)localStorage.setItem('aria_youtube_key',YOUTUBE_KEY);
+  closeModal();updateProviderBadge();
+  if(!userProfile.done){document.getElementById('onboardingOverlay').classList.remove('hidden');setTimeout(function(){document.getElementById('obName').focus();},300);}
+  else{startAriaAfterOnboarding(false);}
+}
+function openModal(){
+  var sg=(localStorage.getItem('aria_groq_keys')||'').split(',');var sgm=localStorage.getItem('aria_gemini_key')||'';
+  if(sg[0])document.getElementById('modalGroqKey').value=sg[0];if(sg[1])document.getElementById('modalGroqKey2').value=sg[1];
+  if(sgm)document.getElementById('modalGeminiKey').value=sgm;
+  var yt=localStorage.getItem('aria_youtube_key')||'';if(yt)document.getElementById('modalYoutubeKey').value=yt;
+  document.getElementById('modalOverlay').classList.remove('hidden');
+}
+function closeModal(){document.getElementById('modalOverlay').classList.add('hidden');}
+function closeVoiceModal(){document.getElementById('voiceModal').classList.add('hidden');}
+
+
+
+function toggleSettingsMenu(){
+  var menu=document.getElementById('settingsMenu'),btn=document.getElementById('settingsBtn');
+  if(menu.classList.contains('open')){menu.classList.remove('open');btn.classList.remove('open');}
+  else{menu.classList.add('open');btn.classList.add('open');}
+}
+function closeSettingsMenu(){document.getElementById('settingsMenu').classList.remove('open');document.getElementById('settingsBtn').classList.remove('open');}
+
+function exportMemory(){
+  if(!ariaMemory.length){alert('Nessun ricordo salvato ancora.');return;}
+  var encoded=btoa(unescape(encodeURIComponent(JSON.stringify({memory:ariaMemory,profile:userProfile,version:1}))));
+  if(navigator.clipboard){navigator.clipboard.writeText(encoded).then(function(){alert('Codice copiato!');}).catch(function(){prompt('Copia:',encoded);});}
+  else{prompt('Copia:',encoded);}
+}
+function importMemory(){
+  var code=prompt('Incolla il codice memoria:');if(!code)return;
+  try{var data=JSON.parse(decodeURIComponent(escape(atob(code.trim()))));if(!data.memory||!Array.isArray(data.memory))throw new Error();ariaMemory=data.memory;saveMemory();alert('Ripristinata! ('+ariaMemory.length+' ricordi)');}
+  catch(e){alert('Codice non valido.');}
+}
+function updateProviderBadge(){var b=document.getElementById('providerBadge');if(b)b.textContent=lastProviderUsed==='gemini-grounded'?'🟢 GEMINI + SEARCH + 🔊 TTS':'🔵 GROQ + 🟢 GEMINI TTS';}
+
+// ═══════════════════════════════════════════════════
+// OCCHI
+// ═══════════════════════════════════════════════════
+function moveEyes(mx,my){
+  [{el:document.getElementById('irisL'),eye:document.getElementById('eyeL')},{el:document.getElementById('irisR'),eye:document.getElementById('eyeR')}].forEach(function(e){
+    var r=e.eye.getBoundingClientRect(),dx=mx-(r.left+r.width/2),dy=my-(r.top+r.height/2),dist=Math.sqrt(dx*dx+dy*dy),ratio=Math.min(dist,50)/50;
+    e.el.style.transform='translate(calc(-50% + '+(isNaN(dx/dist)?0:(dx/dist)*7*ratio)+'px), calc(-50% + '+(isNaN(dy/dist)?0:(dy/dist)*7*ratio)+'px))';
+  });
+}
+function setEmotion(emo){
+  var face=document.getElementById('face');face.className='face-container';
+  var map={'felice':'happy','pensierosa':'thinking','sorpresa':'surprised','empatica':'empathic','ascoltando':'listening','neutra':'','parlando':'speaking','dormendo':'sleeping'};
+  var cls=map[emo]||'';if(cls)face.classList.add(cls);
+  if(VOICE_STATE==='listening'||VOICE_STATE==='countdown')face.classList.add('listening-active');
+  if(emo==='neutra')hideSubtitle();
+  animateMouth(emo);
+}
+function animateMouth(emo){
+  var lt=document.getElementById('lipTop');
+  var lb=document.getElementById('lipBot');
+  var mi=document.getElementById('mouthInner');
+  var te=document.getElementById('teeth');
+  if(!lt)return;
+  var M={
+    'felice':    {lt:'M110,200 Q118,195 130,196 Q142,195 150,200 Q142,198 130,198 Q118,198 110,200 Z',lb:'M110,200 Q118,210 130,211 Q142,210 150,200 Q142,206 130,207 Q118,206 110,200 Z',i:0,t:0},
+    'pensierosa':{lt:'M113,202 Q121,199 130,199 Q139,199 147,202 Q139,201 130,201 Q121,201 113,202 Z',lb:'M113,202 Q121,207 130,207 Q139,207 147,202 Q139,205 130,205 Q121,205 113,202 Z',i:0,t:0},
+    'sorpresa':  {lt:'M115,199 Q122,193 130,193 Q138,193 145,199 Q138,196 130,196 Q122,196 115,199 Z',lb:'M115,199 Q122,210 130,212 Q138,210 145,199 Q138,207 130,208 Q122,207 115,199 Z',i:0.6,t:0.6},
+    'empatica':  {lt:'M111,201 Q119,196 130,197 Q141,196 149,201 Q141,199 130,199 Q119,199 111,201 Z',lb:'M111,201 Q119,209 130,210 Q141,209 149,201 Q141,206 130,207 Q119,206 111,201 Z',i:0,t:0},
+    'ascoltando':{lt:'M112,201 Q120,197 130,198 Q140,197 148,201 Q140,199 130,200 Q120,199 112,201 Z',lb:'M112,201 Q120,207 130,208 Q140,207 148,201 Q140,205 130,206 Q120,205 112,201 Z',i:0,t:0},
+    'parlando':  {lt:'M110,200 Q118,195 130,196 Q142,195 150,200 Q142,198 130,198 Q118,198 110,200 Z',lb:'M110,200 Q118,209 130,210 Q142,209 150,200 Q142,205 130,206 Q118,205 110,200 Z',i:0.3,t:0.3},
+    'neutra':    {lt:'M112,201 Q120,197 130,198 Q140,197 148,201 Q140,199 130,200 Q120,199 112,201 Z',lb:'M112,201 Q120,207 130,208 Q140,207 148,201 Q140,205 130,206 Q120,205 112,201 Z',i:0,t:0},
+    'dormendo':  {lt:'M116,202 Q123,200 130,200 Q137,200 144,202 Q137,201 130,201 Q123,201 116,202 Z',lb:'M116,202 Q123,205 130,205 Q137,205 144,202 Q137,204 130,204 Q123,204 116,202 Z',i:0,t:0}
   };
-  recognition.onerror = () => { isRecording = false; setAriaState('idle'); updateMicBtn(); };
-  recognition.onend = () => { isRecording = false; if(!isAriaSpeaking && !countdownActive) setAriaState('idle'); updateMicBtn(); };
+  var m=M[emo]||M['neutra'];
+  lt.setAttribute('d',m.lt);
+  lb.setAttribute('d',m.lb);
+  if(mi)mi.setAttribute('opacity',m.i);
+  if(te)te.setAttribute('opacity',m.t);
+  if(emo==='parlando')startMouthTalk();else stopMouthTalk();
+}
+var mouthTalkInterval=null;
+function startMouthTalk(){
+  if(mouthTalkInterval)return;
+  var phase=0;
+  var F=[
+    {lt:'M112,201 Q120,197 130,198 Q140,197 148,201 Q140,199 130,200 Q120,199 112,201 Z',lb:'M112,201 Q120,206 130,207 Q140,206 148,201 Q140,204 130,205 Q120,204 112,201 Z',i:'0',t:'0'},
+    {lt:'M110,200 Q118,194 130,195 Q142,194 150,200 Q142,197 130,197 Q118,197 110,200 Z',lb:'M110,200 Q118,209 130,210 Q142,209 150,200 Q142,205 130,206 Q118,205 110,200 Z',i:'0.5',t:'0.45'},
+    {lt:'M109,199 Q117,191 130,192 Q143,191 151,199 Q143,195 130,195 Q117,195 109,199 Z',lb:'M109,199 Q117,212 130,214 Q143,212 151,199 Q143,208 130,210 Q117,208 109,199 Z',i:'0.88',t:'0.82'},
+    {lt:'M110,200 Q118,194 130,195 Q142,194 150,200 Q142,197 130,197 Q118,197 110,200 Z',lb:'M110,200 Q118,209 130,210 Q142,209 150,200 Q142,205 130,206 Q118,205 110,200 Z',i:'0.5',t:'0.45'},
+  ];
+  mouthTalkInterval=setInterval(function(){
+    phase=(phase+1)%F.length;
+    var f=F[phase];
+    var lt=document.getElementById('lipTop');
+    var lb=document.getElementById('lipBot');
+    var te=document.getElementById('teeth');
+    var mi=document.getElementById('mouthInner');
+    if(!lt)return;
+    lt.setAttribute('d',f.lt);
+    lb.setAttribute('d',f.lb);
+    if(te)te.setAttribute('opacity',f.t);
+    if(mi)mi.setAttribute('opacity',f.i);
+  },220);
+}
+// ─── BROWSER TTS FALLBACK ───
+function speakWithBrowser(text, onEnd){
+  if(!window.speechSynthesis){if(onEnd)onEnd();return;}
+  window.speechSynthesis.cancel();
+  var utter=new SpeechSynthesisUtterance(text);
+  utter.lang='it-IT';
+  utter.rate=1.05;
+  utter.pitch=1.0;
+  // Cerca la voce italiana migliore disponibile
+  var voices=window.speechSynthesis.getVoices();
+  var itVoices=voices.filter(function(v){return v.lang.startsWith('it');});
+  // Preferenza: Google > Microsoft Neural > qualsiasi altra
+  var best=itVoices.find(function(v){return v.name.toLowerCase().indexOf('google')>=0;})
+    ||itVoices.find(function(v){return v.name.toLowerCase().indexOf('natural')>=0||v.name.toLowerCase().indexOf('neural')>=0;})
+    ||itVoices.find(function(v){return !v.localService;}) // online = migliore qualità
+    ||itVoices[0];
+  if(best)utter.voice=best;
+  utter.onend=function(){if(onEnd)onEnd();};
+  utter.onerror=function(){if(onEnd)onEnd();};
+  window.speechSynthesis.speak(utter);
 }
 
-function toggleMic() {
-  if(isRecording) { recognition.stop(); } 
-  else { 
-    if(isAriaSpeaking) synth.cancel();
-    stopCountdown();
-    // Se c'è un video, non interrompiamo il video ma permettiamo all'utente di parlare
-    try { recognition.start(); startVisualizer(); } catch(e){} 
-  }
+function stopBrowserTTS(){
+  if(window.speechSynthesis)window.speechSynthesis.cancel();
 }
 
-async function processInput(text) {
-  if(!text.trim()) return;
-  setAriaState('thinking');
-  CHAT_HISTORY.push({role:"user", content:text});
-  if(CHAT_HISTORY.length > 15) CHAT_HISTORY.shift();
-  localStorage.setItem('aria_history', JSON.stringify(CHAT_HISTORY));
+function stopMouthTalk(){if(mouthTalkInterval){clearInterval(mouthTalkInterval);mouthTalkInterval=null;}}
 
-  // Controllo comandi speciali locali
-  const lower = text.toLowerCase();
-  if(lower.includes("metti") || lower.includes("riproduci") || lower.includes("cerca video")) {
-    if(YOUTUBE_KEY) {
-      const query = text.replace(/metti|riproduci|cerca video/gi, "").trim();
-      await searchAndPlayYoutube(query);
-      return;
+// ═══════════════════════════════════════════════════
+// CHAT / SOTTOTITOLI
+// ═══════════════════════════════════════════════════
+function showSubtitle(who,text){
+  var box=document.getElementById('subtitleBox');if(!box)return;
+  document.getElementById('subLabel').textContent=who==='user'?'TU':'ARIA';
+  box.className='subtitle-box visible'+(who==='user'?' user-sub':'');
+  document.getElementById('subText').textContent=text;
+}
+function hideSubtitle(){var box=document.getElementById('subtitleBox');if(box)box.classList.remove('visible');}
+function addBubble(who,text){
+  var area=document.getElementById('chatArea'),div=document.createElement('div');div.className='bubble '+who;
+  if(who==='aria'){var nm=document.createElement('div');nm.className='bubble-name';nm.textContent='ARIA';div.appendChild(nm);}
+  var p=document.createElement('p');p.textContent=text;div.appendChild(p);area.appendChild(div);
+  showSubtitle(who,text);return div;
+}
+function addTyping(){
+  showSubtitle('aria','...');
+  var area=document.getElementById('chatArea'),div=document.createElement('div');div.className='bubble aria';div.id='typingBubble';
+  var nm=document.createElement('div');nm.className='bubble-name';nm.textContent='ARIA';div.appendChild(nm);
+  var dots=document.createElement('div');dots.className='typing-dots';dots.innerHTML='<span></span><span></span><span></span>';div.appendChild(dots);area.appendChild(div);
+}
+function removeTyping(){var t=document.getElementById('typingBubble');if(t)t.remove();}
+
+// ═══════════════════════════════════════════════════
+// API
+// ═══════════════════════════════════════════════════
+async function askAria(userMsg){
+  if(!GROQ_KEYS||!GROQ_KEYS.length){openModal();return;}
+  var _ytCtrl=detectYoutubeControl(userMsg);if(_ytCtrl){addBubble('user',userMsg);conversationHistory.push({role:'user',content:userMsg});await handleYoutubeControl(userMsg,_ytCtrl);return;}
+  if(detectYoutubeTrigger(userMsg)){addBubble('user',userMsg);conversationHistory.push({role:'user',content:userMsg});await handleYoutubeRequest(userMsg);return;}
+  addBubble('user',userMsg);conversationHistory.push({role:'user',content:userMsg});
+  clearTimeout(silenceTimer);silenceTimer=null;setState('thinking');addTyping();setEmotion('pensierosa');
+  try{
+    var pendingGrounding=false;
+    if(!detectGroundingTrigger(userMsg)&&conversationHistory.length>=3){
+      var prev='';for(var i=conversationHistory.length-2;i>=0;i--){if(conversationHistory[i].role==='assistant'){prev=conversationHistory[i].content.toLowerCase();break;}}
+      if(/\b(quale città|che città|dove sei|in quale città|in che città|dove ti trovi|da che parte)\b/.test(prev))pendingGrounding=true;
+    }
+    var useGrounding=(detectGroundingTrigger(userMsg)||pendingGrounding);
+    var fullText;
+    if(useGrounding){console.log('ARIA grounding:',userMsg);try{fullText=await callGeminiGrounded();lastProviderUsed='gemini-grounded';}catch(e){fullText=await callGroq();lastProviderUsed='groq';}}
+    else{fullText=await callGroq();lastProviderUsed='groq';}
+    updateProviderBadge();
+    var emoMatch=fullText.match(/\[EMO:([^\]]+)\]/);
+    var emo=emoMatch?emoMatch[1]:'neutra';
+    var cleanText=fullText.replace(/\[EMO:[^\]]+\]/g,'').trim();
+    removeTyping();conversationHistory.push({role:'assistant',content:fullText});setEmotion(emo);
+    addBubble('aria',cleanText);showSubtitle('aria',cleanText);
+    setEmotion('parlando');startMouthTalk();
+    document.getElementById('btnStop').style.display='flex';
+    speakWithBrowser(cleanText,function(){stopMouthTalk();animateMouth('neutra');document.getElementById('btnStop').style.display='none';goIdleAfterSpeaking();});
+
+  }catch(err){removeTyping();showSubtitle('aria','⚠️ '+(err.message||'Errore connessione.'));setEmotion('neutra');setState('idle');updateMicBtn();}
+}
+
+function playWavBuffer(wavBuffer,emo,subtitleText){
+  return new Promise(function(resolve){
+    function onDone(){stopMouthTalk();setEmotion(emo||'neutra');document.getElementById('btnStop').style.display='none';resolve();}
+    function onStart(){if(subtitleText)showSubtitle('aria',subtitleText);startMouthTalk();}
+    if(audioCtx){
+      audioCtx.decodeAudioData(wavBuffer.slice(0),function(decoded){
+        var src=audioCtx.createBufferSource();src.buffer=decoded;src.connect(audioCtx.destination);src.onended=onDone;src.start(0);onStart();
+        currentAudio={pause:function(){try{src.stop();}catch(e){}}};
+      },function(){onStart();playWithAudioElement(wavBuffer,onDone);});
+    }else{onStart();playWithAudioElement(wavBuffer,onDone);}
+  });
+}
+async function callGroq(){
+  var recentHistory=conversationHistory.slice(-6);
+  // Pulisce EMO tag e filtra messaggi vuoti dalla history
+  var cleanHistory=recentHistory.map(function(m){return{role:m.role,content:m.content.replace(/\[EMO:[^\]]+\]/g,'').trim()};}).filter(function(m){return m.content.length>0;});
+  // Garantisce che la history non inizi con 'assistant' (Groq lo rifiuta)
+  while(cleanHistory.length>0&&cleanHistory[0].role==='assistant')cleanHistory.shift();
+  var messages=[{role:'system',content:buildSystemPrompt()}].concat(cleanHistory);
+  var models=['llama-3.3-70b-versatile','llama-3.1-70b-versatile'];
+  for(var mi=0;mi<models.length;mi++){
+    for(var i=0;i<GROQ_KEYS.length;i++){
+      var idx=(groqKeyIndex+i)%GROQ_KEYS.length,key=GROQ_KEYS[idx];
+      var response=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:models[mi],messages:messages,max_tokens:250,temperature:0.75})});
+      var data=await response.json();
+      if(data.error){
+        var emsg=data.error.message||JSON.stringify(data.error);
+        if(emsg.indexOf('rate')>=0||data.error.code===429){groqKeyIndex=(idx+1)%GROQ_KEYS.length;continue;}
+        // Modello non disponibile → prova il prossimo modello
+        if(emsg.indexOf('decommissioned')>=0||emsg.indexOf('no longer supported')>=0||emsg.indexOf('not found')>=0||data.error.code===404){console.warn('Groq model',models[mi],'non disponibile, provo il prossimo');break;}
+        // Errore 400 su questo modello → prova il prossimo modello
+        console.warn('Groq '+models[mi]+' error:',emsg);break;
+      }
+      groqKeyIndex=(idx+1)%GROQ_KEYS.length;return data.choices[0].message.content;
     }
   }
+  throw new Error('Groq non disponibile');
+}
 
-  try {
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: { "Authorization": `Bearer ${currentGroqKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "llama-3.1-70b-versatile",
-        messages: [
-          {role:"system", content: `Sei ARIA, un'assistente vocale empatica e brillante. Nome utente: ${USER_DATA.name}, Età: ${USER_DATA.age}. Rispondi in modo naturale e conciso.`},
-          ...CHAT_HISTORY
-        ],
-        temperature: 0.7, max_tokens: 250
-      })
+var GROUNDING_TRIGGERS=[
+  /\b(che tempo|tempo (fa|farà|c'è)|piov|nebbioso|neve|nev|nuvoloso|sole|soleggiato|temperatura|gradi|umidità|vento|previsioni meteo|meteo)\b/i,
+  /\b(ultime notizie|notizie|notizia|cosa (è successo|succede|sta succedendo)|oggi nel mondo|news|si parla di|titoli|giornale)\b/i,
+  /\b(ieri|stamattina|stamane|stasera|questa (settimana|mattina|sera|notte)|nelle ultime ore)\b/i,
+  /\b(guerra|conflitto|attacco|bombardamento|missile|esercito|truppe|invasione|cessate il fuoco|crisi|tensioni|diplomazia|nato|onu|terrorismo)\b/i,
+  /\b(elezioni|governo|premier|ministro|presidente della repubblica|parlamento|voto|referendum|sondaggio|politica)\b/i,
+  /\b(risultato|ha vinto|chi ha vinto|classifica|partita|gol|gara|campionato|serie a|champions|coppa|torneo|derby)\b/i,
+  /\b(dov'è|dove si trova|capitale di|presidente di|chi è il|quanti abitanti|distanza tra|quanto è lontano)\b/i,
+  /\b(quanti giorni (mancano|sono passati)|quando è|data di|anniversario|festività|natale|pasqua|capodanno)\b/i,
+  /\b(prezzo (del|della|di)|costo|quotazione|euro|dollaro|borsa|azioni|bitcoin|crypto|inflazione|pil|economia|recessione)\b/i,
+  /\b(ultimo modello|nuova versione|ha lanciato|ha presentato|aggiornamento|release|elon musk|openai|apple|google|samsung|tesla)\b/i
+];
+function detectGroundingTrigger(text){return GROUNDING_TRIGGERS.some(function(re){return re.test(text.toLowerCase());});}
+async function callGeminiGrounded(){
+  var key=localStorage.getItem('aria_gemini_key')||'';if(!key)throw new Error('Nessuna chiave Gemini');
+  // Pulisce history: EMO tag rimossi, messaggi vuoti esclusi, non può iniziare con 'model'
+  var contents=conversationHistory.map(function(m){return{role:m.role==='assistant'?'model':'user',parts:[{text:m.content.replace(/\[EMO:[^\]]+\]/g,'').trim()}]};}).filter(function(c){return c.parts[0].text.length>0;});
+  while(contents.length>0&&contents[0].role==='model')contents.shift();
+  // Gemini richiede almeno un elemento in contents
+  if(!contents.length)throw new Error('Gemini grounding: history vuota');
+  var response=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+key,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system_instruction:{parts:[{text:buildSystemPrompt()}]},contents:contents,tools:[{google_search:{}}],generationConfig:{maxOutputTokens:300,temperature:0.75}})});
+  var data=await response.json();if(data.error)throw new Error(data.error.message);
+  var text=(data.candidates[0].content.parts||[]).map(function(p){return p.text||'';}).join('').trim();
+  if(!text)throw new Error('Gemini grounding: risposta vuota');return text;
+}
+
+// ═══════════════════════════════════════════════════
+// YOUTUBE
+// ═══════════════════════════════════════════════════
+var YOUTUBE_TRIGGERS=/\b(metti|fammi (sentire|vedere|ascoltare)|ascolta(re)?|suona(re)?|cerca su youtube|cerca (un |il |la |lo )?video|apri youtube|metti su|fai (partire|vedere)|riproduci)\b/i;
+function detectYoutubeTrigger(text){return YOUTUBE_TRIGGERS.test(text.toLowerCase());}
+
+// ═══════════════════════════════════════════════════
+// CONTROLLO VOCALE YOUTUBE PLAYER
+// ═══════════════════════════════════════════════════
+var YT_CONTROL_PATTERNS = [
+  {re:/\b(metti in pausa|pausa|fermati|stop music|stoppa)\b/i,               action:'pause'},
+  {re:/\b(riprendi|continua|play|fai partire)\b/i,                           action:'play'},
+  {re:/\b(chiudi|chiudilo|basta|spegni|ferma il video|ferma la canzone)\b/i, action:'close'},
+  {re:/\b(silenzia|muta|togli il suono)\b/i,                                 action:'mute'},
+  {re:/\b(togli il muto|unmute|riattiva il suono)\b/i,                       action:'unmute'},
+  {re:/\b(volume al massimo|a tutto volume|alza al massimo)\b/i,             action:'vol100'},
+  {re:/\b(volume al minimo|quasi silenzio)\b/i,                              action:'vol10'},
+  {re:/\b(alza il volume|piu forte|aumenta il volume)\b/i,                   action:'volup'},
+  {re:/\b(abbassa il volume|piu piano|diminuisci il volume)\b/i,             action:'voldown'},
+  {re:/\b(vai avanti|salta|avanza).*?(\d+).*?(second|minut)/i,               action:'seekfwd', extract:'time'},
+  {re:/\b(torna indietro|riavvolgi).*?(\d+).*?(second|minut)/i,              action:'seekbwd', extract:'time'},
+  {re:/\b(vai avanti|salta avanti)\b/i,                                      action:'seekfwd', extract:null},
+  {re:/\b(torna indietro|riavvolgi)\b/i,                                     action:'seekbwd', extract:null},
+];
+
+function detectYoutubeControl(text){
+  if(!ytPlayerObj)return null;
+  for(var i=0;i<YT_CONTROL_PATTERNS.length;i++){
+    if(YT_CONTROL_PATTERNS[i].re.test(text))return YT_CONTROL_PATTERNS[i];
+  }
+  return null;
+}
+
+function extractSeconds(text){
+  var m=text.match(/(\d+)\s*(second|minut)/i);
+  if(!m)return 10;
+  var n=parseInt(m[1]);
+  return m[2].toLowerCase().startsWith('m')?n*60:n;
+}
+
+async function handleYoutubeControl(userMsg,pattern){
+  var reply='';
+  try{
+    var vol,ct;
+    switch(pattern.action){
+      case 'pause':
+        ytPlayerObj.pauseVideo();reply='In pausa! Dimmi pure.';break;
+      case 'play':
+        ytPlayerObj.playVideo();reply='Riparto!';break;
+      case 'close':
+        closeYoutube();return;
+      case 'mute':
+        ytPlayerObj.mute();reply='Audio disattivato.';break;
+      case 'unmute':
+        ytPlayerObj.unMute();reply='Audio riattivato!';break;
+      case 'vol100':
+        ytPlayerObj.setVolume(100);reply='Volume al massimo!';break;
+      case 'vol10':
+        ytPlayerObj.setVolume(10);reply='Volume quasi al minimo.';break;
+      case 'volup':
+        vol=Math.min(100,(ytPlayerObj.getVolume()||50)+25);
+        ytPlayerObj.setVolume(vol);reply='Volume alzato a '+vol+'%.';break;
+      case 'voldown':
+        vol=Math.max(0,(ytPlayerObj.getVolume()||50)-25);
+        ytPlayerObj.setVolume(vol);reply='Volume abbassato a '+vol+'%.';break;
+      case 'seekfwd':
+        ct=ytPlayerObj.getCurrentTime();
+        ytPlayerObj.seekTo(ct+(pattern.extract?extractSeconds(userMsg):15),true);
+        reply='Avanzato di '+(pattern.extract?extractSeconds(userMsg):15)+' secondi!';break;
+      case 'seekbwd':
+        ct=ytPlayerObj.getCurrentTime();
+        ytPlayerObj.seekTo(Math.max(0,ct-(pattern.extract?extractSeconds(userMsg):15)),true);
+        reply='Tornato indietro di '+(pattern.extract?extractSeconds(userMsg):15)+' secondi!';break;
+    }
+  }catch(e){reply='Non riesco a controllare il player adesso.';}
+  if(reply){
+    addBubble('aria',reply);showSubtitle('aria',reply);
+    clearTimeout(silenceTimer);setState('speaking');setEmotion('felice');startMouthTalk();
+    speakWithBrowser(reply,function(){
+      stopMouthTalk();animateMouth('neutra');
+      // Se video in pausa riavvia ascolto per altri comandi
+      var ytState=ytPlayerObj?ytPlayerObj.getPlayerState():-1;
+      if(ytState===2||ytState===5||ytState===-1){startListening();}
+      else{setState('idle');updateMicBtn();}
     });
-    
-    if(response.status === 429 && GROQ_KEY2) {
-        currentGroqKey = (currentGroqKey === GROQ_KEY) ? GROQ_KEY2 : GROQ_KEY;
-        processInput(text); return;
+  }
+}
+function extractYoutubeQuery(text){return text.replace(/\b(metti su|metti|fammi sentire|fammi vedere|fammi ascoltare|ascoltare|ascolta|suonare|suona|cerca su youtube|cerca (un |il |la |lo )?video|apri youtube|fai partire|fai vedere|riproduci)\b/gi,'').replace(/\s+/g,' ').trim()||text;}
+async function searchYoutube(query){
+  if(!YOUTUBE_KEY)throw new Error('Nessuna chiave YouTube');
+  var res=await fetch('https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=1&q='+encodeURIComponent(query)+'&key='+YOUTUBE_KEY);
+  var data=await res.json();if(data.error)throw new Error(data.error.message);
+  if(!data.items||!data.items.length)throw new Error('Nessun video trovato');
+  return{id:data.items[0].id.videoId,title:data.items[0].snippet.title};
+}
+function openYoutubePlayer(videoId,title){
+  // Ferma immediatamente qualsiasi voce in corso
+  if(window.speechSynthesis)window.speechSynthesis.cancel();
+  stopMouthTalk();animateMouth('felice');
+  if(currentAudio){try{currentAudio.pause();}catch(e){}currentAudio=null;}
+  // Ferma il microfono e il ciclo listening
+  stopListening();clearTimeout(silenceTimer);silenceTimer=null;
+  document.getElementById('btnStop').style.display='none';
+  setState('idle');updateMicBtn();
+  // Apri il player
+  var player=document.getElementById('ytPlayer');document.getElementById('ytTitle').textContent=title;player.classList.add('visible');hideSubtitle();
+  var old=document.getElementById('ytIframe');if(old)old.remove();
+  var div=document.createElement('div');div.id='ytIframe';player.insertBefore(div,player.firstChild);
+  if(window.YT&&window.YT.Player){createYTPlayer(videoId);}
+  else{window._ytPendingVideoId=videoId;if(!document.getElementById('ytApiScript')){var tag=document.createElement('script');tag.id='ytApiScript';tag.src='https://www.youtube.com/iframe_api';document.head.appendChild(tag);}}
+}
+window.onYouTubeIframeAPIReady=function(){if(window._ytPendingVideoId){createYTPlayer(window._ytPendingVideoId);window._ytPendingVideoId=null;}};
+var ytPlayerObj=null;
+function createYTPlayer(videoId){
+  if(ytPlayerObj){try{ytPlayerObj.destroy();}catch(e){}ytPlayerObj=null;}
+  ytPlayerObj=new YT.Player('ytIframe',{width:'100%',height:'100%',videoId:videoId,playerVars:{autoplay:1,rel:0,playsinline:1},events:{onStateChange:function(event){if(event.data===YT.PlayerState.ENDED)closeYoutube();}}});
+}
+function closeYoutube(){
+  var player=document.getElementById('ytPlayer'),wasVisible=player.classList.contains('visible');
+  player.classList.remove('visible');if(ytPlayerObj){try{ytPlayerObj.destroy();}catch(e){}ytPlayerObj=null;}
+  var old=document.getElementById('ytIframe');if(old)old.remove();hideSubtitle();
+  if(wasVisible&&VOICE_STATE!=='speaking'){
+    var frasi=["Com'era? Ti è piaciuta?","Bella, no? Vuoi sentire altro?","Finita! Vuoi un'altra canzone?"];
+    var frase=frasi[Math.floor(Math.random()*frasi.length)];
+    clearTimeout(silenceTimer);setState('speaking');addBubble('aria',frase);setEmotion('felice');
+    playShortTTS(frase,function(){goIdleAfterSpeaking();});
+  }
+}
+async function handleYoutubeRequest(userMsg){
+  if(!YOUTUBE_KEY){
+    var nm='Per fare questo ho bisogno della chiave YouTube — aggiungila nelle impostazioni!';
+    addBubble('aria',nm);showSubtitle('aria',nm);setState('speaking');
+    await new Promise(function(resolve){playShortTTS(nm,resolve);});goIdleAfterSpeaking();return;
+  }
+  clearTimeout(silenceTimer);silenceTimer=null;setState('thinking');addTyping();setEmotion('pensierosa');
+  try{
+    var video=await searchYoutube(extractYoutubeQuery(userMsg));removeTyping();
+    var dm='🎵 '+video.title;addBubble('aria',dm);showSubtitle('aria',dm);setEmotion('felice');setState('speaking');
+    await new Promise(function(resolve){playShortTTS('Eccolo, lo metto su!',resolve);});
+    openYoutubePlayer(video.id,video.title); // stato gestito dentro openYoutubePlayer
+  }catch(e){
+    removeTyping();var em="Non sono riuscita a trovare il video, scusa!";
+    addBubble('aria',em);showSubtitle('aria',em);setState('speaking');
+    await new Promise(function(resolve){playShortTTS(em,resolve);});goIdleAfterSpeaking();
+  }
+}
+
+function playWithAudioElement(wavBuffer,onDone){
+  var blob=new Blob([wavBuffer],{type:'audio/wav'}),url=URL.createObjectURL(blob),audio=new Audio(url);
+  currentAudio=audio;audio.onended=function(){URL.revokeObjectURL(url);onDone();};audio.onerror=function(){URL.revokeObjectURL(url);onDone();};
+  audio.play().catch(function(){onDone();});
+}
+function base64ToArrayBuffer(b64){var bin=atob(b64),buf=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)buf[i]=bin.charCodeAt(i);return buf.buffer;}
+function pcmToWav(pcmBuffer,sampleRate,numChannels,bitDepth){
+  var pcm=new Uint8Array(pcmBuffer),wavLen=44+pcm.byteLength,buf=new ArrayBuffer(wavLen),view=new DataView(buf);
+  function ws(off,str){for(var i=0;i<str.length;i++)view.setUint8(off+i,str.charCodeAt(i));}
+  ws(0,'RIFF');view.setUint32(4,wavLen-8,true);ws(8,'WAVE');ws(12,'fmt ');view.setUint32(16,16,true);view.setUint16(20,1,true);view.setUint16(22,numChannels,true);
+  view.setUint32(24,sampleRate,true);view.setUint32(28,sampleRate*numChannels*bitDepth/8,true);view.setUint16(32,numChannels*bitDepth/8,true);view.setUint16(34,bitDepth,true);
+  ws(36,'data');view.setUint32(40,pcm.byteLength,true);new Uint8Array(buf,44).set(pcm);return buf;
+}
+function stopSpeaking(){
+  if(currentAudio){currentAudio.pause();currentAudio=null;}if(window.speechSynthesis)window.speechSynthesis.cancel();
+  stopMouthTalk();stopCountdown();document.getElementById('btnStop').style.display='none';setState('idle');updateMicBtn();hideSubtitle();
+}
+async function saveAndClose(){
+  var b=document.getElementById('saveBanner');if(b)b.classList.remove('visible');
+  await extractMemoryFromSession();window.removeEventListener('beforeunload',onBeforeUnload);
+}
+function onBeforeUnload(e){
+  if(memoryExtracted||conversationHistory.length<2)return;
+  var b=document.getElementById('saveBanner');if(b)b.classList.add('visible');e.preventDefault();e.returnValue='';
+}
+window.addEventListener('beforeunload',onBeforeUnload);
+
+// ═══════════════════════════════════════════════════
+// SISTEMA VOCALE — TAP TO TALK
+// ═══════════════════════════════════════════════════
+var VOICE_STATE='idle';
+var commandRecognition=null;  // tenuto per compatibilità stopListening
+var countdownInterval=null;
+var countdownSec=10;
+var speechEndTimer=null;
+var silenceTimer=null;
+
+function setState(s){VOICE_STATE=s;updateStateLabel();}
+function updateStateLabel(){
+  var label=document.getElementById('stateLabel'),text=document.getElementById('stateLabelText');if(!label||!text)return;
+  var map={idle:{cls:'',txt:'in attesa'},listening:{cls:'s-listening',txt:'🎤 ti ascolto'},thinking:{cls:'s-thinking',txt:'⏳ sto pensando'},speaking:{cls:'s-speaking',txt:'💬 sto parlando'},countdown:{cls:'s-countdown',txt:'⏱ ancora qui?'}};
+  var s=map[VOICE_STATE]||map.idle;label.className='state-label'+(s.cls?' '+s.cls:'');text.textContent=s.txt;
+}
+function goSpeaking(){
+  // Blocca il timer sleep mentre ARIA sta parlando
+  clearTimeout(silenceTimer);silenceTimer=null;
+  setState('speaking');updateMicBtn();
+}
+function initSpeechRecognition(){setState('idle');}
+
+function toggleMic(){
+  if(VOICE_STATE==='listening'){stopListening();setState('idle');updateMicBtn();return;}
+  if(VOICE_STATE==='speaking'){stopSpeaking();return;}
+  if(VOICE_STATE==='countdown')stopCountdown();
+  startListening();
+}
+
+function startListening(){
+  stopWakeWord(); // ferma wake word se attivo
+  clearTimeout(silenceTimer);
+  if(VOICE_STATE==='listening'){
+    silenceTimer=setTimeout(function(){if(VOICE_STATE==='listening'&&!isYoutubeOpen())startCountdown();},20000);return;
+  }
+  var banner=document.getElementById('wakeBanner');if(banner)banner.classList.remove('visible');
+  setState('listening');accumulatedText='';clearTimeout(speechEndTimer);updateMicBtn();setEmotion('ascoltando');
+  var _mv=document.getElementById('micViz');if(_mv)_mv.classList.add('active');
+  startListeningAttempt();
+  silenceTimer=setTimeout(function(){if(VOICE_STATE==='listening'&&!isYoutubeOpen())startCountdown();},20000);
+}
+
+function isYoutubeOpen(){var p=document.getElementById('ytPlayer');return p&&p.classList.contains('visible');}
+
+// ═══════════════════════════════════════════════════
+// SISTEMA ASCOLTO — MEDIARECORDER + ANALISI VOLUME
+// Nessun Web Speech API = nessun beep su Android
+// ═══════════════════════════════════════════════════
+var mrStream=null;          // stream microfono attivo
+var mrRecorder=null;        // MediaRecorder attivo
+var mrChunks=[];            // chunk audio raccolti
+var mrAnalyser=null;        // AnalyserNode per rilevare volume
+var mrAnalyserCtx=null;     // AudioContext dedicato all'analisi
+var mrSilenceTimer=null;    // timer silenzio → invia
+var mrWasSpeaking=false;    // l'utente ha parlato almeno una volta
+var mrAnalyserInterval=null;// interval per lettura volume
+var SILENCE_THRESHOLD=8;   // volume sotto questa soglia = silenzio (0-255)
+var SILENCE_DURATION=1500;  // ms di silenzio continuo → invia
+var MIN_SPEECH_MS=300;      // ms minimi di parlato per evitare invii accidentali
+
+function startListeningAttempt(){
+  if(VOICE_STATE!=='listening')return;
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    showSubtitle('aria','Microfono non disponibile su questo browser.');setState('idle');updateMicBtn();return;
+  }
+  navigator.mediaDevices.getUserMedia({audio:true,video:false}).then(function(stream){
+    if(VOICE_STATE!=='listening'){stream.getTracks().forEach(function(t){t.stop();});return;}
+    mrStream=stream;
+    mrChunks=[];
+    mrWasSpeaking=false;
+    var mrRecordingStart=Date.now();
+
+    // Analizzatore volume
+    mrAnalyserCtx=new(window.AudioContext||window.webkitAudioContext)();
+    var source=mrAnalyserCtx.createMediaStreamSource(stream);
+    mrAnalyser=mrAnalyserCtx.createAnalyser();
+    mrAnalyser.fftSize=512;
+    source.connect(mrAnalyser);
+
+    // MediaRecorder
+    var mimeType=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm';
+    mrRecorder=new MediaRecorder(stream,{mimeType:mimeType});
+    mrRecorder.ondataavailable=function(e){if(e.data&&e.data.size>0)mrChunks.push(e.data);};
+    mrRecorder.onstop=function(){
+      // Pulisci stream e analyser
+      if(mrStream){mrStream.getTracks().forEach(function(t){t.stop();});mrStream=null;}
+      if(mrAnalyserCtx){try{mrAnalyserCtx.close();}catch(e){}mrAnalyserCtx=null;}
+      mrAnalyser=null;
+      var elapsed=Date.now()-mrRecordingStart;
+      var hasAudio=mrChunks.length>0&&mrChunks.reduce(function(s,c){return s+c.size;},0)>1000;
+      if((!mrWasSpeaking&&!hasAudio)||(!mrWasSpeaking&&elapsed<800)){
+        mrChunks=[];
+        if(VOICE_STATE==='listening')startListeningAttempt();
+        return;
+      }
+      var blob=new Blob(mrChunks,{type:mimeType});
+      mrChunks=[];
+      if(VOICE_STATE==='listening'||VOICE_STATE==='countdown')goThinkingFromAudio(blob);
+    };
+    mrRecorder.start(100); // chunk ogni 100ms
+
+    // Avvia loop analisi volume SOLO dopo che l'AudioContext è attivo
+    function startAnalyserLoop(){
+      _micVizBars=null; // reset cache barre per sicurezza
+      var dataArray=new Uint8Array(mrAnalyser.frequencyBinCount);
+      var speechStartTime=null;
+      mrAnalyserInterval=setInterval(function(){
+      if(!mrAnalyser){clearInterval(mrAnalyserInterval);mrAnalyserInterval=null;return;}
+      if(VOICE_STATE!=='listening'){
+        // Se non siamo in listening, ferma l'interval ma non chiamare stopListening
+        // (potrebbe interrompere countdown/sleeping/speaking in corso)
+        clearInterval(mrAnalyserInterval);mrAnalyserInterval=null;
+        if(mrRecorder&&mrRecorder.state==='recording'){try{mrRecorder.stop();}catch(e){}}
+        return;
+      }
+      mrAnalyser.getByteFrequencyData(dataArray);
+      var sum=0;for(var i=0;i<dataArray.length;i++)sum+=dataArray[i];
+      var avg=sum/dataArray.length;
+      updateMicViz(dataArray,avg);
+
+      if(avg>SILENCE_THRESHOLD){
+        // Sta parlando
+        if(!speechStartTime)speechStartTime=Date.now();
+        if(Date.now()-speechStartTime>MIN_SPEECH_MS)mrWasSpeaking=true;
+        clearTimeout(mrSilenceTimer);mrSilenceTimer=null;
+        // Resetta anche il silence timer globale (countdown sleep)
+        clearTimeout(silenceTimer);
+        silenceTimer=setTimeout(function(){if(VOICE_STATE==='listening'&&!isYoutubeOpen())startCountdown();},20000);
+      }else{
+        // Silenzio
+        speechStartTime=null;
+        if(mrWasSpeaking&&!mrSilenceTimer){
+          mrSilenceTimer=setTimeout(function(){
+            if(VOICE_STATE==='listening')stopListening();
+          },SILENCE_DURATION);
+        }
+      }
+    },100);
+    } // fine startAnalyserLoop
+
+    // Avvia loop SOLO dopo che AudioContext è running — garantisce dati reali
+    if(mrAnalyserCtx.state==='suspended'){
+      mrAnalyserCtx.resume().then(startAnalyserLoop).catch(startAnalyserLoop);
+    }else{
+      startAnalyserLoop();
     }
 
-    const data = await response.json();
-    const reply = data.choices[0].message.content;
-    CHAT_HISTORY.push({role:"assistant", content:reply});
-    speak(reply);
-  } catch(e) {
-    speak("Scusami, ho un piccolo problema di connessione.");
-  }
-}
-
-function speak(text) {
-  synth.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  const savedVoiceName = localStorage.getItem('aria_voice');
-  if(savedVoiceName) {
-    const v = synth.getVoices().find(vx => vx.name === savedVoiceName);
-    if(v) utterance.voice = v;
-  }
-  utterance.onstart = () => { isAriaSpeaking = true; setAriaState('speaking'); showSubtitle(text, false); };
-  utterance.onend = () => { isAriaSpeaking = false; if(!countdownActive) startCountdown(); };
-  synth.speak(utterance);
-}
-
-function startCountdown() {
-  // Se il player YouTube è visibile, NON avviare il countdown per evitare loop audio
-  if(document.getElementById('ytPlayer').classList.contains('visible')) {
-    setAriaState('idle');
-    return;
-  }
-  
-  stopCountdown();
-  countdownActive = true;
-  setAriaState('countdown');
-  let timeLeft = 3;
-  const ring = document.getElementById('countdownRing');
-  const text = document.getElementById('cdText');
-  const circle = document.getElementById('cdCircle');
-  ring.style.display = 'flex';
-  text.innerText = timeLeft;
-  
-  countdownInterval = setInterval(() => {
-    timeLeft--;
-    text.innerText = timeLeft;
-    let offset = 163.36 - (163.36 * (timeLeft/3));
-    circle.style.strokeDashoffset = offset;
-    if(timeLeft <= 0) {
-      stopCountdown();
-      toggleMic();
-    }
-  }, 1000);
-}
-
-function stopCountdown() {
-  countdownActive = false;
-  clearInterval(countdownInterval);
-  document.getElementById('countdownRing').style.display = 'none';
-  document.getElementById('cdCircle').style.strokeDashoffset = 0;
-}
-
-function setAriaState(state) {
-  face.className = 'face-container';
-  stateLabel.className = 'state-label';
-  
-  switch(state) {
-    case 'listening':
-      face.classList.add('listening-active');
-      stateLabel.classList.add('s-listening');
-      stateLabelText.innerText = "ti ascolto";
-      openSvgEyes();
-      break;
-    case 'thinking':
-      face.classList.add('thinking');
-      stateLabel.classList.add('s-thinking');
-      stateLabelText.innerText = "sto pensando";
-      break;
-    case 'speaking':
-      face.classList.add('speaking');
-      stateLabel.classList.add('s-speaking');
-      stateLabelText.innerText = "sto parlando";
-      openSvgEyes();
-      break;
-    case 'countdown':
-      stateLabel.classList.add('s-countdown');
-      stateLabelText.innerText = "pronta tra...";
-      break;
-    case 'idle':
-    default:
-      stateLabelText.innerText = "in attesa";
-      break;
-  }
-}
-
-function showSubtitle(text, isUser) {
-  subBox.classList.add('visible');
-  subLabel.innerText = isUser ? USER_DATA.name : "ARIA";
-  subText.innerText = text;
-  subBox.className = isUser ? 'subtitle-box visible user-sub' : 'subtitle-box visible';
-}
-
-function updateMicBtn() {
-  micBtn.className = isRecording ? 'btn btn-mic recording' : 'btn btn-mic';
-  if(!isRecording) stopVisualizer();
-}
-
-async function searchAndPlayYoutube(query) {
-  try {
-    const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&maxResults=1&type=video&key=${YOUTUBE_KEY}`);
-    const data = await res.json();
-    if(data.items && data.items.length > 0) {
-      const video = data.items[0];
-      playYoutubeVideo(video.id.videoId, video.snippet.title);
-    } else {
-      speak("Non ho trovato video per " + query);
-    }
-  } catch(e) { speak("Errore nella ricerca YouTube."); }
-}
-
-function playYoutubeVideo(id, title) {
-  // 1. Fermiamo l'ascolto automatico e la voce
-  stopCountdown();
-  synth.cancel();
-  isAriaSpeaking = false;
-
-  // 2. Mostriamo il player
-  const player = document.getElementById('ytPlayer');
-  const iframeContainer = document.getElementById('ytIframe');
-  player.classList.add('visible');
-  document.getElementById('ytTitle').innerText = title;
-  iframeContainer.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${id}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-  
-  // 3. Settiamo lo stato su Idle
-  setAriaState('idle');
-  showSubtitle("Riproduco: " + title, false);
-}
-
-function closeYoutubePlayer() {
-  const player = document.getElementById('ytPlayer');
-  player.classList.remove('visible');
-  document.getElementById('ytIframe').innerHTML = "";
-  // Quando chiudiamo il video, resettiamo lo stato e NON avviamo il countdown automatico
-  // per dare pace all'utente. Se vuole parlare, premerà il mic.
-  setAriaState('idle');
-}
-
-// Visualizer e altre utility...
-function startVisualizer() {
-  if(!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  if(!analyser) {
-    analyser = audioContext.createAnalyser();
-    analyser.fftSize = 32;
-    dataArray = new Uint8Array(analyser.frequencyBinCount);
-  }
-  navigator.mediaDevices.getUserMedia({audio:true}).then(stream => {
-    if(source) source.disconnect();
-    source = audioContext.createMediaStreamSource(stream);
-    source.connect(analyser);
-    document.getElementById('micViz').classList.add('active');
-    drawVisualizer();
+  }).catch(function(err){
+    setState('idle');updateMicBtn();
+    showSubtitle('aria','Non riesco ad accedere al microfono. Controlla i permessi.');
   });
 }
-function stopVisualizer() {
-  document.getElementById('micViz').classList.remove('active');
-  cancelAnimationFrame(animationId);
-}
-function drawVisualizer() {
-  animationId = requestAnimationFrame(drawVisualizer);
-  analyser.getByteFrequencyData(dataArray);
-  const bars = document.querySelectorAll('.mic-viz-bar');
-  bars.forEach((bar, i) => {
-    let h = (dataArray[i % dataArray.length] / 255) * 36;
-    bar.style.height = Math.max(3, h) + 'px';
-    bar.className = h > 25 ? 'mic-viz-bar hot' : 'mic-viz-bar';
-  });
-}
 
-function toggleSettingsMenu() { 
-  const btn = document.getElementById('settingsBtn');
-  const menu = document.getElementById('settingsMenu');
-  btn.classList.toggle('open');
-  menu.classList.toggle('open');
-}
-function closeSettingsMenu() {
-  document.getElementById('settingsBtn').classList.remove('open');
-  document.getElementById('settingsMenu').classList.remove('open');
-}
 
-function loadVoices() {
-  voices = synth.getVoices();
-  if(voices.length === 0) {
-    synth.onvoiceschanged = () => { voices = synth.getVoices(); };
+// ── MIC VISUALIZER ──
+var _micVizBars=null;
+function updateMicViz(dataArray,avg){
+  if(!_micVizBars){
+    _micVizBars=[];
+    for(var i=0;i<14;i++){var b=document.getElementById('mvb'+i);if(b)_micVizBars.push(b);}
+  }
+  var N=_micVizBars.length;if(!N)return;
+  // Campiona N bande distribuite sullo spettro (focus sulle frequenze vocali)
+  var step=Math.floor(dataArray.length*0.6/N); // usa il 60% basso dello spettro (voce umana)
+  var maxH=33; // px max barra
+  var hot=avg>SILENCE_THRESHOLD;
+  for(var j=0;j<N;j++){
+    var val=dataArray[j*step]||0;
+    // Simmetria: le barre centrali più alte (forma a campana leggera)
+    var center=Math.abs(j-(N-1)/2)/((N-1)/2);
+    val=val*(1-center*0.25);
+    var h=Math.max(3,Math.round((val/255)*maxH));
+    _micVizBars[j].style.height=h+'px';
+    if(hot)_micVizBars[j].classList.add('hot');else _micVizBars[j].classList.remove('hot');
   }
 }
-function openVoiceModal() {
-  const list = document.getElementById('voiceList');
-  list.innerHTML = "";
-  voices.forEach(v => {
-    if(v.lang.includes('it') || v.lang.includes('en')) {
-      const div = document.createElement('div');
-      div.className = 'settings-item';
-      div.style.borderRadius = '12px';
-      div.innerHTML = `<div class="settings-label"><div class="settings-title">${v.name}</div><div class="settings-sub">${v.lang}</div></div>`;
-      if(localStorage.getItem('aria_voice') === v.name) div.style.borderColor = 'var(--accent)';
-      div.onclick = () => {
-        localStorage.setItem('aria_voice', v.name);
-        alert("Voce selezionata: " + v.name);
-      };
-      list.appendChild(div);
+function stopListening(){
+  var _mv=document.getElementById('micViz');if(_mv){_mv.classList.remove('active');for(var _i=0;_i<14;_i++){var _b=document.getElementById('mvb'+_i);if(_b){_b.style.height='3px';_b.classList.remove('hot');}}}
+  clearTimeout(mrSilenceTimer);mrSilenceTimer=null;
+  clearInterval(mrAnalyserInterval);mrAnalyserInterval=null;
+  if(mrRecorder&&mrRecorder.state==='recording'){try{mrRecorder.stop();}catch(e){}mrRecorder=null;}
+  else{
+    // Se il recorder non è attivo, pulisci stream manualmente
+    if(mrStream){mrStream.getTracks().forEach(function(t){t.stop();});mrStream=null;}
+    if(mrAnalyserCtx){try{mrAnalyserCtx.close();}catch(e){}mrAnalyserCtx=null;}
+    mrAnalyser=null;
+  }
+  if(commandRecognition){try{commandRecognition.stop();}catch(e){}commandRecognition=null;}
+}
+
+function goThinkingFromAudio(blob){
+  // Imposta thinking direttamente — stopListening è già stato chiamato da mrSilenceTimer
+  clearTimeout(silenceTimer);silenceTimer=null;
+  setState('thinking');updateMicBtn();addTyping();setEmotion('pensierosa');
+  // Usa Groq Whisper per la trascrizione — più veloce di Gemini (~300ms)
+  var key=GROQ_KEYS[groqKeyIndex%GROQ_KEYS.length]||'';
+  if(!key){setState('idle');updateMicBtn();startListening();return;}
+  try{
+    var formData=new FormData();
+    // Groq Whisper accetta webm/ogg/mp4/wav — usiamo il blob direttamente
+    var filename='audio.'+(blob.type.includes('ogg')?'ogg':blob.type.includes('mp4')?'mp4':blob.type.includes('wav')?'wav':'webm');
+    formData.append('file',blob,filename);
+    formData.append('model','whisper-large-v3-turbo'); // più veloce di whisper-large-v3, stessa qualità
+    formData.append('language','it'); // forza italiano — più veloce e accurato
+    formData.append('response_format','json');
+    fetch('https://api.groq.com/openai/v1/audio/transcriptions',{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+key},
+      body:formData
+    }).then(function(res){return res.json();}).then(function(data){
+      if(data.error){
+        // Fallback a Gemini se Groq fallisce
+        goThinkingFromAudioGemini(blob);return;
+      }
+      var t=(data.text||'').trim();
+      if(t){addBubble('user',t);showSubtitle('user',t);conversationHistory.push({role:'user',content:t});askAriaFromTranscript(t);}
+      else{setState('idle');updateMicBtn();startListening();}
+    }).catch(function(){
+      // Fallback a Gemini
+      goThinkingFromAudioGemini(blob);
+    });
+  }catch(e){goThinkingFromAudioGemini(blob);}
+}
+
+// Fallback trascrizione Gemini (usato se Groq non disponibile)
+function goThinkingFromAudioGemini(blob){
+  var reader=new FileReader();
+  reader.onloadend=async function(){
+    var b64=reader.result.split(',')[1];
+    var mime=blob.type.split(';')[0]||'audio/webm';
+    var key=localStorage.getItem('aria_gemini_key')||'';
+    if(!key){setState('idle');updateMicBtn();startListening();return;}
+    try{
+      var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+key,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({contents:[{parts:[
+          {inline_data:{mime_type:mime,data:b64}},
+          {text:'Trascrivi esattamente in italiano le parole pronunciate in questo audio. Rispondi SOLO con la trascrizione, nessun altro testo. Se non riesci a sentire nulla rispondi con una stringa vuota.'}
+        ]}],generationConfig:{maxOutputTokens:200,temperature:0}})
+      });
+      var data=await res.json();
+      if(data.error||!data.candidates||!data.candidates[0]){setState('idle');updateMicBtn();startListening();return;}
+      var parts=data.candidates[0].content&&data.candidates[0].content.parts;
+      var t=parts&&parts[0]&&parts[0].text?parts[0].text.trim():'';
+      if(t){addBubble('user',t);showSubtitle('user',t);conversationHistory.push({role:'user',content:t});askAriaFromTranscript(t);}
+      else{setState('idle');updateMicBtn();startListening();}
+    }catch(e){setState('idle');updateMicBtn();startListening();}
+  };
+  reader.readAsDataURL(blob);
+}
+
+// goThinking: versione testuale (input da tastiera)
+function goThinking(transcript){
+  stopListening();
+  clearTimeout(speechEndTimer);
+  clearTimeout(silenceTimer);
+  setState('thinking');
+  updateMicBtn();
+  if(transcript)askAria(transcript);
+}
+
+// askAriaFromTranscript: chiamato dopo trascrizione audio — bolla utente già aggiunta
+async function askAriaFromTranscript(userMsg){
+  // Controlla chiavi disponibili (robusto: usa GROQ_KEYS array, non GROQ_KEY statica)
+  if(!GROQ_KEYS||!GROQ_KEYS.length){openModal();return;}
+  // Gestisci richieste YouTube anche da voce
+  var _ytCtrl2=detectYoutubeControl(userMsg);if(_ytCtrl2){await handleYoutubeControl(userMsg,_ytCtrl2);return;}
+  if(detectYoutubeTrigger(userMsg)){await handleYoutubeRequest(userMsg);return;}
+  setState('thinking');addTyping();setEmotion('pensierosa');
+  try{
+    var pendingGrounding=false;
+    if(!detectGroundingTrigger(userMsg)&&conversationHistory.length>=3){
+      var prev='';for(var i=conversationHistory.length-2;i>=0;i--){if(conversationHistory[i].role==='assistant'){prev=conversationHistory[i].content.toLowerCase();break;}}
+      if(/\b(quale città|che città|dove sei|in quale città|in che città|dove ti trovi|da che parte)\b/.test(prev))pendingGrounding=true;
     }
-  });
-  document.getElementById('voiceModal').classList.remove('hidden');
-}
-function closeVoiceModal() { document.getElementById('voiceModal').classList.add('hidden'); }
+    var useGrounding=(detectGroundingTrigger(userMsg)||pendingGrounding);
+    var fullText;
+    if(useGrounding){console.log('ARIA grounding:',userMsg);try{fullText=await callGeminiGrounded();lastProviderUsed='gemini-grounded';}catch(e){fullText=await callGroq();lastProviderUsed='groq';}}
+    else{fullText=await callGroq();lastProviderUsed='groq';}
+    updateProviderBadge();
+    var emoMatch=fullText.match(/\[EMO:([^\]]+)\]/);
+    var emo=emoMatch?emoMatch[1]:'neutra';
+    var cleanText=fullText.replace(/\[EMO:[^\]]+\]/g,'').trim();
+    removeTyping();conversationHistory.push({role:'assistant',content:fullText});setEmotion(emo);
+    addBubble('aria',cleanText);showSubtitle('aria',cleanText);
+    setEmotion('parlando');startMouthTalk();
+    document.getElementById('btnStop').style.display='flex';
+    speakWithBrowser(cleanText,function(){stopMouthTalk();animateMouth('neutra');document.getElementById('btnStop').style.display='none';goIdleAfterSpeaking();});
 
-function exportMemory() {
-  const data = { history: CHAT_HISTORY, user: USER_DATA, groq: GROQ_KEY, groq2: GROQ_KEY2, gemini: GEMINI_KEY, yt: YOUTUBE_KEY };
-  const str = btoa(JSON.stringify(data));
-  navigator.clipboard.writeText(str).then(() => alert("Memoria copiata negli appunti!"));
+  }catch(err){removeTyping();showSubtitle('aria','⚠️ '+(err.message||'Errore connessione.'));setEmotion('neutra');setState('idle');updateMicBtn();}
 }
-function importMemory() {
-  const code = prompt("Incolla qui il codice della memoria:");
-  if(code) {
-    try {
-      const data = JSON.parse(atob(code));
-      CHAT_HISTORY = data.history || [];
-      USER_DATA = data.user || null;
-      localStorage.setItem('aria_history', JSON.stringify(CHAT_HISTORY));
-      localStorage.setItem('aria_user', JSON.stringify(USER_DATA));
-      if(data.groq) localStorage.setItem('groq_key', data.groq);
-      location.reload();
-    } catch(e) { alert("Codice non valido."); }
+
+// goIdleAfterSpeaking: delay 300ms + check stato
+// evita di avviare l'ascolto se nel frattempo è arrivata una nuova richiesta
+function goIdleAfterSpeaking(){
+  if(conversationHistory.length>0){
+    setState('idle');
+    setTimeout(function(){
+      if(VOICE_STATE==='thinking'||VOICE_STATE==='speaking')return;
+      // Non riavviare il microfono se YouTube è aperto — ascolterebbe la canzone
+      if(isYoutubeOpen()){updateMicBtn();return;}
+      // Riavvia listening con timer esteso a 40s (l'utente ha appena sentito la risposta)
+      clearTimeout(silenceTimer);
+      setState('listening');accumulatedText='';updateMicBtn();setEmotion('ascoltando');
+      var _mv2=document.getElementById('micViz');if(_mv2)_mv2.classList.add('active');
+      startListeningAttempt();
+      silenceTimer=setTimeout(function(){
+        if(VOICE_STATE==='listening'&&!isYoutubeOpen())startCountdown();
+      },40000); // 40s invece di 20s dopo che ARIA risponde
+    },300);
+  }else{setState('idle');updateMicBtn();}
+}
+
+// ─── COUNTDOWN ───
+function startCountdown(){
+  setState('countdown');countdownSec=10;updateMicBtn();setEmotion('ascoltando');
+  var ring=document.getElementById('countdownRing'),arc=document.getElementById('countdownArc'),num=document.getElementById('countdownNum');
+  if(ring)ring.style.display='flex';
+  function updateArc(){if(arc)arc.setAttribute('stroke-dashoffset',163.4*(1-countdownSec/10));if(num)num.textContent=countdownSec;var t=document.getElementById('stateLabelText');if(t)t.textContent='⏱ '+countdownSec+'s — ancora qui?';}
+  updateArc();
+  countdownInterval=setInterval(function(){countdownSec--;updateArc();if(countdownSec<=0){stopCountdown();sayGoodbye();}},1000);
+}
+function stopCountdown(){
+  clearInterval(countdownInterval);countdownInterval=null;
+  var ring=document.getElementById('countdownRing');if(ring)ring.style.display='none';
+}
+
+// ─── WAKE WORD ───
+var wakeRecognition=null;
+var wakeWordActive=false;
+
+function startWakeWord(){
+  // Silenzia beep Android: mantieni AudioContext sospeso durante wake word
+  try { if(window.audioCtx && audioCtx.state==='running') audioCtx.suspend(); } catch(e){}
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR||wakeWordActive)return;
+  wakeWordActive=true;
+  function attempt(){
+    if(!wakeWordActive)return;
+    wakeRecognition=new SR();
+    wakeRecognition.continuous=true;
+    wakeRecognition.interimResults=false;
+    wakeRecognition.lang='it-IT';
+    wakeRecognition.onresult=function(e){
+      var t=e.results[e.results.length-1][0].transcript.toLowerCase();
+      if(t.indexOf('aria')>=0){wakeUp(true);}
+    };
+    wakeRecognition.onend=function(){
+      // Riavvia silenziosamente — in sleeping i beep non danno fastidio
+      if(wakeWordActive)setTimeout(attempt,500);
+    };
+    wakeRecognition.onerror=function(){
+      if(wakeWordActive)setTimeout(attempt,1000);
+    };
+    try{wakeRecognition.start();}catch(e){if(wakeWordActive)setTimeout(attempt,1000);}
+  }
+  attempt();
+}
+
+function stopWakeWord(){
+  wakeWordActive=false;
+  if(wakeRecognition){try{wakeRecognition.stop();}catch(e){}wakeRecognition=null;}
+}
+
+// ─── SLEEPING ───
+function sayGoodbye(){
+  extractMemoryFromSession();setState('speaking');updateMicBtn();stopListening();
+  if(isYoutubeOpen()){goSleeping();return;}
+  var frasi=['Sono qui, chiamami quando hai bisogno.','Mi fermo un attimo, svegliami quando vuoi!','A presto! Dimmi pure il mio nome per ricominciare.','Vado a riposare, ma sono qui se mi chiami.'];
+  var frase=frasi[Math.floor(Math.random()*frasi.length)];
+  showSubtitle('aria',frase);setEmotion('empatica');
+  playShortTTS(frase,function(){goSleeping();});
+}
+
+function goSleeping(){
+  svgSleeping=true; closeSvgEyes();
+  setState('idle');updateMicBtn();setEmotion('dormendo');hideSubtitle();
+  var b=document.getElementById('wakeBanner');if(b)b.classList.add('visible');
+  startWakeWord(); // ascolta "aria" in background
+}
+
+function wakeUp(fromWakeWord){
+  svgSleeping=false; openSvgEyes();
+  try { if(window.audioCtx && audioCtx.state!=="running") audioCtx.resume(); } catch(e){}
+  stopWakeWord(); // spegne Web Speech
+  var b=document.getElementById('wakeBanner');if(b)b.classList.remove('visible');
+  setEmotion('felice');
+  if(isYoutubeOpen()){setState('idle');updateMicBtn();return;}
+  var frasi=fromWakeWord
+    ?['Ciao, sono qui! Dimmi pure.','Eccomi! Di cosa vuoi parlare?','Sono sveglia, dimmi tutto!']
+    :['Eccomi! Di cosa vuoi parlare?','Sono sveglia! Come posso aiutarti?','Ci sono! Dimmi pure.'];
+  var frase=frasi[Math.floor(Math.random()*frasi.length)];
+  showSubtitle('aria',frase);
+  playShortTTS(frase,function(){hideSubtitle();startListening();});
+}
+
+function updateMicBtn(){
+  var btn=document.getElementById('btnMic');if(!btn)return;
+  if(VOICE_STATE==='listening'||VOICE_STATE==='countdown'){btn.classList.add('recording');btn.textContent='⏹';}
+  else{btn.classList.remove('recording');btn.textContent='🎤';}
+}
+
+async function playShortTTS(text,callback){
+  speakWithBrowser(text,callback||function(){});
+}
+
+function sendText(){var input=document.getElementById('textInput'),msg=input.value.trim();if(!msg)return;input.value='';askAria(msg);}
+
+window.onload=function(){
+  // Precarica voci browser per ridurre latenza primo utilizzo
+  if(window.speechSynthesis){
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged=function(){window.speechSynthesis.getVoices();};
+  }
+  document.addEventListener('touchmove',function(e){moveEyes(e.touches[0].clientX,e.touches[0].clientY);});
+  document.addEventListener('mousemove',function(e){moveEyes(e.clientX,e.clientY);});
+  document.getElementById('textInput').addEventListener('keydown',function(e){if(e.key==='Enter')sendText();});
+  document.getElementById('audioUnlockOverlay').classList.remove('hidden');
+};
+
+// Chiamata dopo unlock audio — avvia wake word se onboarding completato e ARIA è in idle
+function onAudioUnlocked(){
+  if(localStorage.getItem('aria_onboarding_done')==='true'&&VOICE_STATE==='idle'){
+    // Se ARIA è già dormendo (wakeBanner visibile) avvia wake word
+    var b=document.getElementById('wakeBanner');
+    if(b&&b.classList.contains('visible'))startWakeWord();
   }
 }
-
-// Gestione occhi SVG
-function moveSvgEyes(e) {
-  const x = e.clientX || (e.touches && e.touches[0].clientX);
-  const y = e.clientY || (e.touches && e.touches[0].clientY);
-  if(!x || !y) return;
-  const eyes = [ {id:'svgEyeL', cx:85, cy:125}, {id:'svgEyeR', cx:175, cy:125} ];
-  eyes.forEach(c => {
-    const el = document.getElementById(c.id);
-    const iris = el.querySelector('.iris');
-    const pupil = el.querySelector('.pupil');
-    const r1 = el.querySelector('.refl1');
-    const r2 = el.querySelector('.refl2');
-    const dx = (x - window.innerWidth/2) / (window.innerWidth/2) * 6;
-    const dy = (y - window.innerHeight/2) / (window.innerHeight/2) * 6;
-    if(iris){iris.setAttribute('cx',dx);iris.setAttribute('cy',dy);}
-    if(pupil){pupil.setAttribute('cx',dx);pupil.setAttribute('cy',dy);}
-    if(r1){r1.setAttribute('cx',dx-4);r1.setAttribute('cy',dy-4);}
-    if(r2){r2.setAttribute('cx',dx+4);r2.setAttribute('cy',dy+4);}
+</script>
+<script>
+function moveSvgEyes(e){
+  var svg=document.getElementById('ariaSvgFace');
+  if(!svg)return;
+  var rect=svg.getBoundingClientRect();
+  var px=e.touches?e.touches[0].clientX:e.clientX;
+  var py=e.touches?e.touches[0].clientY:e.clientY;
+  var dx=(px-(rect.left+rect.width/2))/(rect.width/2);
+  var dy=(py-(rect.top+rect.height/2))/(rect.height/2);
+  var mx=2.8;
+  dx=Math.max(-1,Math.min(1,dx))*mx;
+  dy=Math.max(-1,Math.min(1,dy))*mx;
+  var eyes={svgEyeL:{cx:109,cy:141},svgEyeR:{cx:151,cy:141}};
+  Object.keys(eyes).forEach(function(id){
+    var c=eyes[id];
+    var isL=id==='svgEyeL';
+    var iris=document.getElementById(isL?'irisL_svg':'irisR_svg');
+    var pupil=document.getElementById(isL?'pupilL_svg':'pupilR_svg');
+    var r1=document.getElementById(isL?'refL1_svg':'refR1_svg');
+    var r2=document.getElementById(isL?'refL2_svg':'refR2_svg');
+    if(iris){iris.setAttribute('cx',c.cx+dx);iris.setAttribute('cy',c.cy+dy);}
+    if(pupil){pupil.setAttribute('cx',c.cx+dx);pupil.setAttribute('cy',c.cy+dy);}
+    if(r1){r1.setAttribute('cx',c.cx+dx-5);r1.setAttribute('cy',c.cy+dy-5);}
+    if(r2){r2.setAttribute('cx',c.cx+dx+5);r2.setAttribute('cy',c.cy+dy+4);}
   });
 }
 document.addEventListener('mousemove',moveSvgEyes);
 document.addEventListener('touchmove',moveSvgEyes,{passive:true});
 
+var svgSleeping = false;
+
 function closeSvgEyes(){
-  ['svgEyeL','svgEyeR'].forEach(id=>{
-    const el = document.querySelector('#'+id+' ellipse:first-child');
-    if(el) { el.style.transition='ry 0.3s'; el.setAttribute('ry','1'); }
+  ['svgEyeL','svgEyeR'].forEach(function(id){
+    var el=document.querySelector('#'+id+' ellipse');
+    if(!el)return;
+    el.style.transition='transform 0.4s ease-in';
+    el.style.transform='scaleY(0.04)';
   });
 }
 function openSvgEyes(){
-  ['svgEyeL','svgEyeR'].forEach(id=>{
-    const el = document.querySelector('#'+id+' ellipse:first-child');
-    if(el) { el.style.transition='ry 0.3s'; el.setAttribute('ry','22'); }
+  ['svgEyeL','svgEyeR'].forEach(function(id){
+    var el=document.querySelector('#'+id+' ellipse');
+    if(!el)return;
+    el.style.transition='transform 0.3s ease-out';
+    el.style.transform='scaleY(1)';
   });
 }
 
 function doBlinkSvg(){
-  closeSvgEyes();
-  setTimeout(openSvgEyes, 150);
+  if(svgSleeping) return; // non blinkare se dorme
+  ['svgEyeL','svgEyeR'].forEach(function(id){
+    var el=document.querySelector('#'+id+' ellipse');
+    if(!el)return;
+    el.style.transition='transform 0.07s ease-in';
+    el.style.transform='scaleY(0.06)';
+    setTimeout(function(){
+      if(!svgSleeping){
+        el.style.transition='transform 0.10s ease-out';
+        el.style.transform='scaleY(1)';
+      }
+    },90);
+  });
+  setTimeout(doBlinkSvg,3000+Math.random()*4000);
 }
-setInterval(() => { if(Math.random() > 0.7) doBlinkSvg(); }, 4000);
-
-function sendMessage() {
-  const input = document.getElementById('textInput');
-  const text = input.value.trim();
-  if(!text) return;
-  input.value = "";
-  stopCountdown();
-  processInput(text);
-}
+setTimeout(doBlinkSvg,2000+Math.random()*2000);
 </script>
 </body>
 </html>

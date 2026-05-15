@@ -263,6 +263,9 @@
     <input type="password" class="modal-input" id="modalGroqKey" placeholder="Chiave 1 — gsk_..." style="margin-bottom:6px;" />
     <input type="password" class="modal-input" id="modalGroqKey2" placeholder="Chiave 2 — gsk_... (opzionale)" />
     <div class="modal-hint">Chiavi gratuite su <a href="https://console.groq.com" target="_blank">console.groq.com</a></div>
+    <div style="font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--accent);letter-spacing:1px;margin-bottom:8px;margin-top:12px;">🟢 GEMINI — ricerca notizie (opzionale)</div>
+    <input type="password" class="modal-input" id="modalGeminiKey" placeholder="Chiave Gemini — AIza..." style="margin-bottom:6px;" />
+    <div class="modal-hint" style="margin-bottom:16px;">Su <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a></div>
     <div style="font-family:'Space Mono',monospace;font-size:0.65rem;color:#f59e0b;letter-spacing:1px;margin-bottom:8px;margin-top:12px;">🔴 YOUTUBE — ricerca video (opzionale)</div>
     <input type="password" class="modal-input" id="modalYoutubeKey" placeholder="Chiave YouTube Data API v3 — AIza..." />
     <div class="modal-hint" style="margin-bottom:16px;">Su <a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a></div>
@@ -270,7 +273,14 @@
   </div>
 </div>
 
-
+<!-- MODAL VOCE -->
+<div class="modal-overlay hidden" id="voiceModal">
+  <div class="modal-box">
+    <div class="modal-title">🔊 SCEGLI LA VOCE</div>
+    <div id="voiceList" style="max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:16px;"></div>
+    <button class="btn-confirm" onclick="closeVoiceModal()">✓ Conferma</button>
+  </div>
+</div>
 
 <div class="bg-aura"></div>
 
@@ -281,6 +291,10 @@
 </div>
 <div class="settings-btn" id="settingsBtn" onclick="toggleSettingsMenu()">⚙️</div>
 <div class="settings-menu" id="settingsMenu">
+  <div class="settings-item" onclick="openVoiceModal();closeSettingsMenu();">
+    <div class="settings-icon" style="background:rgba(52,211,153,0.12);">🔊</div>
+    <div class="settings-arrow">›</div>
+  </div>
   <div class="settings-item" onclick="exportMemory();closeSettingsMenu();">
     <div class="settings-icon" style="background:rgba(251,191,36,0.12);">📤</div>
     <div class="settings-label"><div class="settings-title">Esporta memoria</div><div class="settings-sub">Copia codice per backup</div></div>
@@ -293,7 +307,6 @@
   </div>
   <div class="settings-item" onclick="openModal();closeSettingsMenu();">
     <div class="settings-icon" style="background:rgba(124,109,250,0.12);">🔑</div>
-    <div class="settings-label"><div class="settings-title">Chiavi API</div><div class="settings-sub" id="providerBadge">Groq + Voce Browser</div></div>
     <div class="settings-arrow">›</div>
   </div>
 </div>
@@ -440,14 +453,10 @@
 var GROQ_KEYS = (localStorage.getItem('aria_groq_keys')||localStorage.getItem('aria_groq_key')||'').split(',').filter(function(k){return k.trim();});
 var GROQ_KEY = GROQ_KEYS[0]||'';
 var groqKeyIndex = 0;
-var GEMINI_TTS_KEYS = []; // non utilizzato — voce browser
-var geminiTtsKeyIndex = 0;
 var YOUTUBE_KEY = localStorage.getItem('aria_youtube_key')||'';
 var MEMORY_MAX = 50;
 var ariaMemory = JSON.parse(localStorage.getItem('aria_memory')||'[]');
 var memoryExtracted = false;
-var ttsRateLimited = false;
-var ttsRetryTimeout = null;
 var lastProviderUsed = 'groq';
 var currentAudio = null;
 var audioCtx = null;
@@ -553,7 +562,7 @@ function startAriaAfterOnboarding(isNew){
 function unlockAudio(){
   try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();var buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.1,audioCtx.sampleRate);var src=audioCtx.createBufferSource();src.buffer=buf;src.connect(audioCtx.destination);src.start();}catch(e){}
   document.getElementById('audioUnlockOverlay').classList.add('hidden');
-  if(!GROQ_KEY){openModal();return;}
+  if(!GROQ_KEYS||!GROQ_KEYS.length){openModal();return;}
   if(!userProfile.done){document.getElementById('onboardingOverlay').classList.remove('hidden');setTimeout(function(){document.getElementById('obName').focus();},300);}
   else{startAriaAfterOnboarding(false);}
 }
@@ -564,20 +573,23 @@ function confirmSetup(){
   GROQ_KEYS=[g1,g2].filter(function(k){return k.length>0;});GROQ_KEY=GROQ_KEYS[0];groqKeyIndex=0;
   YOUTUBE_KEY=document.getElementById('modalYoutubeKey').value.trim();
   localStorage.setItem('aria_groq_keys',GROQ_KEYS.join(','));
+  var gk=document.getElementById('modalGeminiKey');if(gk)localStorage.setItem('aria_gemini_key',gk.value.trim());
   if(YOUTUBE_KEY)localStorage.setItem('aria_youtube_key',YOUTUBE_KEY);
   closeModal();updateProviderBadge();
   if(!userProfile.done){document.getElementById('onboardingOverlay').classList.remove('hidden');setTimeout(function(){document.getElementById('obName').focus();},300);}
   else{startAriaAfterOnboarding(false);}
 }
 function openModal(){
-  var sg=(localStorage.getItem('aria_groq_keys')||'').split(',');
+  var sg=(localStorage.getItem('aria_groq_keys')||'').split(',');var sgm=localStorage.getItem('aria_gemini_key')||'';
   if(sg[0])document.getElementById('modalGroqKey').value=sg[0];if(sg[1])document.getElementById('modalGroqKey2').value=sg[1];
+  if(sgm)document.getElementById('modalGeminiKey').value=sgm;
   var yt=localStorage.getItem('aria_youtube_key')||'';if(yt)document.getElementById('modalYoutubeKey').value=yt;
   document.getElementById('modalOverlay').classList.remove('hidden');
 }
 function closeModal(){document.getElementById('modalOverlay').classList.add('hidden');}
+function closeVoiceModal(){document.getElementById('voiceModal').classList.add('hidden');}
 
-var GEMINI_VOICES=[];
+
 
 function toggleSettingsMenu(){
   var menu=document.getElementById('settingsMenu'),btn=document.getElementById('settingsBtn');
@@ -597,7 +609,7 @@ function importMemory(){
   try{var data=JSON.parse(decodeURIComponent(escape(atob(code.trim()))));if(!data.memory||!Array.isArray(data.memory))throw new Error();ariaMemory=data.memory;saveMemory();alert('Ripristinata! ('+ariaMemory.length+' ricordi)');}
   catch(e){alert('Codice non valido.');}
 }
-function updateProviderBadge(){var b=document.getElementById('providerBadge');if(b)b.textContent='🔵 GROQ + 🔊 Voce Browser';}
+function updateProviderBadge(){var b=document.getElementById('providerBadge');if(b)b.textContent=lastProviderUsed==='gemini-grounded'?'🟢 GEMINI + SEARCH + 🔊 TTS':'🔵 GROQ + 🟢 GEMINI TTS';}
 
 // ═══════════════════════════════════════════════════
 // OCCHI
@@ -719,41 +731,34 @@ function removeTyping(){var t=document.getElementById('typingBubble');if(t)t.rem
 // API
 // ═══════════════════════════════════════════════════
 async function askAria(userMsg){
-  if(!GROQ_KEY){openModal();return;}
+  if(!GROQ_KEYS||!GROQ_KEYS.length){openModal();return;}
+  var _ytCtrl=detectYoutubeControl(userMsg);if(_ytCtrl){addBubble('user',userMsg);conversationHistory.push({role:'user',content:userMsg});await handleYoutubeControl(userMsg,_ytCtrl);return;}
   if(detectYoutubeTrigger(userMsg)){addBubble('user',userMsg);conversationHistory.push({role:'user',content:userMsg});await handleYoutubeRequest(userMsg);return;}
   addBubble('user',userMsg);conversationHistory.push({role:'user',content:userMsg});
   clearTimeout(silenceTimer);silenceTimer=null;setState('thinking');addTyping();setEmotion('pensierosa');
   try{
-    var fullText=await callGroq();lastProviderUsed='groq';
+    var pendingGrounding=false;
+    if(!detectGroundingTrigger(userMsg)&&conversationHistory.length>=3){
+      var prev='';for(var i=conversationHistory.length-2;i>=0;i--){if(conversationHistory[i].role==='assistant'){prev=conversationHistory[i].content.toLowerCase();break;}}
+      if(/\b(quale città|che città|dove sei|in quale città|in che città|dove ti trovi|da che parte)\b/.test(prev))pendingGrounding=true;
+    }
+    var useGrounding=(detectGroundingTrigger(userMsg)||pendingGrounding);
+    var fullText;
+    if(useGrounding){console.log('ARIA grounding:',userMsg);try{fullText=await callGeminiGrounded();lastProviderUsed='gemini-grounded';}catch(e){fullText=await callGroq();lastProviderUsed='groq';}}
+    else{fullText=await callGroq();lastProviderUsed='groq';}
     updateProviderBadge();
     var emoMatch=fullText.match(/\[EMO:([^\]]+)\]/);
     var emo=emoMatch?emoMatch[1]:'neutra';
     var cleanText=fullText.replace(/\[EMO:[^\]]+\]/g,'').trim();
-    removeTyping();conversationHistory.push({role:'assistant',content:fullText});
+    removeTyping();conversationHistory.push({role:'assistant',content:fullText});setEmotion(emo);
     addBubble('aria',cleanText);showSubtitle('aria',cleanText);
     setEmotion('parlando');startMouthTalk();
     document.getElementById('btnStop').style.display='flex';
-    speakWithBrowser(cleanText,function(){
-      stopMouthTalk();animateMouth('neutra');
-      document.getElementById('btnStop').style.display='none';
-      goIdleAfterSpeaking();
-    });
+    speakWithBrowser(cleanText,function(){stopMouthTalk();animateMouth('neutra');document.getElementById('btnStop').style.display='none';goIdleAfterSpeaking();});
+
   }catch(err){removeTyping();showSubtitle('aria','⚠️ '+(err.message||'Errore connessione.'));setEmotion('neutra');setState('idle');updateMicBtn();}
 }
 
-async function fetchTTS(text){
-  var body=JSON.stringify({contents:[{parts:[{text:text}]}],generationConfig:{response_modalities:['AUDIO'],speech_config:{voice_config:{prebuilt_voice_config:{voice_name:selectedGeminiVoice||'Kore'}}}}});
-  for(var i=0;i<GEMINI_TTS_KEYS.length;i++){
-    var idx=(geminiTtsKeyIndex+i)%GEMINI_TTS_KEYS.length,key=GEMINI_TTS_KEYS[idx];
-    var response=await fetch('https://generativelanguage.googleapis.com/v1alpha/models/gemini-2.5-flash-tts:generateContent?key='+key,{method:'POST',headers:{'Content-Type':'application/json'},body:body});
-    var data=await response.json();
-    if(data.error&&data.error.code===429){geminiTtsKeyIndex=(idx+1)%GEMINI_TTS_KEYS.length;continue;}
-    if(data.error){console.error('TTS Gemini key',idx,'error:',data.error.code,data.error.message);throw new Error(data.error.message);}
-    geminiTtsKeyIndex=(idx+1)%GEMINI_TTS_KEYS.length;
-    return pcmToWav(base64ToArrayBuffer(data.candidates[0].content.parts[0].inlineData.data),24000,1,16);
-  }
-  var err=new Error('TTS: tutte le chiavi in rate limit');err.isRateLimit=true;throw err;
-}
 function playWavBuffer(wavBuffer,emo,subtitleText){
   return new Promise(function(resolve){
     function onDone(){stopMouthTalk();setEmotion(emo||'neutra');document.getElementById('btnStop').style.display='none';resolve();}
@@ -766,8 +771,6 @@ function playWavBuffer(wavBuffer,emo,subtitleText){
     }else{onStart();playWithAudioElement(wavBuffer,onDone);}
   });
 }
-async function speakGeminiTTS(text){if(GEMINI_TTS_KEYS&&GEMINI_TTS_KEYS.length>0){var w=await fetchTTS(text);if(w)await playWavBuffer(w,'neutra',null);}}
-
 async function callGroq(){
   var recentHistory=conversationHistory.slice(-6);
   // Pulisce EMO tag e filtra messaggi vuoti dalla history
@@ -809,7 +812,7 @@ var GROUNDING_TRIGGERS=[
 ];
 function detectGroundingTrigger(text){return GROUNDING_TRIGGERS.some(function(re){return re.test(text.toLowerCase());});}
 async function callGeminiGrounded(){
-  var key=GEMINI_TTS_KEYS[0];if(!key)throw new Error('Nessuna chiave Gemini');
+  var key=localStorage.getItem('aria_gemini_key')||'';if(!key)throw new Error('Nessuna chiave Gemini');
   // Pulisce history: EMO tag rimossi, messaggi vuoti esclusi, non può iniziare con 'model'
   var contents=conversationHistory.map(function(m){return{role:m.role==='assistant'?'model':'user',parts:[{text:m.content.replace(/\[EMO:[^\]]+\]/g,'').trim()}]};}).filter(function(c){return c.parts[0].text.length>0;});
   while(contents.length>0&&contents[0].role==='model')contents.shift();
@@ -826,6 +829,88 @@ async function callGeminiGrounded(){
 // ═══════════════════════════════════════════════════
 var YOUTUBE_TRIGGERS=/\b(metti|fammi (sentire|vedere|ascoltare)|ascolta(re)?|suona(re)?|cerca su youtube|cerca (un |il |la |lo )?video|apri youtube|metti su|fai (partire|vedere)|riproduci)\b/i;
 function detectYoutubeTrigger(text){return YOUTUBE_TRIGGERS.test(text.toLowerCase());}
+
+// ═══════════════════════════════════════════════════
+// CONTROLLO VOCALE YOUTUBE PLAYER
+// ═══════════════════════════════════════════════════
+var YT_CONTROL_PATTERNS = [
+  {re:/\b(metti in pausa|pausa|fermati|stop music|stoppa)\b/i,               action:'pause'},
+  {re:/\b(riprendi|continua|play|fai partire)\b/i,                           action:'play'},
+  {re:/\b(chiudi|chiudilo|basta|spegni|ferma il video|ferma la canzone)\b/i, action:'close'},
+  {re:/\b(silenzia|muta|togli il suono)\b/i,                                 action:'mute'},
+  {re:/\b(togli il muto|unmute|riattiva il suono)\b/i,                       action:'unmute'},
+  {re:/\b(volume al massimo|a tutto volume|alza al massimo)\b/i,             action:'vol100'},
+  {re:/\b(volume al minimo|quasi silenzio)\b/i,                              action:'vol10'},
+  {re:/\b(alza il volume|piu forte|aumenta il volume)\b/i,                   action:'volup'},
+  {re:/\b(abbassa il volume|piu piano|diminuisci il volume)\b/i,             action:'voldown'},
+  {re:/\b(vai avanti|salta|avanza).*?(\d+).*?(second|minut)/i,               action:'seekfwd', extract:'time'},
+  {re:/\b(torna indietro|riavvolgi).*?(\d+).*?(second|minut)/i,              action:'seekbwd', extract:'time'},
+  {re:/\b(vai avanti|salta avanti)\b/i,                                      action:'seekfwd', extract:null},
+  {re:/\b(torna indietro|riavvolgi)\b/i,                                     action:'seekbwd', extract:null},
+];
+
+function detectYoutubeControl(text){
+  if(!ytPlayerObj)return null;
+  for(var i=0;i<YT_CONTROL_PATTERNS.length;i++){
+    if(YT_CONTROL_PATTERNS[i].re.test(text))return YT_CONTROL_PATTERNS[i];
+  }
+  return null;
+}
+
+function extractSeconds(text){
+  var m=text.match(/(\d+)\s*(second|minut)/i);
+  if(!m)return 10;
+  var n=parseInt(m[1]);
+  return m[2].toLowerCase().startsWith('m')?n*60:n;
+}
+
+async function handleYoutubeControl(userMsg,pattern){
+  var reply='';
+  try{
+    var vol,ct;
+    switch(pattern.action){
+      case 'pause':
+        ytPlayerObj.pauseVideo();reply='In pausa! Dimmi pure.';break;
+      case 'play':
+        ytPlayerObj.playVideo();reply='Riparto!';break;
+      case 'close':
+        closeYoutube();return;
+      case 'mute':
+        ytPlayerObj.mute();reply='Audio disattivato.';break;
+      case 'unmute':
+        ytPlayerObj.unMute();reply='Audio riattivato!';break;
+      case 'vol100':
+        ytPlayerObj.setVolume(100);reply='Volume al massimo!';break;
+      case 'vol10':
+        ytPlayerObj.setVolume(10);reply='Volume quasi al minimo.';break;
+      case 'volup':
+        vol=Math.min(100,(ytPlayerObj.getVolume()||50)+25);
+        ytPlayerObj.setVolume(vol);reply='Volume alzato a '+vol+'%.';break;
+      case 'voldown':
+        vol=Math.max(0,(ytPlayerObj.getVolume()||50)-25);
+        ytPlayerObj.setVolume(vol);reply='Volume abbassato a '+vol+'%.';break;
+      case 'seekfwd':
+        ct=ytPlayerObj.getCurrentTime();
+        ytPlayerObj.seekTo(ct+(pattern.extract?extractSeconds(userMsg):15),true);
+        reply='Avanzato di '+(pattern.extract?extractSeconds(userMsg):15)+' secondi!';break;
+      case 'seekbwd':
+        ct=ytPlayerObj.getCurrentTime();
+        ytPlayerObj.seekTo(Math.max(0,ct-(pattern.extract?extractSeconds(userMsg):15)),true);
+        reply='Tornato indietro di '+(pattern.extract?extractSeconds(userMsg):15)+' secondi!';break;
+    }
+  }catch(e){reply='Non riesco a controllare il player adesso.';}
+  if(reply){
+    addBubble('aria',reply);showSubtitle('aria',reply);
+    clearTimeout(silenceTimer);setState('speaking');setEmotion('felice');startMouthTalk();
+    speakWithBrowser(reply,function(){
+      stopMouthTalk();animateMouth('neutra');
+      // Se video in pausa riavvia ascolto per altri comandi
+      var ytState=ytPlayerObj?ytPlayerObj.getPlayerState():-1;
+      if(ytState===2||ytState===5||ytState===-1){startListening();}
+      else{setState('idle');updateMicBtn();}
+    });
+  }
+}
 function extractYoutubeQuery(text){return text.replace(/\b(metti su|metti|fammi sentire|fammi vedere|fammi ascoltare|ascoltare|ascolta|suonare|suona|cerca su youtube|cerca (un |il |la |lo )?video|apri youtube|fai partire|fai vedere|riproduci)\b/gi,'').replace(/\s+/g,' ').trim()||text;}
 async function searchYoutube(query){
   if(!YOUTUBE_KEY)throw new Error('Nessuna chiave YouTube');
@@ -835,6 +920,15 @@ async function searchYoutube(query){
   return{id:data.items[0].id.videoId,title:data.items[0].snippet.title};
 }
 function openYoutubePlayer(videoId,title){
+  // Ferma immediatamente qualsiasi voce in corso
+  if(window.speechSynthesis)window.speechSynthesis.cancel();
+  stopMouthTalk();animateMouth('felice');
+  if(currentAudio){try{currentAudio.pause();}catch(e){}currentAudio=null;}
+  // Ferma il microfono e il ciclo listening
+  stopListening();clearTimeout(silenceTimer);silenceTimer=null;
+  document.getElementById('btnStop').style.display='none';
+  setState('idle');updateMicBtn();
+  // Apri il player
   var player=document.getElementById('ytPlayer');document.getElementById('ytTitle').textContent=title;player.classList.add('visible');hideSubtitle();
   var old=document.getElementById('ytIframe');if(old)old.remove();
   var div=document.createElement('div');div.id='ytIframe';player.insertBefore(div,player.firstChild);
@@ -869,7 +963,7 @@ async function handleYoutubeRequest(userMsg){
     var video=await searchYoutube(extractYoutubeQuery(userMsg));removeTyping();
     var dm='🎵 '+video.title;addBubble('aria',dm);showSubtitle('aria',dm);setEmotion('felice');setState('speaking');
     await new Promise(function(resolve){playShortTTS('Eccolo, lo metto su!',resolve);});
-    openYoutubePlayer(video.id,video.title);goIdleAfterSpeaking();
+    openYoutubePlayer(video.id,video.title); // stato gestito dentro openYoutubePlayer
   }catch(e){
     removeTyping();var em="Non sono riuscita a trovare il video, scusa!";
     addBubble('aria',em);showSubtitle('aria',em);setState('speaking');
@@ -1135,7 +1229,7 @@ function goThinkingFromAudioGemini(blob){
   reader.onloadend=async function(){
     var b64=reader.result.split(',')[1];
     var mime=blob.type.split(';')[0]||'audio/webm';
-    var key=GEMINI_TTS_KEYS[0]||'';
+    var key=localStorage.getItem('aria_gemini_key')||'';
     if(!key){setState('idle');updateMicBtn();startListening();return;}
     try{
       var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+key,{
@@ -1171,6 +1265,7 @@ async function askAriaFromTranscript(userMsg){
   // Controlla chiavi disponibili (robusto: usa GROQ_KEYS array, non GROQ_KEY statica)
   if(!GROQ_KEYS||!GROQ_KEYS.length){openModal();return;}
   // Gestisci richieste YouTube anche da voce
+  var _ytCtrl2=detectYoutubeControl(userMsg);if(_ytCtrl2){await handleYoutubeControl(userMsg,_ytCtrl2);return;}
   if(detectYoutubeTrigger(userMsg)){await handleYoutubeRequest(userMsg);return;}
   setState('thinking');addTyping();setEmotion('pensierosa');
   try{
@@ -1179,7 +1274,7 @@ async function askAriaFromTranscript(userMsg){
       var prev='';for(var i=conversationHistory.length-2;i>=0;i--){if(conversationHistory[i].role==='assistant'){prev=conversationHistory[i].content.toLowerCase();break;}}
       if(/\b(quale città|che città|dove sei|in quale città|in che città|dove ti trovi|da che parte)\b/.test(prev))pendingGrounding=true;
     }
-    var useGrounding=(detectGroundingTrigger(userMsg)||pendingGrounding)&&GEMINI_TTS_KEYS.length>0;
+    var useGrounding=(detectGroundingTrigger(userMsg)||pendingGrounding);
     var fullText;
     if(useGrounding){console.log('ARIA grounding:',userMsg);try{fullText=await callGeminiGrounded();lastProviderUsed='gemini-grounded';}catch(e){fullText=await callGroq();lastProviderUsed='groq';}}
     else{fullText=await callGroq();lastProviderUsed='groq';}
@@ -1188,29 +1283,11 @@ async function askAriaFromTranscript(userMsg){
     var emo=emoMatch?emoMatch[1]:'neutra';
     var cleanText=fullText.replace(/\[EMO:[^\]]+\]/g,'').trim();
     removeTyping();conversationHistory.push({role:'assistant',content:fullText});setEmotion(emo);
-    if(GEMINI_TTS_KEYS&&GEMINI_TTS_KEYS.length>0&&!ttsRateLimited){
-      if(currentAudio){try{currentAudio.pause();}catch(e){}currentAudio=null;}
-      var ttsPromise=fetchTTS(cleanText).catch(function(e){return(e&&(e.isRateLimit||(e.message&&e.message.indexOf('rate limit')>=0)))?'RATE_LIMITED':null;});
-      goSpeaking();document.getElementById('btnStop').style.display='flex';
-      var wavBuffer=await ttsPromise;
-      if(wavBuffer==='RATE_LIMITED'){
-        ttsRateLimited=true;addBubble('aria',cleanText);showSubtitle('aria',cleanText);
-        document.getElementById('btnStop').style.display='flex';setEmotion('parlando');startMouthTalk();
-        speakWithBrowser(cleanText,function(){stopMouthTalk();animateMouth('neutra');document.getElementById('btnStop').style.display='none';goIdleAfterSpeaking();});
-        clearTimeout(ttsRetryTimeout);ttsRetryTimeout=setTimeout(function(){ttsRateLimited=false;},60000);
-      }else if(wavBuffer){addBubble('aria',cleanText);setEmotion('parlando');await playWavBuffer(wavBuffer,emo,cleanText);goIdleAfterSpeaking();}
-      else{
-        // TTS Gemini ha risposto null — fallback browser TTS
-        addBubble('aria',cleanText);showSubtitle('aria',cleanText);setEmotion('parlando');startMouthTalk();
-        document.getElementById('btnStop').style.display='flex';
-        speakWithBrowser(cleanText,function(){stopMouthTalk();animateMouth('neutra');document.getElementById('btnStop').style.display='none';goIdleAfterSpeaking();});
-      }
-    }else if(ttsRateLimited){
-      addBubble('aria',cleanText);showSubtitle('aria',cleanText);
-      setEmotion('parlando');startMouthTalk();
-      document.getElementById('btnStop').style.display='flex';
-      speakWithBrowser(cleanText,function(){stopMouthTalk();animateMouth('neutra');document.getElementById('btnStop').style.display='none';goIdleAfterSpeaking();});
-    }else{addBubble('aria',cleanText);showSubtitle('aria',cleanText);setEmotion(emo||'neutra');goIdleAfterSpeaking();}
+    addBubble('aria',cleanText);showSubtitle('aria',cleanText);
+    setEmotion('parlando');startMouthTalk();
+    document.getElementById('btnStop').style.display='flex';
+    speakWithBrowser(cleanText,function(){stopMouthTalk();animateMouth('neutra');document.getElementById('btnStop').style.display='none';goIdleAfterSpeaking();});
+
   }catch(err){removeTyping();showSubtitle('aria','⚠️ '+(err.message||'Errore connessione.'));setEmotion('neutra');setState('idle');updateMicBtn();}
 }
 

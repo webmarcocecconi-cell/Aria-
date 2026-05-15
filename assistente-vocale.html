@@ -1298,6 +1298,8 @@ function goIdleAfterSpeaking(){
     setState('idle');
     setTimeout(function(){
       if(VOICE_STATE==='thinking'||VOICE_STATE==='speaking')return;
+      // Non riavviare il microfono se YouTube è aperto — ascolterebbe la canzone
+      if(isYoutubeOpen()){updateMicBtn();return;}
       // Riavvia listening con timer esteso a 40s (l'utente ha appena sentito la risposta)
       clearTimeout(silenceTimer);
       setState('listening');accumulatedText='';updateMicBtn();setEmotion('ascoltando');

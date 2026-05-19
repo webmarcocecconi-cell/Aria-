@@ -81,22 +81,11 @@
   
   /* ANIMAZIONI DI STATO SULL'IMMAGINE */
   /* 1. Effetto respiro fluttuante quando ascolta */
-  @keyframes ariaBreath {
-    0%, 100% { transform: translateZ(10px) translateY(0); filter: drop-shadow(0 10px 30px rgba(52,211,153,0.2)); }
-    50% { transform: translateZ(10px) translateY(-5px); filter: drop-shadow(0 15px 35px rgba(52,211,153,0.4)); }
-  }
   body.listening .anime-avatar-img {
-    animation: ariaBreath 2.5s ease-in-out infinite;
     border-color: var(--state-listening);
   }
   
-  /* 2. Effetto pulsazione morbida quando parla (il cambio bocca è gestito da JS) */
-  @keyframes ariaSpeakingPulse {
-    0%, 100% { transform: translateZ(10px) scale(1); filter: drop-shadow(0 10px 30px rgba(244,114,182,0.2)); }
-    50% { transform: translateZ(10px) scale(1.02) translateY(-1px); filter: drop-shadow(0 15px 35px rgba(244,114,182,0.4)); }
-  }
   body.speaking .anime-avatar-img {
-    animation: ariaSpeakingPulse 0.6s ease-in-out infinite;
     border-color: var(--state-speaking);
   }
   
@@ -591,41 +580,7 @@ function loadSettingsAndHistory() {
   }
 }
 
-// LOGICA PARALLASSE INTEGRATA (L'IMMAGINE SI INCLINA E SEGUE IL MOUSE IN 3D)
-var avatarContainer = document.getElementById('avatarContainer');
-document.addEventListener('mousemove', function(event) {
-  var rect = avatarContainer.getBoundingClientRect();
-  var centerX = rect.left + rect.width / 2;
-  var centerY = rect.top + rect.height / 2;
-  
-  // Calcola la distanza del mouse dal centro dell'avatar
-  var deltaX = event.clientX - centerX;
-  var deltaY = event.clientY - centerY;
-  
-  // Limita l'inclinazione a un massimo di 12 gradi per non distorcere
-  var rotateY = Math.min(Math.max((deltaX / window.innerWidth) * 25, -12), 12);
-  var rotateX = Math.min(Math.max((centerY - event.clientY) / window.innerHeight * 25, -12), 12);
-  
-  avatarContainer.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-});
-
-// Resetta la posizione quando il mouse esce dallo schermo
-document.addEventListener('mouseleave', function() {
-  avatarContainer.style.transform = 'rotateX(0deg) rotateY(0deg)';
-});
-
-// Supporto per il Touch (Tracciamento su Telefono)
-document.addEventListener('touchmove', function(event) {
-  var touch = event.touches[0];
-  var rect = avatarContainer.getBoundingClientRect();
-  var centerX = rect.left + rect.width / 2;
-  var centerY = rect.top + rect.height / 2;
-  
-  var rotateY = Math.min(Math.max(((touch.clientX - centerX) / window.innerWidth) * 20, -10), 10);
-  var rotateX = Math.min(Math.max((centerY - touch.clientY) / window.innerHeight * 20, -10), 10);
-  
-  avatarContainer.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-}, { passive: true });
+// Parallasse rimosso - l'animazione è gestita dal cambio immagini
 
 // Event Listeners Pulsanti
 btnMic.onclick = function() {

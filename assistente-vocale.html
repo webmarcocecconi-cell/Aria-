@@ -9,7 +9,6 @@
   :root {
     --bg: #0d0f1a; --surface: #161829; --card: #1e2035; --accent: #7c6dfa;
     --accent2: #f472b6; --accent3: #34d399; --text: #e8eaf6; --muted: #6b7280;
-    --eye-white: #f0f4ff; --eye-iris: #7c6dfa; --eye-pupil: #0d0f1a;
     --border: rgba(124,109,250,0.2); --state-listening: #34d399;
     --state-thinking: #fbbf24; --state-speaking: #f472b6; --state-countdown: #7c6dfa;
   }
@@ -34,6 +33,7 @@
   .logo-title { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 1.2rem; letter-spacing: 1px; color: var(--text); }
   .logo-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; display: inline-block; animation: pulse 2s infinite; }
   @keyframes pulse { 0%,100% {transform:scale(1); opacity:1;} 50% {transform:scale(1.4); opacity:0.5;} }
+  
   .nav-btn {
     background: var(--card); border: 1px solid var(--border); color: var(--text);
     width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
@@ -41,25 +41,81 @@
   }
   .nav-btn:active { transform: scale(0.92); background: var(--accent); }
   
+  /* SEZIONE AVATAR IMMAGINE CON PARALLASSE */
   .face-section {
     flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
     position: relative; z-index: 1; padding: 20px;
+    perspective: 1000px; /* Abilita l'effetto di profondità 3D */
   }
   .avatar-container {
-    width: 220px; height: 220px; position: relative; display: flex; align-items: center; justify-content: center;
+    width: 230px;
+    height: 230px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform-style: preserve-3d;
+    transition: transform 0.1s ease-out;
   }
   .glow-ring {
-    position: absolute; width: 100%; height: 100%;
-    border-radius: 50%; border: 2px dashed rgba(124,109,250,0.15);
-    transform: rotate(0deg); transition: all 0.5s ease;
+    position: absolute; width: 102%; height: 102%;
+    border-radius: 50%; border: 2px dashed rgba(124,109,250,0.3);
+    transform: translateZ(-10px); transition: all 0.5s ease;
+    z-index: 1;
   }
-  #svgFace { width: 100%; height: 100%; z-index: 2; overflow: visible; }
   
+  /* IL NUOVO CONTENITORE DELL'IMMAGINE ORIGINALE PURI */
+  .anime-avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-image: url('aria.png'); /* Carica la tua foto rinominata nella stessa cartella */
+    background-size: cover;
+    background-position: center;
+    border: 3px solid var(--border);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    z-index: 2;
+    transform: translateZ(10px);
+    transition: filter 0.3s ease, border-color 0.3s ease, transform 0.1s ease-out;
+  }
+  
+  /* ANIMAZIONI DI STATO SULL'IMMAGINE */
+  /* 1. Effetto respiro fluttuante quando ascolta */
+  @keyframes ariaBreath {
+    0%, 100% { transform: translateZ(10px) translateY(0); filter: drop-shadow(0 10px 30px rgba(52,211,153,0.2)); }
+    50% { transform: translateZ(10px) translateY(-5px); filter: drop-shadow(0 15px 35px rgba(52,211,153,0.4)); }
+  }
+  body.listening .anime-avatar-img {
+    animation: ariaBreath 2.5s ease-in-out infinite;
+    border-color: var(--state-listening);
+  }
+  
+  /* 2. Effetto pulsazione elastica morbida quando parla */
+  @keyframes ariaSpeakingPulse {
+    0%, 100% { transform: translateZ(10px) scale(1); filter: drop-shadow(0 10px 30px rgba(244,114,182,0.2)); }
+    50% { transform: translateZ(10px) scale(1.03) translateY(-2px); filter: drop-shadow(0 15px 35px rgba(244,114,182,0.5)); }
+  }
+  body.speaking .anime-avatar-img {
+    animation: ariaSpeakingPulse 0.15s ease-in-out infinite;
+    border-color: var(--state-speaking);
+  }
+  
+  /* 3. Stato di elaborazione pensiero */
+  @keyframes ariaThinking {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+  }
+  body.thinking .anime-avatar-img {
+    animation: ariaThinking 1s ease-in-out infinite;
+    border-color: var(--state-thinking);
+  }
+
   .status-badge {
     margin-top: 25px; padding: 6px 16px; border-radius: 20px;
     background: var(--card); border: 1px solid var(--border);
     font-family: 'Space Mono', monospace; font-size: 0.85rem; font-weight: 700;
     display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 5;
   }
   .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
   
@@ -67,6 +123,7 @@
     margin-top: 15px; min-height: 44px; max-height: 80px; width: 85%;
     text-align: center; font-size: 0.95rem; color: var(--muted);
     overflow-y: auto; padding: 0 10px; font-weight: 400; line-height: 1.4;
+    z-index: 5;
   }
   
   .controls-section {
@@ -150,14 +207,12 @@
   }
   .wave-path { fill: none; stroke-linecap: round; stroke-width: 3; }
   
-  /* STATI APP */
-  body.listening .glow-ring { transform: scale(1.1); border-color: var(--state-listening); animation: spin 12s linear infinite; box-shadow: 0 0 30px rgba(52,211,153,0.15); }
-  body.thinking .glow-ring { transform: scale(1.05); border-color: var(--state-thinking); animation: pulseGlow 1.5s ease-in-out infinite; }
-  body.speaking .glow-ring { transform: scale(1.08); border-color: var(--state-speaking); animation: spin 25s linear infinite; }
+  /* STATI GLOBALI CONTENITORE ACCENTI */
+  body.listening .glow-ring { transform: scale(1.08) translateZ(-10px); border-color: var(--state-listening); animation: spin 12s linear infinite; }
+  body.speaking .glow-ring { transform: scale(1.05) translateZ(-10px); border-color: var(--state-speaking); animation: spin 25s linear infinite; }
   body.speaking .wave-container { opacity: 0.7; }
   
-  @keyframes spin { 100% { transform: rotate(360deg) scale(1.1); } }
-  @keyframes pulseGlow { 0%,100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.1); } }
+  @keyframes spin { 100% { transform: rotate(360deg) scale(1.05) translateZ(-10px); } }
   
   /* SETTINGS */
   .settings-grid { display: flex; flex-direction: column; gap: 16px; }
@@ -166,7 +221,6 @@
   .setting-label { font-weight: 600; font-size: 0.95rem; }
   .setting-desc { font-size: 0.8rem; color: var(--muted); }
   
-  /* TOGGLE SWITCH */
   .switch { position: relative; display: inline-block; width: 46px; height: 26px; }
   .switch input { opacity: 0; width: 0; height: 0; }
   .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--card); border: 1px solid var(--border); transition: .3s; border-radius: 34px; }
@@ -194,44 +248,9 @@
   </header>
 
   <main class="face-section">
-    <div class="avatar-container">
+    <div class="avatar-container" id="avatarContainer">
       <div class="glow-ring"></div>
-      
-      <svg id="svgFace" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <radialGradient id="irisGrad" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#a78bfa"/>
-            <stop offset="70%" stop-color="#7c6dfa"/>
-            <stop offset="100%" stop-color="#5b21b6"/>
-          </radialGradient>
-          <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
-            <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000" flood-opacity="0.3"/>
-          </filter>
-        </defs>
-
-        <circle cx="100" cy="100" r="95" fill="none" pointer-events="all"/>
-
-        <g id="svgEyeL" filter="url(#shadow)">
-          <ellipse cx="65" cy="95" rx="22" ry="22" fill="var(--eye-white)" />
-          <ellipse id="irisL" cx="65" cy="95" rx="13" ry="13" fill="url(#irisGrad)" />
-          <circle id="pupilL" cx="65" cy="95" r="6" fill="var(--eye-pupil)" />
-          <circle id="reflL1" cx="61" cy="91" r="3" fill="#ffffff" opacity="0.8"/>
-          <circle id="reflL2" cx="69" cy="99" r="1.5" fill="#ffffff" opacity="0.6"/>
-        </g>
-
-        <g id="svgEyeR" filter="url(#shadow)">
-          <ellipse cx="135" cy="95" rx="22" ry="22" fill="var(--eye-white)" />
-          <ellipse id="irisR" cx="135" cy="95" rx="13" ry="13" fill="url(#irisGrad)" />
-          <circle id="pupilR" cx="135" cy="95" r="6" fill="var(--eye-pupil)" />
-          <circle id="reflR1" cx="131" cy="91" r="3" fill="#ffffff" opacity="0.8"/>
-          <circle id="reflR2" cx="139" cy="99" r="1.5" fill="#ffffff" opacity="0.6"/>
-        </g>
-
-        <path id="browsL" d="M 42 74 Q 65 70 82 76" fill="none" stroke="var(--muted)" stroke-width="3" stroke-linecap="round"/>
-        <path id="browsR" d="M 118 76 Q 135 70 158 74" fill="none" stroke="var(--muted)" stroke-width="3" stroke-linecap="round"/>
-
-        <path id="svgMouth" d="M 75 135 Q 100 142 125 135" fill="none" stroke="var(--accent)" stroke-width="4.5" stroke-linecap="round" filter="url(#shadow)"/>
-      </svg>
+      <div class="anime-avatar-img"></div>
     </div>
 
     <div class="status-badge">
@@ -284,8 +303,7 @@
       <h3 class="modal-title">CRONOLOGIA CHAT</h3>
       <button class="modal-close" id="closeHistory">&times;</button>
     </div>
-    <div class="modal-body chat-list" id="chatList">
-      </div>
+    <div class="modal-body chat-list" id="chatList"></div>
   </div>
 </div>
 
@@ -295,8 +313,7 @@
       <h3 class="modal-title">SELEZIONE VOCE SINTESI</h3>
       <button class="modal-close" id="closeVoice">&times;</button>
     </div>
-    <div class="modal-body" id="voiceList">
-      </div>
+    <div class="modal-body" id="voiceList"></div>
   </div>
 </div>
 
@@ -330,19 +347,8 @@
         </label>
       </div>
 
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-label">Sveglia Visiva (Blink)</span>
-          <span class="setting-desc">Permetti animazione ammiccamento occhi casuale</span>
-        </div>
-        <label class="switch">
-          <input type="checkbox" id="setBlink" checked>
-          <span class="slider"></span>
-        </label>
-      </div>
-      
       <div class="setting-row" style="border:none; margin-top:20px; justify-content:center;">
-        <span style="font-size:0.75rem; color:var(--muted); font-family:'Space Mono', monospace;">ARIA Engine v2.4 • Client Web</span>
+        <span style="font-size:0.75rem; color:var(--muted); font-family:'Space Mono', monospace;">ARIA Engine v2.5 • Client Web</span>
       </div>
 
     </div>
@@ -350,24 +356,19 @@
 </div>
 
 <script>
-/**
- * ARIA CORE ENGINE - LOGICA INTEGRATA
- */
-
-// Stato Globale
+// Stato Globale dell'applicazione
 var appState = {
-  status: 'READY', // READY, LISTENING, THINKING, SPEAKING
+  status: 'READY',
   isMuted: false,
   selectedVoiceURI: localStorage.getItem('aria_voice_uri') || '',
   settings: {
     bargeIn: true,
-    autoListen: false,
-    blink: true
+    autoListen: true
   },
   history: JSON.parse(localStorage.getItem('aria_history')) || []
 };
 
-// Elementi DOM
+// Elementi DOM principali
 var body = document.body;
 var btnMic = document.getElementById('btnMic');
 var btnMute = document.getElementById('btnMute');
@@ -379,7 +380,7 @@ var statusText = document.getElementById('statusText');
 var subtitleBox = document.getElementById('subtitleBox');
 var historyPreviewText = document.getElementById('historyPreviewText');
 
-// Modali
+// Modali references
 var modalHistory = document.getElementById('modalHistory');
 var modalVoice = document.getElementById('modalVoice');
 var modalSettings = document.getElementById('modalSettings');
@@ -391,7 +392,6 @@ var synth = window.speechSynthesis;
 var currentUtterance = null;
 var allVoices = [];
 
-// Inizializzazione Riconoscimento Vocale
 if (SpeechRecognition) {
   recognition = new SpeechRecognition();
   recognition.lang = 'it-IT';
@@ -404,7 +404,6 @@ if (SpeechRecognition) {
   };
   
   recognition.onerror = function(e) {
-    console.error("Errore riconoscimento:", e.error);
     if(e.error !== 'no-speech') {
       updateSubtitles("Errore di acquisizione audio: " + e.error);
     }
@@ -423,35 +422,25 @@ if (SpeechRecognition) {
       handleUserText(text);
     }
   };
-} else {
-  btnMic.style.opacity = '0.4';
-  subtitleBox.innerText = "Riconoscimento vocale non supportato in questo browser.";
 }
 
-// Caricamento e Gestione Voci (TTS) con filtro per Voce Google Italiano Prioritaria
+// Forza e assegna "Google Italiano" come priorità fissa
 function loadVoices() {
   if (!synth) return;
   allVoices = synth.getVoices();
-  
-  // Se la lista è vuota (alcuni browser la caricano in asincrono), riprova più tardi
   if (allVoices.length === 0) return;
 
   var itVoices = allVoices.filter(function(v) {
     return v.lang.includes('it-IT') || v.lang.includes('it_IT');
   });
 
-  // Se l'utente non ha mai salvato una preferenza, cerchiamo di default "Google Italiano"
   if (!appState.selectedVoiceURI) {
-    var selected = null;
-    
-    // 1. Priorità assoluta: Cerca una voce che contiene la stringa "google" nell'elenco italiano
-    selected = itVoices.find(function(v) {
+    var selected = itVoices.find(function(v) {
       return v.name.toLowerCase().includes('google');
     });
     
-    // 2. Fallback subordinato: Se non esiste "Google", cerca le altre voci femminili conosciute
     if (!selected) {
-      var femaleKeywords = ['elsa', 'alice', 'aurora', 'paola', 'female', 'femminile', 'zira', 'hazel', 'cosmo'];
+      var femaleKeywords = ['elsa', 'alice', 'aurora', 'paola', 'female', 'cosmo'];
       for (var i = 0; i < itVoices.length; i++) {
         var nameLower = itVoices[i].name.toLowerCase();
         for (var j = 0; j < femaleKeywords.length; j++) {
@@ -464,85 +453,52 @@ function loadVoices() {
       }
     }
     
-    // 3. Fallback estremo: Se non trova nulla, prendi la prima voce disponibile in lista
-    if (!selected && itVoices.length > 0) {
-      selected = itVoices[0];
-    }
+    if (!selected && itVoices.length > 0) selected = itVoices[0];
     
     if (selected) {
       appState.selectedVoiceURI = selected.voiceURI;
       localStorage.setItem('aria_voice_uri', selected.voiceURI);
     }
   }
-  
   populateVoiceModal(itVoices);
 }
 
 if (synth) {
   loadVoices();
-  if (synth.onvoiceschanged !== undefined) {
-    synth.onvoiceschanged = loadVoices;
-  }
+  if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = loadVoices;
 }
 
 function populateVoiceModal(itVoices) {
   var container = document.getElementById('voiceList');
   container.innerHTML = '';
-  
-  if(itVoices.length === 0) {
-    container.innerHTML = '<p style="color:var(--muted); font-size:0.9rem;">Nessuna voce italiana trouvata sul dispositivo.</p>';
-    return;
-  }
-  
   itVoices.forEach(function(v) {
     var opt = document.createElement('div');
     opt.className = 'voice-opt';
     if(v.voiceURI === appState.selectedVoiceURI) opt.classList.add('selected');
-    
-    opt.innerHTML = `
-      <div>
-        <div class="voice-name">${v.name}</div>
-        <div class="voice-locale">${v.voiceURI.includes('local') ? 'Locale Sistema' : 'Cloud Engine'}</div>
-      </div>
-      <span class="voice-check">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-      </span>
-    `;
-    
+    opt.innerHTML = `<div><div class="voice-name">${v.name}</div><div class="voice-locale">Voice Engine</div></div><span class="voice-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span>`;
     opt.onclick = function() {
       appState.selectedVoiceURI = v.voiceURI;
       localStorage.setItem('aria_voice_uri', v.voiceURI);
       document.querySelectorAll('.voice-opt').forEach(function(el){ el.classList.remove('selected'); });
       opt.classList.add('selected');
-      
-      // Test della voce appena scelta
-      setTimeout(function(){
-        speakWithBrowser("Voce impostata correttamente.");
-      }, 200);
+      setTimeout(function(){ speakWithBrowser("Voce di sintesi vocale attivata."); }, 200);
     };
-    
     container.appendChild(opt);
   });
 }
 
-// Cambiamento di Stato della UI e dell'Avatar Animato
 function changeState(newState) {
   appState.status = newState;
   body.classList.remove('listening', 'thinking', 'speaking');
-  
-  // Reset bocca standard
-  animateMouth('reset');
   
   if (newState === 'LISTENING') {
     body.classList.add('listening');
     statusDot.style.backgroundColor = 'var(--state-listening)';
     statusText.innerText = 'ASCOLTO';
-    animateMouth('listening');
   } else if (newState === 'THINKING') {
     body.classList.add('thinking');
     statusDot.style.backgroundColor = 'var(--state-thinking)';
     statusText.innerText = 'ELABORAZIONE';
-    animateMouth('thinking');
   } else if (newState === 'SPEAKING') {
     body.classList.add('speaking');
     statusDot.style.backgroundColor = 'var(--state-speaking)';
@@ -560,175 +516,130 @@ function updateSubtitles(text) {
   subtitleBox.scrollTop = subtitleBox.scrollHeight;
 }
 
-// Gestione dei messaggi e interazione con l'intelligenza o risposte simulate
 function handleUserText(text) {
   appendChatHistory('user', text);
   updateSubtitles("Tu: " + text);
-  
   changeState('THINKING');
   
-  // Simulazione risposta IA locale intelligente (espandibile con chiamate API)
   setTimeout(function() {
     var reply = generateAriaReply(text);
     appendChatHistory('aria', reply);
     updateSubtitles(reply);
-    
-    if(!appState.isMuted) {
-      speakWithBrowser(reply);
-    } else {
-      changeState('READY');
-    }
+    if(!appState.isMuted) speakWithBrowser(reply); else changeState('READY');
   }, 1000);
 }
 
 function generateAriaReply(input) {
   var text = input.toLowerCase();
-  
-  if(text.includes('ciao') || text.includes('salve')) {
-    return "Ciao! Sono ARIA, la tua assistente virtuale personalizzata. Come posso darti una mano oggi?";
-  }
-  if(text.includes('chi sei') || text.includes('tuo nome')) {
-    return "Il mio nome è ARIA. Sono un'interfaccia vocale intelligente progettata per dialogare con te in modo naturale e immediato.";
-  }
-  if(text.includes('come stai') || text.includes('come va')) {
-    return "Sto benissimo, grazie! I miei circuiti sono al massimo delle prestazioni e sono pronta ad aiutarti.";
-  }
-  if(text.includes('meteo') || text.includes('tempo')) {
-    return "Non ho un modulo meteo attivo in tempo reale in questo preciso istante, ma ti consiglio di dare un'occhiata fuori dalla finestra o di consultare il tuo widget preferito.";
-  }
-  if(text.includes('ore') || text.includes('ora') || text.includes('tempo')) {
-    var ora = new Date().toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'});
-    return "In questo momento sono esattamente le " + ora + ".";
-  }
-  if(text.includes('grazie')) {
-    return "Di nulla! È sempre un vero piacere esserti utile.";
-  }
-  
-  return "Ho ricevuto il tuo messaggio: '" + input + "'. Al momento sono in modalità autonoma offline, ma la mia interfaccia vocale e grafica risponde perfettamente.";
+  if(text.includes('ciao') || text.includes('salve')) return "Ciao! Sono ARIA. Come posso aiutarti oggi?";
+  if(text.includes('chi sei') || text.includes('tuo nome')) return "Sono ARIA, il tuo assistente virtuale privato.";
+  if(text.includes('come stai')) return "I miei moduli operativi sono al cento per cento, grazie per averlo chiesto!";
+  if(text.includes('ora') || text.includes('ore')) return "In questo momento sono le " + new Date().toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'}) + ".";
+  return "Ho ricevuto il messaggio. La mia interfaccia e le animazioni grafiche rispondono perfettamente.";
 }
 
-// Sintesi Vocale (Testo -> Voce)
 function speakWithBrowser(text) {
   if (!synth) return;
-  
-  if (synth.speaking) {
-    synth.cancel();
-  }
+  if (synth.speaking) synth.cancel();
   
   currentUtterance = new SpeechSynthesisUtterance(text);
   currentUtterance.lang = 'it-IT';
   
-  // Aggancio della voce selezionata
   if (appState.selectedVoiceURI) {
     var selected = allVoices.find(function(v) { return v.voiceURI === appState.selectedVoiceURI; });
     if (selected) currentUtterance.voice = selected;
   }
   
-  currentUtterance.onstart = function() {
-    changeState('SPEAKING');
-  };
-  
+  currentUtterance.onstart = function() { changeState('SPEAKING'); };
   currentUtterance.onend = function() {
     changeState('READY');
-    // Se l'auto ascolto è attivo, riparte subito la registrazione
-    if(appState.settings.autoListen && recognition) {
-      setTimeout(function(){
-        if(appState.status === 'READY') recognition.start();
-      }, 400);
+    if(appState.settings.autoListen && recognition && appState.status === 'READY') {
+      setTimeout(function(){ recognition.start(); }, 400);
     }
   };
-  
-  currentUtterance.onerror = function(e) {
-    console.error("Errore sintesi:", e);
-    changeState('READY');
-  };
-  
-  // Animazione labiale sincrona durante il parlato
-  var charIndex = 0;
-  currentUtterance.onboundary = function(event) {
-    if(event.name === 'word') {
-      animateMouthSpeech();
-    }
-  };
-  
+  currentUtterance.onerror = function() { changeState('READY'); };
   synth.speak(currentUtterance);
 }
 
-// Gestione della Cronologia (Memorizzazione)
 function appendChatHistory(role, text) {
-  var msg = {
-    role: role,
-    text: text,
-    time: new Date().toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'})
-  };
-  
-  appState.history.push(msg);
-  if(appState.history.length > 40) appState.history.shift(); // Limite di 40 messaggi
+  appState.history.push({ role: role, text: text, time: new Date().toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'}) });
+  if(appState.history.length > 30) appState.history.shift();
   localStorage.setItem('aria_history', JSON.stringify(appState.history));
-  
-  // Aggiorna l'anteprima rapida
-  if(role === 'aria') {
-    historyPreviewText.innerText = text;
-    historyPreviewText.style.color = 'var(--text)';
-  }
-  
+  if(role === 'aria') { historyPreviewText.innerText = text; historyPreviewText.style.color = 'var(--text)'; }
   renderHistoryModal();
 }
 
 function renderHistoryModal() {
   var list = document.getElementById('chatList');
   list.innerHTML = '';
-  
   if(appState.history.length === 0) {
-    list.innerHTML = '<p style="color:var(--muted); text-align:center; padding:20px; font-size:0.9rem;">Nessun messaggio presente nella cronologia.</p>';
+    list.innerHTML = '<p style="color:var(--muted); text-align:center; padding:20px;">Nessuna cronologia.</p>';
     return;
   }
-  
   appState.history.forEach(function(m) {
     var div = document.createElement('div');
     div.className = 'chat-msg ' + m.role;
-    div.innerHTML = `
-      <div>${m.text}</div>
-      <span class="chat-time">${m.time}</span>
-    `;
+    div.innerHTML = `<div>${m.text}</div><span class="chat-time">${m.time}</span>`;
     list.appendChild(div);
   });
   list.scrollTop = list.scrollHeight;
 }
 
-// Caricamento Iniziale della UI da Storage
 function loadSettingsAndHistory() {
   renderHistoryModal();
   if(appState.history.length > 0) {
-    var last = appState.history[appState.history.length - 1];
-    historyPreviewText.innerText = last.text;
+    historyPreviewText.innerText = appState.history[appState.history.length - 1].text;
     historyPreviewText.style.color = 'var(--text)';
   }
-  
-  // Carica checkbox switch
-  document.getElementById('setBargeIn').checked = appState.settings.bargeIn;
-  document.getElementById('setAutoListen').checked = appState.settings.autoListen;
-  document.getElementById('setBlink').checked = appState.settings.blink;
 }
 
-// Event Listeners dei Pulsanti principali
+// LOGICA PARALLASSE INTEGRATA (L'IMMAGINE SI INCLINA E SEGUE IL MOUSE IN 3D)
+var avatarContainer = document.getElementById('avatarContainer');
+document.addEventListener('mousemove', function(event) {
+  var rect = avatarContainer.getBoundingClientRect();
+  var centerX = rect.left + rect.width / 2;
+  var centerY = rect.top + rect.height / 2;
+  
+  // Calcola la distanza del mouse dal centro dell'avatar
+  var deltaX = event.clientX - centerX;
+  var deltaY = event.clientY - centerY;
+  
+  // Limita l'inclinazione a un massimo di 12 gradi per non distorcere
+  var rotateY = Math.min(Math.max((deltaX / window.innerWidth) * 25, -12), 12);
+  var rotateX = Math.min(Math.max((centerY - event.clientY) / window.innerHeight * 25, -12), 12);
+  
+  avatarContainer.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+});
+
+// Resetta la posizione quando il mouse esce dallo schermo
+document.addEventListener('mouseleave', function() {
+  avatarContainer.style.transform = 'rotateX(0deg) rotateY(0deg)';
+});
+
+// Supporto per il Touch (Tracciamento su Telefono)
+document.addEventListener('touchmove', function(event) {
+  var touch = event.touches[0];
+  var rect = avatarContainer.getBoundingClientRect();
+  var centerX = rect.left + rect.width / 2;
+  var centerY = rect.top + rect.height / 2;
+  
+  var rotateY = Math.min(Math.max(((touch.clientX - centerX) / window.innerWidth) * 20, -10), 10);
+  var rotateX = Math.min(Math.max((centerY - touch.clientY) / window.innerHeight * 20, -10), 10);
+  
+  avatarContainer.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+}, { passive: true });
+
+// Event Listeners Pulsanti
 btnMic.onclick = function() {
   if(!recognition) return;
-  
-  // Se ARIA sta parlando e l'interruzione (bargeIn) è attiva, ferma la voce
   if(appState.status === 'SPEAKING' && appState.settings.bargeIn) {
     if(synth) synth.cancel();
     changeState('READY');
     return;
   }
-  
-  if(appState.status === 'LISTENING') {
-    recognition.stop();
-  } else {
+  if(appState.status === 'LISTENING') recognition.stop(); else {
     if(synth && synth.speaking) synth.cancel();
-    try {
-      recognition.start();
-    } catch(e) { console.log(e); }
+    try { recognition.start(); } catch(e){}
   }
 };
 
@@ -737,148 +648,29 @@ btnMute.onclick = function() {
   if(appState.isMuted) {
     btnMute.classList.add('active');
     btnMute.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2V15H6L11 19V5Z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`;
-    if(synth && synth.speaking) {
-      synth.cancel();
-      changeState('READY');
-    }
+    if(synth && synth.speaking) { synth.cancel(); changeState('READY'); }
   } else {
     btnMute.classList.remove('active');
     btnMute.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>`;
   }
 };
 
-// Logica di apertura/chiusura Modali elastici
-function toggleModal(modal, action) {
-  if(action === 'open') {
-    modal.classList.add('open');
-  } else {
-    modal.classList.remove('open');
-  }
-}
+function toggleModal(modal, action) { if(action === 'open') modal.classList.add('open'); else modal.classList.remove('open'); }
 
 btnHistory.onclick = function() { toggleModal(modalHistory, 'open'); };
 document.getElementById('historyPreview').onclick = function() { toggleModal(modalHistory, 'open'); };
 document.getElementById('closeHistory').onclick = function() { toggleModal(modalHistory, 'close'); };
-modalHistory.onclick = function(e) { if(e.target === modalHistory) toggleModal(modalHistory, 'close'); };
 
 btnChooseVoice.onclick = function() { loadVoices(); toggleModal(modalVoice, 'open'); };
 document.getElementById('closeVoice').onclick = function() { toggleModal(modalVoice, 'close'); };
-modalVoice.onclick = function(e) { if(e.target === modalVoice) toggleModal(modalVoice, 'close'); };
 
 btnSettings.onclick = function() { toggleModal(modalSettings, 'open'); };
 document.getElementById('closeSettings').onclick = function() { toggleModal(modalSettings, 'close'); };
-modalSettings.onclick = function(e) { if(e.target === modalSettings) toggleModal(modalSettings, 'close'); };
 
-// Listener Impostazioni Switch
 document.getElementById('setBargeIn').onchange = function(e) { appState.settings.bargeIn = e.target.checked; };
 document.getElementById('setAutoListen').onchange = function(e) { appState.settings.autoListen = e.target.checked; };
-document.getElementById('setBlink').onchange = function(e) { appState.settings.blink = e.target.checked; };
 
-
-/**
- * SEZIONE ANIMAZIONI AVATAR (SVG MOUSE TRACKING & MOUTH ENGINE)
- */
-function moveSvgEyes(event) {
-  var svg = document.getElementById('svgFace');
-  var rect = svg.getBoundingClientRect();
-  
-  // Coordinate del centro dello schermo dell'avatar
-  var faceX = rect.left + rect.width / 2;
-  var faceY = rect.top + rect.height / 2;
-  
-  var clientX = event.clientX || (event.touches && event.touches[0].clientX);
-  var clientY = event.clientY || (event.touches && event.touches[0].clientY);
-  
-  if(!clientX || !clientY) return;
-
-  var rad = Math.atan2(clientY - faceY, clientX - faceX);
-  
-  // Limite movimento pupille (max 3.5px di offset)
-  var distance = Math.min(3.5, Math.hypot(clientX - faceX, clientY - faceY) / 45);
-  var dx = Math.cos(rad) * distance;
-  var dy = Math.sin(rad) * distance;
-
-  // Applica lo spostamento a iride, pupilla e riflessi di entrambi gli occhi
-  var eyesData = [
-    { iris: 'irisL', pupil: 'pupilL', r1: 'reflL1', r2: 'reflL2', cx: 65, cy: 95 },
-    { iris: 'irisR', pupil: 'pupilR', r1: 'reflR1', r2: 'reflR2', cx: 135, cy: 95 }
-  ];
-
-  eyesData.forEach(function(c) {
-    var iris = document.getElementById(c.iris);
-    var pupil = document.getElementById(c.pupil);
-    var r1 = document.getElementById(c.r1);
-    var r2 = document.getElementById(c.r2);
-
-    if(iris){ iris.setAttribute('cx', c.cx + dx); iris.setAttribute('cy', c.cy + dy); }
-    if(pupil){ pupil.setAttribute('cx', c.cx + dx); pupil.setAttribute('cy', c.cy + dy); }
-    if(r1){ r1.setAttribute('cx', c.cx + dx - 4); r1.setAttribute('cy', c.cy + dy - 4); }
-    if(r2){ r2.setAttribute('cx', c.cx + dx + 4); r2.setAttribute('cy', c.cy + dy + 4); }
-  });
-}
-document.addEventListener('mousemove', moveSvgEyes);
-document.addEventListener('touchmove', moveSvgEyes, {passive:true});
-
-// Ammiccamento Occhi Casuale (Blink)
-function doBlinkSvg() {
-  if(!appState.settings.blink || appState.status === 'LISTENING') return;
-  
-  var leftEye = document.querySelector('#svgEyeL ellipse:first-child');
-  var rightEye = document.querySelector('#svgEyeR ellipse:first-child');
-  
-  if(leftEye && rightEye) {
-    leftEye.setAttribute('ry', '1');
-    rightEye.setAttribute('ry', '1');
-    setTimeout(function() {
-      leftEye.setAttribute('ry', '22');
-      rightEye.setAttribute('ry', '22');
-    }, 140);
-  }
-}
-setInterval(doBlinkSvg, 3800);
-
-// Controllo Forme della Bocca (Mouth Shapes)
-var mouthPath = document.getElementById('svgMouth');
-
-function animateMouth(type) {
-  if(!mouthPath) return;
-  mouthPath.style.transition = "d 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
-  
-  if (type === 'listening') {
-    // Bocca a forma di piccola 'O' sorpresa
-    mouthPath.setAttribute('d', 'M 90 140 Q 100 128 110 140 Q 100 152 90 140');
-  } else if (type === 'thinking') {
-    // Linea dritta ondulata / concentrata
-    mouthPath.setAttribute('d', 'M 80 138 Q 100 138 120 138');
-  } else if (type === 'reset') {
-    // Sorriso accennato neutro iniziale
-    mouthPath.setAttribute('d', 'M 75 135 Q 100 142 125 135');
-  }
-}
-
-function animateMouthSpeech() {
-  if(appState.status !== 'SPEAKING' || !mouthPath) return;
-  mouthPath.style.transition = "d 0.08s ease-in-out";
-  
-  // Genera forme randomizzate per simulare l'apertura labiale del parlato
-  var openFactor = Math.floor(Math.random() * 3);
-  if(openFactor === 0) {
-    mouthPath.setAttribute('d', 'M 76 135 Q 100 152 124 135'); // Molto aperta
-  } else if(openFactor === 1) {
-    mouthPath.setAttribute('d', 'M 78 136 Q 100 144 122 136'); // Medio aperta
-  } else {
-    mouthPath.setAttribute('d', 'M 75 135 Q 100 137 125 135'); // Quasi chiusa
-  }
-  
-  // Torna leggermente socchiusa dopo un istante
-  setTimeout(function() {
-    if(appState.status === 'SPEAKING') {
-      mouthPath.setAttribute('d', 'M 75 135 Q 100 141 125 135');
-    }
-  }, 75);
-}
-
-// Wave di Sfondo Animata (Canvas Simil-Siri/Copilot)
+// Onde Sinusoidali Inferiori
 var waveAnimFrame = null;
 var wave1 = document.getElementById('wave1');
 var wave2 = document.getElementById('wave2');
@@ -888,20 +680,14 @@ function startWaveAnimation() {
   function draw() {
     if(appState.status !== 'SPEAKING') return;
     wavePhase += 0.18;
-    
-    // Genera oscillazioni sinusoidali
-    var d1 = "M 0 30 ";
-    var d2 = "M 0 30 ";
+    var d1 = "M 0 30 ", d2 = "M 0 30 ";
     for (var x = 0; x <= 600; x += 20) {
       var y1 = 30 + Math.sin(x * 0.02 + wavePhase) * 14 * Math.sin(wavePhase * 0.5);
       var y2 = 30 + Math.cos(x * 0.015 + wavePhase) * 10 * Math.sin(wavePhase * 0.3);
-      d1 += `L ${x} ${y1} `;
-      d2 += `L ${x} ${y2} `;
+      d1 += `L ${x} ${y1} `; d2 += `L ${x} ${y2} `;
     }
-    
     if(wave1) wave1.setAttribute('d', d1);
     if(wave2) wave2.setAttribute('d', d2);
-    
     waveAnimFrame = requestAnimationFrame(draw);
   }
   draw();
@@ -909,15 +695,11 @@ function startWaveAnimation() {
 
 function stopWaveAnimation() {
   if(waveAnimFrame) cancelAnimationFrame(waveAnimFrame);
-  // Ripristina linea piatta centrale
   if(wave1) wave1.setAttribute('d', 'M 0 30 Q 75 30, 150 30 T 300 30 T 450 30 T 600 30');
   if(wave2) wave2.setAttribute('d', 'M 0 30 Q 75 30, 150 30 T 300 30 T 450 30 T 600 30');
 }
 
-// Esegui il caricamento iniziale dei dati salvati
-window.onload = function() {
-  loadSettingsAndHistory();
-};
+window.onload = function() { loadSettingsAndHistory(); };
 </script>
 </body>
 </html>

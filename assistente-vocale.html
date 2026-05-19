@@ -69,7 +69,7 @@
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    background-image: url('aria.png'); /* Carica la tua foto rinominata nella stessa cartella */
+    background-image: url('base_occhi_aperti_bocca_chiusa.png');
     background-size: cover;
     background-position: center;
     border: 3px solid var(--border);
@@ -90,13 +90,13 @@
     border-color: var(--state-listening);
   }
   
-  /* 2. Effetto pulsazione elastica morbida quando parla */
+  /* 2. Effetto pulsazione morbida quando parla (il cambio bocca è gestito da JS) */
   @keyframes ariaSpeakingPulse {
     0%, 100% { transform: translateZ(10px) scale(1); filter: drop-shadow(0 10px 30px rgba(244,114,182,0.2)); }
-    50% { transform: translateZ(10px) scale(1.03) translateY(-2px); filter: drop-shadow(0 15px 35px rgba(244,114,182,0.5)); }
+    50% { transform: translateZ(10px) scale(1.02) translateY(-1px); filter: drop-shadow(0 15px 35px rgba(244,114,182,0.4)); }
   }
   body.speaking .anime-avatar-img {
-    animation: ariaSpeakingPulse 0.15s ease-in-out infinite;
+    animation: ariaSpeakingPulse 0.6s ease-in-out infinite;
     border-color: var(--state-speaking);
   }
   
@@ -698,6 +698,148 @@ function stopWaveAnimation() {
   if(wave1) wave1.setAttribute('d', 'M 0 30 Q 75 30, 150 30 T 300 30 T 450 30 T 600 30');
   if(wave2) wave2.setAttribute('d', 'M 0 30 Q 75 30, 150 30 T 300 30 T 450 30 T 600 30');
 }
+
+// ============================================================
+// MOTORE ANIMAZIONE AVATAR
+// Gestisce: cambio espressione per stato, movimento bocca
+// durante il parlato, e blink casuale naturale
+// ============================================================
+
+var avatarImg = document.querySelector('.anime-avatar-img');
+
+// Mappa di tutte le immagini disponibili
+var AVATAR_FRAMES = {
+  READY:               'base_occhi_aperti_bocca_chiusa.png',
+  LISTENING:           'parlato_semi.png',
+  THINKING:            'blink_chiuso.png',
+  MOUTH_OPEN:          'parlato_aperta.png',
+  MOUTH_SEMI:          'parlato_semi.png',
+  BLINK:               'blink_chiuso.png',
+  BLINK_MOUTH_SEMI:    'blink_parlato_semi.png',
+  BLINK_MOUTH_OPEN:    'blink_parlato_aperta.png'
+};
+
+// Precarica tutte le immagini in background per evitare flickering
+(function preloadImages() {
+  Object.values(AVATAR_FRAMES).forEach(function(src) {
+    var img = new Image();
+    img.src = src;
+  });
+})();
+
+// Imposta un'immagine con dissolvenza morbida
+function setAvatarFrame(src) {
+  if (!avatarImg) return;
+  var currentSrc = avatarImg.style.backgroundImage;
+  var newSrc = 'url("' + src + '")';
+  if (currentSrc === newSrc) return; // evita refresh inutili
+  avatarImg.style.opacity = '0.6';
+  avatarImg.style.backgroundImage = newSrc;
+  setTimeout(function() { avatarImg.style.opacity = '1'; }, 60);
+}
+
+// Aggiunge transizione opacity all'elemento avatar
+avatarImg.style.transition = 'opacity 0.06s ease, filter 0.3s ease, border-color 0.3s ease, transform 0.1s ease-out';
+
+// ---- ANIMAZIONE BOCCA (durante il parlato) ----
+var mouthAnimInterval = null;
+var isBlinkedWhileSpeaking = false;
+
+function startMouthAnimation() {
+  stopMouthAnimation();
+  // Alterna bocca semi-aperta / aperta simulando l'articolazione
+  // La velocità varia casualmente per sembrare naturale
+  function nextFrame() {
+    if (appState.status !== 'SPEAKING') return;
+
+    var useBlink = isBlinkedWhileSpeaking;
+    var isOpen = Math.random() > 0.4; // 60% bocca aperta, 40% semi
+
+    if (useBlink) {
+      setAvatarFrame(isOpen ? AVATAR_FRAMES.BLINK_MOUTH_OPEN : AVATAR_FRAMES.BLINK_MOUTH_SEMI);
+    } else {
+      setAvatarFrame(isOpen ? AVATAR_FRAMES.MOUTH_OPEN : AVATAR_FRAMES.MOUTH_SEMI);
+    }
+
+    // Intervallo variabile tra 80ms e 200ms — simula ritmo naturale del parlato
+    var delay = 80 + Math.floor(Math.random() * 120);
+    mouthAnimInterval = setTimeout(nextFrame, delay);
+  }
+  nextFrame();
+}
+
+function stopMouthAnimation() {
+  if (mouthAnimInterval) {
+    clearTimeout(mouthAnimInterval);
+    mouthAnimInterval = null;
+  }
+  isBlinkedWhileSpeaking = false;
+}
+
+// ---- BLINK CASUALE NATURALE ----
+var blinkTimeout = null;
+
+function scheduleNextBlink() {
+  // Gli esseri umani battono le palpebre ogni 3-7 secondi
+  var delay = 3000 + Math.floor(Math.random() * 4000);
+  blinkTimeout = setTimeout(function() {
+    doBlink();
+  }, delay);
+}
+
+function doBlink() {
+  var currentStatus = appState.status;
+
+  if (currentStatus === 'SPEAKING') {
+    // Durante il parlato: usa le immagini blink+bocca
+    isBlinkedWhileSpeaking = true;
+    setTimeout(function() {
+      isBlinkedWhileSpeaking = false;
+    }, 150); // blink brevissimo, 150ms
+  } else if (currentStatus === 'READY') {
+    // A riposo: chiude gli occhi e li riapre
+    setAvatarFrame(AVATAR_FRAMES.BLINK);
+    setTimeout(function() {
+      if (appState.status === 'READY') {
+        setAvatarFrame(AVATAR_FRAMES.READY);
+      }
+    }, 150);
+  } else if (currentStatus === 'LISTENING') {
+    // Anche mentre ascolta, blink naturale
+    setAvatarFrame(AVATAR_FRAMES.BLINK);
+    setTimeout(function() {
+      if (appState.status === 'LISTENING') {
+        setAvatarFrame(AVATAR_FRAMES.LISTENING);
+      }
+    }, 150);
+  }
+  // THINKING: gli occhi sono già chiusi nell'immagine, skip
+
+  scheduleNextBlink();
+}
+
+// Avvia il ciclo di blink all'inizio
+scheduleNextBlink();
+
+// ---- HOOK SULLO STATO ----
+// Intercetta changeState per aggiornare anche l'immagine avatar
+var _originalChangeState = changeState;
+changeState = function(newState) {
+  _originalChangeState(newState);
+
+  if (newState === 'READY') {
+    stopMouthAnimation();
+    setAvatarFrame(AVATAR_FRAMES.READY);
+  } else if (newState === 'LISTENING') {
+    stopMouthAnimation();
+    setAvatarFrame(AVATAR_FRAMES.LISTENING);
+  } else if (newState === 'THINKING') {
+    stopMouthAnimation();
+    setAvatarFrame(AVATAR_FRAMES.THINKING);
+  } else if (newState === 'SPEAKING') {
+    startMouthAnimation();
+  }
+};
 
 window.onload = function() { loadSettingsAndHistory(); };
 </script>

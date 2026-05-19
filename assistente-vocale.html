@@ -14,195 +14,904 @@
     --state-thinking: #fbbf24; --state-speaking: #f472b6; --state-countdown: #7c6dfa;
   }
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; align-items:center; overflow:hidden; }
-  .bg-aura { position:fixed; inset:0; z-index:0; pointer-events:none; background: radial-gradient(ellipse 60% 50% at 20% 20%, rgba(124,109,250,0.12) 0%, transparent 70%), radial-gradient(ellipse 50% 40% at 80% 80%, rgba(244,114,182,0.10) 0%, transparent 70%); animation:aura 8s ease-in-out infinite alternate; }
-  @keyframes aura { 0% { filter:hue-rotate(0deg); } 100% { filter:hue-rotate(30deg); } }
-  header { position:relative; z-index:2; text-align:center; padding:28px 20px 10px; }
-  header .logo { font-family:'Space Mono',monospace; font-size:2rem; font-weight:700; letter-spacing:4px; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-  .face-container { position:relative; z-index:2; margin:20px auto; width:260px; height:300px; background:#f0ece8; border-radius:16px; border:2px solid var(--border); box-shadow:0 0 40px rgba(124,109,250,0.15); overflow:hidden; transition:all 0.4s ease; }
-  .face-container.thinking { box-shadow:0 0 50px rgba(251,191,36,0.35); border-color:rgba(251,191,36,0.5); }
-  .face-container.speaking { box-shadow:0 0 50px rgba(244,114,182,0.45); border-color:rgba(244,114,182,0.6); animation:pulse-face 0.6s ease-in-out infinite alternate; }
-  .face-container.listening-active { box-shadow:0 0 50px rgba(52,211,153,0.5); border-color:rgba(52,211,153,0.7); }
-  @keyframes pulse-face { from { transform:scale(1); } to { transform:scale(1.025); } }
-  .iris { transition: transform 0.15s ease; }
-  .state-label { display:inline-flex; align-items:center; gap:6px; font-family:'Space Mono',monospace; font-size:0.7rem; letter-spacing:2px; text-transform:uppercase; padding:5px 14px; border-radius:20px; background:var(--card); border:1.5px solid var(--border); color:var(--muted); transition:all 0.3s; min-width:130px; justify-content:center; }
-  .state-label .dot { width:7px; height:7px; border-radius:50%; background:var(--muted); transition:background 0.3s; }
-  .state-label.s-listening { border-color:var(--state-listening); color:var(--state-listening); }
-  .state-label.s-listening .dot { background:var(--state-listening); }
-  .state-label.s-speaking { border-color:var(--state-speaking); color:var(--state-speaking); }
-  .state-label.s-speaking .dot { background:var(--state-speaking); }
-  .subtitle-area { position:fixed; bottom:90px; left:0; right:0; z-index:10; display:flex; justify-content:center; padding:0 20px; pointer-events:none; }
-  .subtitle-box { background:rgba(10,11,20,0.82); backdrop-filter:blur(12px); border:1px solid var(--border); border-radius:18px; padding:12px 20px; max-width:420px; width:100%; font-size:1rem; color:var(--text); text-align:center; opacity:0; transition:0.3s; }
-  .subtitle-box.visible { opacity:1; }
-  .input-area { position:fixed; bottom:0; left:0; right:0; z-index:20; padding:10px 16px 24px; display:flex; gap:10px; align-items:center; background:linear-gradient(to top,var(--bg) 70%,transparent); max-width:480px; margin:0 auto; }
-  .btn-mic { width:48px; height:48px; border-radius:50%; border:none; background:var(--accent); color:white; cursor:pointer; font-size:1.2rem; }
-  .btn-mic.recording { background:linear-gradient(135deg,#ef4444,#f97316); animation: mic-pulse 0.8s infinite alternate; }
-  @keyframes mic-pulse { from { box-shadow:0 0 5px red; } to { box-shadow:0 0 20px red; } }
-  .yt-player { position:fixed; bottom:90px; left:50%; transform:translateX(-50%); z-index:25; width:min(420px,calc(100vw - 32px)); background:black; border-radius:18px; overflow:hidden; display:none; flex-direction:column; }
-  .yt-player.visible { display:flex; }
+  body {
+    background-color: var(--bg); color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    overflow: hidden; height: 100vh; width: 100vw;
+    display: flex; flex-direction: column;
+    user-select: none; -webkit-user-select: none;
+  }
+  .app-container {
+    flex: 1; display: flex; flex-direction: column;
+    position: relative; overflow: hidden; width: 100%; max-width: 600px; margin: 0 auto;
+  }
+  header {
+    padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--border); background: rgba(22,24,41,0.6); backdrop-filter: blur(10px);
+    z-index: 10;
+  }
+  .logo-area { display: flex; align-items: center; gap: 10px; }
+  .logo-title { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 1.2rem; letter-spacing: 1px; color: var(--text); }
+  .logo-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; display: inline-block; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% {transform:scale(1); opacity:1;} 50% {transform:scale(1.4); opacity:0.5;} }
+  .nav-btn {
+    background: var(--card); border: 1px solid var(--border); color: var(--text);
+    width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s ease;
+  }
+  .nav-btn:active { transform: scale(0.92); background: var(--accent); }
+  
+  .face-section {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    position: relative; z-index: 1; padding: 20px;
+  }
+  .avatar-container {
+    width: 220px; height: 220px; position: relative; display: flex; align-items: center; justify-content: center;
+  }
+  .glow-ring {
+    position: absolute; width: 100%; height: 100%;
+    border-radius: 50%; border: 2px dashed rgba(124,109,250,0.15);
+    transform: rotate(0deg); transition: all 0.5s ease;
+  }
+  #svgFace { width: 100%; height: 100%; z-index: 2; overflow: visible; }
+  
+  .status-badge {
+    margin-top: 25px; padding: 6px 16px; border-radius: 20px;
+    background: var(--card); border: 1px solid var(--border);
+    font-family: 'Space Mono', monospace; font-size: 0.85rem; font-weight: 700;
+    display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  
+  .subtitle-box {
+    margin-top: 15px; min-height: 44px; max-height: 80px; width: 85%;
+    text-align: center; font-size: 0.95rem; color: var(--muted);
+    overflow-y: auto; padding: 0 10px; font-weight: 400; line-height: 1.4;
+  }
+  
+  .controls-section {
+    padding: 20px 20px 30px; display: flex; flex-direction: column; align-items: center; gap: 20px;
+    background: linear-gradient(to top, var(--bg) 70%, transparent); z-index: 5;
+  }
+  .action-row { display: flex; align-items: center; justify-content: center; gap: 25px; width: 100%; }
+  
+  .mic-btn {
+    width: 76px; height: 76px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #6366f1);
+    border: none; color: white; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; box-shadow: 0 8px 24px rgba(124,109,250,0.4);
+    position: relative; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .mic-btn::after {
+    content: ''; position: absolute; top: -4px; left: -4px; right: -4px; bottom: -4px;
+    border-radius: 50%; border: 2px solid var(--accent); opacity: 0; transform: scale(0.9);
+    transition: all 0.3s ease;
+  }
+  .mic-btn:active { transform: scale(0.9); box-shadow: 0 4px 12px rgba(124,109,250,0.2); }
+  
+  .secondary-btn {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: var(--card); border: 1px solid var(--border); color: var(--text);
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .secondary-btn:active { transform: scale(0.9); background: rgba(124,109,250,0.1); }
+  .secondary-btn.active { background: var(--accent2); border-color: var(--accent2); color: white; }
+  
+  .history-preview {
+    width: 100%; background: rgba(30,32,53,0.4); border: 1px solid rgba(124,109,250,0.1);
+    border-radius: 14px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;
+    font-size: 0.85rem; cursor: pointer; min-height: 44px;
+  }
+  .history-preview .icon { color: var(--accent); display: flex; align-items: center; }
+  .history-preview .text { flex:1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
+  
+  .modal-overlay {
+    position: absolute; top:0; left:0; width:100%; height:100%;
+    background: rgba(13,15,26,0.85); backdrop-filter: blur(8px);
+    z-index: 100; display: flex; align-items: flex-end;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: auto; }
+  .modal-sheet {
+    width: 100%; background: var(--surface); border-top: 1px solid var(--border);
+    border-top-left-radius: 24px; border-top-right-radius: 24px;
+    padding: 24px; max-height: 80%; display: flex; flex-direction: column;
+    transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.32, 0.94, 0.6, 1);
+  }
+  .modal-overlay.open .modal-sheet { transform: translateY(0); }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .modal-title { font-family: 'Space Mono', monospace; font-size: 1.1rem; font-weight: 700; }
+  .modal-close { background:none; border:none; color:var(--muted); font-size: 1.5rem; cursor:pointer; padding:5px; }
+  .modal-body { flex: 1; overflow-y: auto; padding-bottom: 20px; }
+  
+  .voice-opt, .chat-item {
+    padding: 14px 16px; border-radius: 12px; background: var(--card);
+    border: 1px solid transparent; margin-bottom: 10px; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease;
+  }
+  .voice-opt:active, .chat-item:active { transform: scale(0.98); }
+  .voice-opt.selected { border-color: var(--accent); background: rgba(124,109,250,0.1); }
+  .voice-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 2px; }
+  .voice-locale { font-size: 0.75rem; color: var(--muted); font-family: 'Space Mono', monospace; }
+  .voice-check { color: var(--accent); display: none; }
+  .voice-opt.selected .voice-check { display: block; }
+  
+  .chat-list { display: flex; flex-direction: column; gap: 12px; }
+  .chat-msg { display: flex; flex-direction: column; max-width: 85%; padding: 12px 14px; border-radius: 16px; line-height: 1.4; font-size: 0.95rem; }
+  .chat-msg.user { background: var(--accent); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+  .chat-msg.aria { background: var(--card); color: var(--text); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid var(--border); }
+  .chat-time { font-size: 0.7rem; color: rgba(255,255,255,0.6); margin-top: 4px; align-self: flex-end; font-family: 'Space Mono', monospace; }
+  .chat-msg.aria .chat-time { color: var(--muted); }
+  
+  .wave-container {
+    position: absolute; width: 100%; height: 60px; bottom: 0; left: 0;
+    pointer-events: none; opacity: 0; transition: opacity 0.4s ease; z-index: 2;
+  }
+  .wave-path { fill: none; stroke-linecap: round; stroke-width: 3; }
+  
+  /* STATI APP */
+  body.listening .glow-ring { transform: scale(1.1); border-color: var(--state-listening); animation: spin 12s linear infinite; box-shadow: 0 0 30px rgba(52,211,153,0.15); }
+  body.thinking .glow-ring { transform: scale(1.05); border-color: var(--state-thinking); animation: pulseGlow 1.5s ease-in-out infinite; }
+  body.speaking .glow-ring { transform: scale(1.08); border-color: var(--state-speaking); animation: spin 25s linear infinite; }
+  body.speaking .wave-container { opacity: 0.7; }
+  
+  @keyframes spin { 100% { transform: rotate(360deg) scale(1.1); } }
+  @keyframes pulseGlow { 0%,100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.1); } }
+  
+  /* SETTINGS */
+  .settings-grid { display: flex; flex-direction: column; gap: 16px; }
+  .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(124,109,250,0.1); }
+  .setting-info { display: flex; flex-direction: column; gap: 4px; }
+  .setting-label { font-weight: 600; font-size: 0.95rem; }
+  .setting-desc { font-size: 0.8rem; color: var(--muted); }
+  
+  /* TOGGLE SWITCH */
+  .switch { position: relative; display: inline-block; width: 46px; height: 26px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--card); border: 1px solid var(--border); transition: .3s; border-radius: 34px; }
+  .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: var(--text); transition: .3s; border-radius: 50%; }
+  input:checked + .slider { background-color: var(--accent); border-color: var(--accent); }
+  input:checked + .slider:before { transform: translateX(20px); background-color: white; }
 </style>
-<script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
-<div class="modal-overlay" id="audioUnlockOverlay" style="position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:1000; display:flex; align-items:center; justify-content:center;">
-  <button onclick="unlockAudio()" style="padding:20px 40px; border-radius:50px; border:none; background:var(--accent); color:white; font-weight:bold; cursor:pointer;">ATTIVA ARIA</button>
+<div class="app-container">
+  <header>
+    <div class="logo-area">
+      <span class="logo-title">ARIA</span>
+      <span class="logo-dot"></span>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <button class="nav-btn" id="btnHistory" title="Cronologia dei messaggi">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </button>
+      <button class="nav-btn" id="btnSettings" title="Impostazioni">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="face-section">
+    <div class="avatar-container">
+      <div class="glow-ring"></div>
+      
+      <svg id="svgFace" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="irisGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#a78bfa"/>
+            <stop offset="70%" stop-color="#7c6dfa"/>
+            <stop offset="100%" stop-color="#5b21b6"/>
+          </radialGradient>
+          <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+            <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000" flood-opacity="0.3"/>
+          </filter>
+        </defs>
+
+        <circle cx="100" cy="100" r="95" fill="none" pointer-events="all"/>
+
+        <g id="svgEyeL" filter="url(#shadow)">
+          <ellipse cx="65" cy="95" rx="22" ry="22" fill="var(--eye-white)" />
+          <ellipse id="irisL" cx="65" cy="95" rx="13" ry="13" fill="url(#irisGrad)" />
+          <circle id="pupilL" cx="65" cy="95" r="6" fill="var(--eye-pupil)" />
+          <circle id="reflL1" cx="61" cy="91" r="3" fill="#ffffff" opacity="0.8"/>
+          <circle id="reflL2" cx="69" cy="99" r="1.5" fill="#ffffff" opacity="0.6"/>
+        </g>
+
+        <g id="svgEyeR" filter="url(#shadow)">
+          <ellipse cx="135" cy="95" rx="22" ry="22" fill="var(--eye-white)" />
+          <ellipse id="irisR" cx="135" cy="95" rx="13" ry="13" fill="url(#irisGrad)" />
+          <circle id="pupilR" cx="135" cy="95" r="6" fill="var(--eye-pupil)" />
+          <circle id="reflR1" cx="131" cy="91" r="3" fill="#ffffff" opacity="0.8"/>
+          <circle id="reflR2" cx="139" cy="99" r="1.5" fill="#ffffff" opacity="0.6"/>
+        </g>
+
+        <path id="browsL" d="M 42 74 Q 65 70 82 76" fill="none" stroke="var(--muted)" stroke-width="3" stroke-linecap="round"/>
+        <path id="browsR" d="M 118 76 Q 135 70 158 74" fill="none" stroke="var(--muted)" stroke-width="3" stroke-linecap="round"/>
+
+        <path id="svgMouth" d="M 75 135 Q 100 142 125 135" fill="none" stroke="var(--accent)" stroke-width="4.5" stroke-linecap="round" filter="url(#shadow)"/>
+      </svg>
+    </div>
+
+    <div class="status-badge">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">PRONTA</span>
+    </div>
+
+    <div class="subtitle-box" id="subtitleBox">
+      Tocca il microfono per iniziare a parlare con me.
+    </div>
+  </main>
+
+  <section class="controls-section">
+    <div class="action-row">
+      <button class="secondary-btn" id="btnMute" title="Disattiva Voce (Silenzioso)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>
+      </button>
+      
+      <button class="mic-btn" id="btnMic" title="Ascolta">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
+          <path d="M19 10v1a7 7 0 01-14 0v-1M12 19v4M8 23h8"/>
+        </svg>
+      </button>
+
+      <button class="secondary-btn" id="btnChooseVoice" title="Cambia Voce">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+      </button>
+    </div>
+
+    <div class="history-preview" id="historyPreview">
+      <span class="icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </span>
+      <span class="text" id="historyPreviewText">Nessuna conversazione recente</span>
+    </div>
+  </section>
+
+  <div class="wave-container">
+    <svg width="100%" height="100%" viewBox="0 0 600 60" preserveAspectRatio="none">
+      <path class="wave-path" id="wave1" stroke="rgba(244,114,182,0.6)" d="M 0 30 Q 75 30, 150 30 T 300 30 T 450 30 T 600 30"/>
+      <path class="wave-path" id="wave2" stroke="rgba(124,109,250,0.4)" d="M 0 30 Q 75 30, 150 30 T 300 30 T 450 30 T 600 30"/>
+    </svg>
+  </div>
 </div>
 
-<div class="bg-aura"></div>
-<header><div class="logo">ARIA</div></header>
-
-<div class="status-area" style="text-align:center; margin-bottom:10px;">
-  <div class="state-label" id="stateLabel"><span class="dot"></span><span id="stateLabelText">in attesa</span></div>
+<div class="modal-overlay" id="modalHistory">
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <h3 class="modal-title">CRONOLOGIA CHAT</h3>
+      <button class="modal-close" id="closeHistory">&times;</button>
+    </div>
+    <div class="modal-body chat-list" id="chatList">
+      </div>
+  </div>
 </div>
 
-<div class="face-container" id="face">
-  <svg id="ariaSvgFace" viewBox="0 0 260 300" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <radialGradient id="asg" cx="50%" cy="42%" r="55%"><stop offset="0%" stop-color="#fde8d8"/><stop offset="100%" stop-color="#f5c9a8"/></radialGradient>
-      <radialGradient id="aiL" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#7c6dfa"/><stop offset="100%" stop-color="#4c1d95"/></radialGradient>
-    </defs>
-    <path d="M40 85 Q130 55 220 85 Q235 180 130 230 Q25 180 40 85" fill="url(#asg)"/>
-    <g id="svgEyeL" transform="translate(85, 125)">
-       <ellipse cx="0" cy="0" rx="18" ry="22" fill="#fff"/>
-       <ellipse class="iris" cx="0" cy="0" rx="11" ry="11" fill="url(#aiL)"/>
-       <ellipse class="pupil" cx="0" cy="0" rx="5" ry="5" fill="#000"/>
-    </g>
-    <g id="svgEyeR" transform="translate(175, 125)">
-       <ellipse cx="0" cy="0" rx="18" ry="22" fill="#fff"/>
-       <ellipse class="iris" cx="0" cy="0" rx="11" ry="11" fill="url(#aiL)"/>
-       <ellipse class="pupil" cx="0" cy="0" rx="5" ry="5" fill="#000"/>
-    </g>
-    <path id="svgMouth" d="M105 185 Q130 195 155 185" fill="none" stroke="#e07a8a" stroke-width="3" stroke-linecap="round"/>
-  </svg>
+<div class="modal-overlay" id="modalVoice">
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <h3 class="modal-title">SELEZIONE VOCE SINTESI</h3>
+      <button class="modal-close" id="closeVoice">&times;</button>
+    </div>
+    <div class="modal-body" id="voiceList">
+      </div>
+  </div>
 </div>
 
-<div class="subtitle-area">
-  <div class="subtitle-box" id="subBox"></div>
-</div>
+<div class="modal-overlay" id="modalSettings">
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <h3 class="modal-title">IMPOSTAZIONI</h3>
+      <button class="modal-close" id="closeSettings">&times;</button>
+    </div>
+    <div class="modal-body settings-grid">
+      
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-label">Interruzione Vocale</span>
+          <span class="setting-desc">Ferma la riproduzione se tocchi il mic mentre parlo</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="setBargeIn" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
 
-<div class="yt-player" id="ytPlayer">
-  <div id="ytIframeContainer"></div>
-  <button onclick="closeYoutubePlayer()" style="background:red; color:white; border:none; padding:10px;">CHIUDI VIDEO</button>
-</div>
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-label">Auto-Ascolto continuo</span>
+          <span class="setting-desc">Riattiva il microfono dopo che ho finito di parlare</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="setAutoListen">
+          <span class="slider"></span>
+        </label>
+      </div>
 
-<div class="input-area">
-  <button class="btn-mic" id="micBtn" onclick="toggleMic()">🎤</button>
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-label">Sveglia Visiva (Blink)</span>
+          <span class="setting-desc">Permetti animazione ammiccamento occhi casuale</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="setBlink" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="setting-row" style="border:none; margin-top:20px; justify-content:center;">
+        <span style="font-size:0.75rem; color:var(--muted); font-family:'Space Mono', monospace;">ARIA Engine v2.4 • Client Web</span>
+      </div>
+
+    </div>
+  </div>
 </div>
 
 <script>
-let GROQ_KEY = localStorage.getItem('groq_key') || "INSERISCI_QUI";
-let YOUTUBE_KEY = localStorage.getItem('youtube_key') || "INSERISCI_QUI";
-let recognition, synth = window.speechSynthesis, playerYT = null;
-let isAriaSpeaking = false, conversationWindowActive = false, conversationTimeout;
+/**
+ * ARIA CORE ENGINE - LOGICA INTEGRATA
+ */
 
-function unlockAudio() {
-  synth.speak(new SpeechSynthesisUtterance(""));
-  document.getElementById('audioUnlockOverlay').style.display = 'none';
-  initRecognition();
-}
+// Stato Globale
+var appState = {
+  status: 'READY', // READY, LISTENING, THINKING, SPEAKING
+  isMuted: false,
+  selectedVoiceURI: localStorage.getItem('aria_voice_uri') || '',
+  settings: {
+    bargeIn: true,
+    autoListen: false,
+    blink: true
+  },
+  history: JSON.parse(localStorage.getItem('aria_history')) || []
+};
 
-function initRecognition() {
-  const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-  recognition = new Speech();
+// Elementi DOM
+var body = document.body;
+var btnMic = document.getElementById('btnMic');
+var btnMute = document.getElementById('btnMute');
+var btnHistory = document.getElementById('btnHistory');
+var btnSettings = document.getElementById('btnSettings');
+var btnChooseVoice = document.getElementById('btnChooseVoice');
+var statusDot = document.getElementById('statusDot');
+var statusText = document.getElementById('statusText');
+var subtitleBox = document.getElementById('subtitleBox');
+var historyPreviewText = document.getElementById('historyPreviewText');
+
+// Modali
+var modalHistory = document.getElementById('modalHistory');
+var modalVoice = document.getElementById('modalVoice');
+var modalSettings = document.getElementById('modalSettings');
+
+// Web Speech API references
+var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+var recognition = null;
+var synth = window.speechSynthesis;
+var currentUtterance = null;
+var allVoices = [];
+
+// Inizializzazione Riconoscimento Vocale
+if (SpeechRecognition) {
+  recognition = new SpeechRecognition();
   recognition.lang = 'it-IT';
   recognition.continuous = false;
   recognition.interimResults = false;
-
-  recognition.onstart = () => {
-    document.getElementById('micBtn').classList.add('recording');
-    updateLabel();
+  
+  recognition.onstart = function() {
+    changeState('LISTENING');
+    updateSubtitles("Ti ascolto... parla ora.");
   };
-
-  recognition.onresult = (e) => {
-    const text = e.results[0][0].transcript.toLowerCase();
-    const isVideoPlaying = playerYT && typeof playerYT.getPlayerState === 'function' && playerYT.getPlayerState() === 1;
-
-    if (isVideoPlaying || !conversationWindowActive) {
-      if (text.includes("aria") || text.includes("area")) {
-        processInput(text.replace(/aria|area/g, "").trim());
-      }
-    } else {
-      processInput(text);
+  
+  recognition.onerror = function(e) {
+    console.error("Errore riconoscimento:", e.error);
+    if(e.error !== 'no-speech') {
+      updateSubtitles("Errore di acquisizione audio: " + e.error);
+    }
+    changeState('READY');
+  };
+  
+  recognition.onend = function() {
+    if (appState.status === 'LISTENING') {
+      changeState('READY');
     }
   };
-
-  recognition.onend = () => {
-    document.getElementById('micBtn').classList.remove('recording');
-    if (!isAriaSpeaking) setTimeout(() => { try { recognition.start(); } catch(e){} }, 300);
+  
+  recognition.onresult = function(event) {
+    var text = event.results[0][0].transcript;
+    if(text.trim() !== "") {
+      handleUserText(text);
+    }
   };
-  recognition.start();
+} else {
+  btnMic.style.opacity = '0.4';
+  subtitleBox.innerText = "Riconoscimento vocale non supportato in questo browser.";
 }
 
-function updateLabel() {
-  const label = document.getElementById('stateLabelText');
-  if(conversationWindowActive) label.innerText = "ascolto diretto";
-  else label.innerText = "attesa 'Aria'";
-}
+// Caricamento e Gestione Voci (TTS) con filtro per Voce Femminile Predefinita
+function loadVoices() {
+  if (!synth) return;
+  allVoices = synth.getVoices();
+  
+  // Se la lista è vuota (alcuni browser la caricano in asincrono), riprova più tardi
+  if (allVoices.length === 0) return;
 
-async function processInput(text) {
-  if(!text) return;
-  setAriaState('thinking');
+  var itVoices = allVoices.filter(function(v) {
+    return v.lang.includes('it-IT') || v.lang.includes('it_IT');
+  });
 
-  // Comandi Video
-  if(playerYT && (text.includes("volume") || text.includes("pausa") || text.includes("chiudi"))) {
-    if(text.includes("alza")) playerYT.setVolume(playerYT.getVolume()+20);
-    else if(text.includes("abbassa")) playerYT.setVolume(playerYT.getVolume()-20);
-    else if(text.includes("pausa")) playerYT.pauseVideo();
-    else if(text.includes("chiudi")) closeYoutubePlayer();
-    speak("Eseguito."); return;
+  // Se l'utente non ha mai salvato una preferenza, cerchiamo di default una voce femminile
+  if (!appState.selectedVoiceURI) {
+    var selected = null;
+    
+    // 1. Cerchiamo nomi noti tipicamente femminili nelle API comuni dei browser
+    var femaleKeywords = ['elsa', 'alice', 'aurora', 'paola', 'female', 'femminile', 'zira', 'hazel', 'cosmo'];
+    for (var i = 0; i < itVoices.length; i++) {
+      var nameLower = itVoices[i].name.toLowerCase();
+      for (var j = 0; j < femaleKeywords.length; j++) {
+        if (nameLower.includes(femaleKeywords[j])) {
+          selected = itVoices[i];
+          break;
+        }
+      }
+      if (selected) break;
+    }
+    
+    // 2. Fallback sussidiario: Se non trova keyword esplicite, preferiamo "Google" o la seconda voce della lista se presente
+    if (!selected && itVoices.length > 0) {
+      var googleVoice = itVoices.find(function(v) { return v.name.toLowerCase().includes('google'); });
+      selected = googleVoice || itVoices[0];
+    }
+    
+    if (selected) {
+      appState.selectedVoiceURI = selected.voiceURI;
+      localStorage.setItem('aria_voice_uri', selected.voiceURI);
+    }
   }
-
-  // AI Response
-  try {
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: { "Authorization": `Bearer ${GROQ_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "llama-3.1-70b-versatile",
-        messages: [{role:"system", content: "Sei ARIA. Rispondi breve."}, {role:"user", content: text}]
-      })
-    });
-    const data = await response.json();
-    speak(data.choices[0].message.content);
-  } catch(e) { speak("Errore di connessione."); }
+  
+  populateVoiceModal(itVoices);
 }
 
-function speak(text) {
-  isAriaSpeaking = true;
-  recognition.stop();
-  clearTimeout(conversationTimeout);
-  conversationWindowActive = true;
+if (synth) {
+  loadVoices();
+  if (synth.onvoiceschanged !== undefined) {
+    synth.onvoiceschanged = loadVoices;
+  }
+}
 
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.onstart = () => { setAriaState('speaking'); showSubtitle(text); };
-  utterance.onend = () => {
-    isAriaSpeaking = false;
-    setAriaState('idle');
-    conversationTimeout = setTimeout(() => { conversationWindowActive = false; updateLabel(); }, 10000);
+function populateVoiceModal(itVoices) {
+  var container = document.getElementById('voiceList');
+  container.innerHTML = '';
+  
+  if(itVoices.length === 0) {
+    container.innerHTML = '<p style="color:var(--muted); font-size:0.9rem;">Nessuna voce italiana trovata sul dispositivo.</p>';
+    return;
+  }
+  
+  itVoices.forEach(function(v) {
+    var opt = document.createElement('div');
+    opt.className = 'voice-opt';
+    if(v.voiceURI === appState.selectedVoiceURI) opt.classList.add('selected');
+    
+    opt.innerHTML = `
+      <div>
+        <div class="voice-name">${v.name}</div>
+        <div class="voice-locale">${v.voiceURI.includes('local') ? 'Locale Sistema' : 'Cloud Engine'}</div>
+      </div>
+      <span class="voice-check">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      </span>
+    `;
+    
+    opt.onclick = function() {
+      appState.selectedVoiceURI = v.voiceURI;
+      localStorage.setItem('aria_voice_uri', v.voiceURI);
+      document.querySelectorAll('.voice-opt').forEach(function(el){ el.classList.remove('selected'); });
+      opt.classList.add('selected');
+      
+      // Test della voce appena scelta
+      setTimeout(function(){
+        speakWithBrowser("Voce impostata correttamente.");
+      }, 200);
+    };
+    
+    container.appendChild(opt);
+  });
+}
+
+// Cambiamento di Stato della UI e dell'Avatar Animato
+function changeState(newState) {
+  appState.status = newState;
+  body.classList.remove('listening', 'thinking', 'speaking');
+  
+  // Reset bocca standard
+  animateMouth('reset');
+  
+  if (newState === 'LISTENING') {
+    body.classList.add('listening');
+    statusDot.style.backgroundColor = 'var(--state-listening)';
+    statusText.innerText = 'ASCOLTO';
+    animateMouth('listening');
+  } else if (newState === 'THINKING') {
+    body.classList.add('thinking');
+    statusDot.style.backgroundColor = 'var(--state-thinking)';
+    statusText.innerText = 'ELABORAZIONE';
+    animateMouth('thinking');
+  } else if (newState === 'SPEAKING') {
+    body.classList.add('speaking');
+    statusDot.style.backgroundColor = 'var(--state-speaking)';
+    statusText.innerText = 'ARIA PARLA';
+    startWaveAnimation();
+  } else {
+    statusDot.style.backgroundColor = 'var(--accent)';
+    statusText.innerText = 'PRONTA';
+    stopWaveAnimation();
+  }
+}
+
+function updateSubtitles(text) {
+  subtitleBox.innerText = text;
+  subtitleBox.scrollTop = subtitleBox.scrollHeight;
+}
+
+// Gestione dei messaggi e interazione con l'intelligenza o risposte simulate
+function handleUserText(text) {
+  appendChatHistory('user', text);
+  updateSubtitles("Tu: " + text);
+  
+  changeState('THINKING');
+  
+  // Simulazione risposta IA locale intelligente (espandibile con chiamate API)
+  setTimeout(function() {
+    var reply = generateAriaReply(text);
+    appendChatHistory('aria', reply);
+    updateSubtitles(reply);
+    
+    if(!appState.isMuted) {
+      speakWithBrowser(reply);
+    } else {
+      changeState('READY');
+    }
+  }, 1000);
+}
+
+function generateAriaReply(input) {
+  var text = input.toLowerCase();
+  
+  if(text.includes('ciao') || text.includes('salve')) {
+    return "Ciao! Sono ARIA, la tua assistente virtuale personalizzata. Come posso darti una mano oggi?";
+  }
+  if(text.includes('chi sei') || text.includes('tuo nome')) {
+    return "Il mio nome è ARIA. Sono un'interfaccia vocale intelligente progettata per dialogare con te in modo naturale e immediato.";
+  }
+  if(text.includes('come stai') || text.includes('come va')) {
+    return "Sto benissimo, grazie! I miei circuiti sono al massimo delle prestazioni e sono pronta ad aiutarti.";
+  }
+  if(text.includes('meteo') || text.includes('tempo')) {
+    return "Non ho un modulo meteo attivo in tempo reale in questo preciso istante, ma ti consiglio di dare un'occhiata fuori dalla finestra o di consultare il tuo widget preferito.";
+  }
+  if(text.includes('ore') || text.includes('ora') || text.includes('tempo')) {
+    var ora = new Date().toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'});
+    return "In questo momento sono esattamente le " + ora + ".";
+  }
+  if(text.includes('grazie')) {
+    return "Di nulla! È sempre un vero piacere esserti utile.";
+  }
+  
+  return "Ho ricevuto il tuo messaggio: '" + input + "'. Al momento sono in modalità autonoma offline, ma la mia interfaccia vocale e grafica risponde perfettamente.";
+}
+
+// Sintesi Vocale (Testo -> Voce)
+function speakWithBrowser(text) {
+  if (!synth) return;
+  
+  if (synth.speaking) {
+    synth.cancel();
+  }
+  
+  currentUtterance = new SpeechSynthesisUtterance(text);
+  currentUtterance.lang = 'it-IT';
+  
+  // Aggancio della voce selezionata
+  if (appState.selectedVoiceURI) {
+    var selected = allVoices.find(function(v) { return v.voiceURI === appState.selectedVoiceURI; });
+    if (selected) currentUtterance.voice = selected;
+  }
+  
+  currentUtterance.onstart = function() {
+    changeState('SPEAKING');
   };
-  synth.speak(utterance);
+  
+  currentUtterance.onend = function() {
+    changeState('READY');
+    // Se l'auto ascolto è attivo, riparte subito la registrazione
+    if(appState.settings.autoListen && recognition) {
+      setTimeout(function(){
+        if(appState.status === 'READY') recognition.start();
+      }, 400);
+    }
+  };
+  
+  currentUtterance.onerror = function(e) {
+    console.error("Errore sintesi:", e);
+    changeState('READY');
+  };
+  
+  // Animazione labiale sincrona durante il parlato
+  var charIndex = 0;
+  currentUtterance.onboundary = function(event) {
+    if(event.name === 'word') {
+      animateMouthSpeech();
+    }
+  };
+  
+  synth.speak(currentUtterance);
 }
 
-function setAriaState(state) {
-  const face = document.getElementById('face');
-  face.className = 'face-container ' + state;
-  if(state === 'idle') openSvgEyes();
+// Gestione della Cronologia (Memorizzazione)
+function appendChatHistory(role, text) {
+  var msg = {
+    role: role,
+    text: text,
+    time: new Date().toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'})
+  };
+  
+  appState.history.push(msg);
+  if(appState.history.length > 40) appState.history.shift(); // Limite di 40 messaggi
+  localStorage.setItem('aria_history', JSON.stringify(appState.history));
+  
+  // Aggiorna l'anteprima rapida
+  if(role === 'aria') {
+    historyPreviewText.innerText = text;
+    historyPreviewText.style.color = 'var(--text)';
+  }
+  
+  renderHistoryModal();
 }
 
-function showSubtitle(t) {
-  const s = document.getElementById('subBox');
-  s.innerText = t; s.classList.add('visible');
-  setTimeout(() => s.classList.remove('visible'), 5000);
+function renderHistoryModal() {
+  var list = document.getElementById('chatList');
+  list.innerHTML = '';
+  
+  if(appState.history.length === 0) {
+    list.innerHTML = '<p style="color:var(--muted); text-align:center; padding:20px; font-size:0.9rem;">Nessun messaggio presente nella cronologia.</p>';
+    return;
+  }
+  
+  appState.history.forEach(function(m) {
+    var div = document.createElement('div');
+    div.className = 'chat-msg ' + m.role;
+    div.innerHTML = `
+      <div>${m.text}</div>
+      <span class="chat-time">${m.time}</span>
+    `;
+    list.appendChild(div);
+  });
+  list.scrollTop = list.scrollHeight;
 }
 
-function openSvgEyes(){ document.querySelectorAll('ellipse[ry="22"]').forEach(e => e.style.transform = "scaleY(1)"); }
-
-function closeYoutubePlayer() {
-  document.getElementById('ytPlayer').classList.remove('visible');
-  if(playerYT) playerYT.stopVideo();
-  conversationWindowActive = false;
+// Caricamento Iniziale della UI da Storage
+function loadSettingsAndHistory() {
+  renderHistoryModal();
+  if(appState.history.length > 0) {
+    var last = appState.history[appState.history.length - 1];
+    historyPreviewText.innerText = last.text;
+    historyPreviewText.style.color = 'var(--text)';
+  }
+  
+  // Carica checkbox switch
+  document.getElementById('setBargeIn').checked = appState.settings.bargeIn;
+  document.getElementById('setAutoListen').checked = appState.settings.autoListen;
+  document.getElementById('setBlink').checked = appState.settings.blink;
 }
+
+// Event Listeners dei Pulsanti principali
+btnMic.onclick = function() {
+  if(!recognition) return;
+  
+  // Se ARIA sta parlando e l'interruzione (bargeIn) è attiva, ferma la voce
+  if(appState.status === 'SPEAKING' && appState.settings.bargeIn) {
+    if(synth) synth.cancel();
+    changeState('READY');
+    return;
+  }
+  
+  if(appState.status === 'LISTENING') {
+    recognition.stop();
+  } else {
+    if(synth && synth.speaking) synth.cancel();
+    try {
+      recognition.start();
+    } catch(e) { console.log(e); }
+  }
+};
+
+btnMute.onclick = function() {
+  appState.isMuted = !appState.isMuted;
+  if(appState.isMuted) {
+    btnMute.classList.add('active');
+    btnMute.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2V15H6L11 19V5Z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`;
+    if(synth && synth.speaking) {
+      synth.cancel();
+      changeState('READY');
+    }
+  } else {
+    btnMute.classList.remove('active');
+    btnMute.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>`;
+  }
+};
+
+// Logica di apertura/chiusura Modali elastici
+function toggleModal(modal, action) {
+  if(action === 'open') {
+    modal.classList.add('open');
+  } else {
+    modal.classList.remove('open');
+  }
+}
+
+btnHistory.onclick = function() { toggleModal(modalHistory, 'open'); };
+document.getElementById('historyPreview').onclick = function() { toggleModal(modalHistory, 'open'); };
+document.getElementById('closeHistory').onclick = function() { toggleModal(modalHistory, 'close'); };
+modalHistory.onclick = function(e) { if(e.target === modalHistory) toggleModal(modalHistory, 'close'); };
+
+btnChooseVoice.onclick = function() { loadVoices(); toggleModal(modalVoice, 'open'); };
+document.getElementById('closeVoice').onclick = function() { toggleModal(modalVoice, 'close'); };
+modalVoice.onclick = function(e) { if(e.target === modalVoice) toggleModal(modalVoice, 'close'); };
+
+btnSettings.onclick = function() { toggleModal(modalSettings, 'open'); };
+document.getElementById('closeSettings').onclick = function() { toggleModal(modalSettings, 'close'); };
+modalSettings.onclick = function(e) { if(e.target === modalSettings) toggleModal(modalSettings, 'close'); };
+
+// Listener Impostazioni Switch
+document.getElementById('setBargeIn').onchange = function(e) { appState.settings.bargeIn = e.target.checked; };
+document.getElementById('setAutoListen').onchange = function(e) { appState.settings.autoListen = e.target.checked; };
+document.getElementById('setBlink').onchange = function(e) { appState.settings.blink = e.target.checked; };
+
+
+/**
+ * SEZIONE ANIMAZIONI AVATAR (SVG MOUSE TRACKING & MOUTH ENGINE)
+ */
+function moveSvgEyes(event) {
+  var svg = document.getElementById('svgFace');
+  var rect = svg.getBoundingClientRect();
+  
+  // Coordinate del centro dello schermo dell'avatar
+  var faceX = rect.left + rect.width / 2;
+  var faceY = rect.top + rect.height / 2;
+  
+  var clientX = event.clientX || (event.touches && event.touches[0].clientX);
+  var clientY = event.clientY || (event.touches && event.touches[0].clientY);
+  
+  if(!clientX || !clientY) return;
+
+  var rad = Math.atan2(clientY - faceY, clientX - faceX);
+  
+  // Limite movimento pupille (max 3.5px di offset)
+  var distance = Math.min(3.5, Math.hypot(clientX - faceX, clientY - faceY) / 45);
+  var dx = Math.cos(rad) * distance;
+  var dy = Math.sin(rad) * distance;
+
+  // Applica lo spostamento a iride, pupilla e riflessi di entrambi gli occhi
+  var eyesData = [
+    { iris: 'irisL', pupil: 'pupilL', r1: 'reflL1', r2: 'reflL2', cx: 65, cy: 95 },
+    { iris: 'irisR', pupil: 'pupilR', r1: 'reflR1', r2: 'reflR2', cx: 135, cy: 95 }
+  ];
+
+  eyesData.forEach(function(c) {
+    var iris = document.getElementById(c.iris);
+    var pupil = document.getElementById(c.pupil);
+    var r1 = document.getElementById(c.r1);
+    var r2 = document.getElementById(c.r2);
+
+    if(iris){ iris.setAttribute('cx', c.cx + dx); iris.setAttribute('cy', c.cy + dy); }
+    if(pupil){ pupil.setAttribute('cx', c.cx + dx); pupil.setAttribute('cy', c.cy + dy); }
+    if(r1){ r1.setAttribute('cx', c.cx + dx - 4); r1.setAttribute('cy', c.cy + dy - 4); }
+    if(r2){ r2.setAttribute('cx', c.cx + dx + 4); r2.setAttribute('cy', c.cy + dy + 4); }
+  });
+}
+document.addEventListener('mousemove', moveSvgEyes);
+document.addEventListener('touchmove', moveSvgEyes, {passive:true});
+
+// Ammiccamento Occhi Casuale (Blink)
+function doBlinkSvg() {
+  if(!appState.settings.blink || appState.status === 'LISTENING') return;
+  
+  var leftEye = document.querySelector('#svgEyeL ellipse:first-child');
+  var rightEye = document.querySelector('#svgEyeR ellipse:first-child');
+  
+  if(leftEye && rightEye) {
+    leftEye.setAttribute('ry', '1');
+    rightEye.setAttribute('ry', '1');
+    setTimeout(function() {
+      leftEye.setAttribute('ry', '22');
+      rightEye.setAttribute('ry', '22');
+    }, 140);
+  }
+}
+setInterval(doBlinkSvg, 3800);
+
+// Controllo Forme della Bocca (Mouth Shapes)
+var mouthPath = document.getElementById('svgMouth');
+
+function animateMouth(type) {
+  if(!mouthPath) return;
+  mouthPath.style.transition = "d 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
+  
+  if (type === 'listening') {
+    // Bocca a forma di piccola 'O' sorpresa
+    mouthPath.setAttribute('d', 'M 90 140 Q 100 128 110 140 Q 100 152 90 140');
+  } else if (type === 'thinking') {
+    // Linea dritta ondulata / concentrata
+    mouthPath.setAttribute('d', 'M 80 138 Q 100 138 120 138');
+  } else if (type === 'reset') {
+    // Sorriso accennato neutro iniziale
+    mouthPath.setAttribute('d', 'M 75 135 Q 100 142 125 135');
+  }
+}
+
+function animateMouthSpeech() {
+  if(appState.status !== 'SPEAKING' || !mouthPath) return;
+  mouthPath.style.transition = "d 0.08s ease-in-out";
+  
+  // Genera forme randomizzate per simulare l'apertura labiale del parlato
+  var openFactor = Math.floor(Math.random() * 3);
+  if(openFactor === 0) {
+    mouthPath.setAttribute('d', 'M 76 135 Q 100 152 124 135'); // Molto aperta
+  } else if(openFactor === 1) {
+    mouthPath.setAttribute('d', 'M 78 136 Q 100 144 122 136'); // Medio aperta
+  } else {
+    mouthPath.setAttribute('d', 'M 75 135 Q 100 137 125 135'); // Quasi chiusa
+  }
+  
+  // Torna leggermente socchiusa dopo un istante
+  setTimeout(function() {
+    if(appState.status === 'SPEAKING') {
+      mouthPath.setAttribute('d', 'M 75 135 Q 100 141 125 135');
+    }
+  }, 75);
+}
+
+// Wave di Sfondo Animata (Canvas Simil-Siri/Copilot)
+var waveAnimFrame = null;
+var wave1 = document.getElementById('wave1');
+var wave2 = document.getElementById('wave2');
+var wavePhase = 0;
+
+function startWaveAnimation() {
+  function draw() {
+    if(appState.status !== 'SPEAKING') return;
+    wavePhase += 0.18;
+    
+    // Genera oscillazioni sinusoidali
+    var d1 = "M 0 30 ";
+    var d2 = "M 0 30 ";
+    for (var x = 0; x <= 600; x += 20) {
+      var y1 = 30 + Math.sin(x * 0.02 + wavePhase) * 14 * Math.sin(wavePhase * 0.5);
+      var y2 = 30 + Math.cos(x * 0.015 + wavePhase) * 10 * Math.sin(wavePhase * 0.3);
+      d1 += `L ${x} ${y1} `;
+      d2 += `L ${x} ${y2} `;
+    }
+    
+    if(wave1) wave1.setAttribute('d', d1);
+    if(wave2) wave2.setAttribute('d', d2);
+    
+    waveAnimFrame = requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+function stopWaveAnimation() {
+  if(waveAnimFrame) cancelAnimationFrame(waveAnimFrame);
+  // Ripristina linea piatta centrale
+  if(wave1) wave1.setAttribute('d', 'M 0 30 Q 75 30, 150 30 T 300 30 T 450 30 T 600 30');
+  if(wave2) wave2.setAttribute('d', 'M 0 30 Q 75 30, 150 30 T 300 30 T 450 30 T 600 30');
+}
+
+// Esegui il caricamento iniziale dei dati salvati
+window.onload = function() {
+  loadSettingsAndHistory();
+};
 </script>
 </body>
 </html>

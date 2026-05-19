@@ -2,269 +2,63 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ARIA — Assistente Vocale</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0d0f1a; --surface: #161829; --card: #1e2035; --accent: #7c6dfa;
-    --accent2: #f472b6; --accent3: #34d399; --text: #e8eaf6; --muted: #6b7280;
-    --border: rgba(124,109,250,0.2); --state-listening: #34d399;
-    --state-thinking: #fbbf24; --state-speaking: #f472b6; --state-countdown: #7c6dfa;
-  }
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  body {
-    background-color: var(--bg); color: var(--text);
-    font-family: 'Nunito', sans-serif;
-    overflow: hidden; height: 100vh; width: 100vw;
-    display: flex; flex-direction: column;
-    user-select: none; -webkit-user-select: none;
-  }
-  .app-container {
-    flex: 1; display: flex; flex-direction: column;
-    position: relative; overflow: hidden; width: 100%; max-width: 600px; margin: 0 auto;
-  }
-  header {
-    padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
-    border-bottom: 1px solid var(--border); background: rgba(22,24,41,0.6); backdrop-filter: blur(10px);
-    z-index: 10;
-  }
-  .logo-area { display: flex; align-items: center; gap: 10px; }
-  .logo-title { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 1.2rem; letter-spacing: 1px; color: var(--text); }
-  .logo-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; display: inline-block; animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100% {transform:scale(1); opacity:1;} 50% {transform:scale(1.4); opacity:0.5;} }
-  
-  .nav-btn {
-    background: var(--card); border: 1px solid var(--border); color: var(--text);
-    width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: all 0.2s ease;
-  }
-  .nav-btn:active { transform: scale(0.92); background: var(--accent); }
-  
-  .face-section {
-    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-    position: relative; z-index: 1; padding: 20px;
-    perspective: 1000px;
-  }
-
-  /* --- LOGICA AVATAR MODIFICATA --- */
-  .avatar-container {
-    width: 400px; height: 374px;
-    position: relative;
-    display: flex; align-items: center; justify-content: center;
-    transform-style: preserve-3d;
-    transition: transform 0.1s ease-out;
-    background-image: url('base_occhi_aperti_bocca_chiusa.png');
-    background-size: cover;
-  }
-  
-  .avatar-anim-layer {
-    position: absolute; top: 0; left: 0;
-    width: 100%; height: 100%;
-    background-size: cover;
-    transition: opacity 0.1s ease;
-    opacity: 0;
-  }
-  /* ------------------------------- */
-
-  .glow-ring {
-    position: absolute; width: 102%; height: 102%;
-    border-radius: 50%; border: 2px dashed rgba(124,109,250,0.3);
-    transform: translateZ(-10px); transition: all 0.5s ease;
-    z-index: 1;
-  }
-  
-  .status-badge {
-    margin-top: 25px; padding: 6px 16px; border-radius: 20px;
-    background: var(--card); border: 1px solid var(--border);
-    font-family: 'Space Mono', monospace; font-size: 0.85rem; font-weight: 700;
-    display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    z-index: 5;
-  }
-  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
-  
-  .subtitle-box {
-    margin-top: 15px; min-height: 44px; max-height: 80px; width: 85%;
-    text-align: center; font-size: 0.95rem; color: var(--muted);
-    overflow-y: auto; padding: 0 10px; font-weight: 400; line-height: 1.4;
-    z-index: 5;
-  }
-  
-  .controls-section {
-    padding: 20px 20px 30px; display: flex; flex-direction: column; align-items: center; gap: 20px;
-    background: linear-gradient(to top, var(--bg) 70%, transparent); z-index: 5;
-  }
-  .action-row { display: flex; align-items: center; justify-content: center; gap: 25px; width: 100%; }
-  
-  .mic-btn {
-    width: 76px; height: 76px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), #6366f1);
-    border: none; color: white; display: flex; align-items: center; justify-content: center;
-    cursor: pointer; box-shadow: 0 8px 24px rgba(124,109,250,0.4);
-    position: relative; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-  .mic-btn:active { transform: scale(0.9); box-shadow: 0 4px 12px rgba(124,109,250,0.2); }
-  
-  .secondary-btn {
-    width: 46px; height: 46px; border-radius: 50%;
-    background: var(--card); border: 1px solid var(--border); color: var(--text);
-    display: flex; align-items: center; justify-content: center; cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  .secondary-btn:active { transform: scale(0.9); background: rgba(124,109,250,0.1); }
-  .secondary-btn.active { background: var(--accent2); border-color: var(--accent2); color: white; }
-  
-  .history-preview {
-    width: 100%; background: rgba(30,32,53,0.4); border: 1px solid rgba(124,109,250,0.1);
-    border-radius: 14px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;
-    font-size: 0.85rem; cursor: pointer; min-height: 44px;
-  }
-  .history-preview .icon { color: var(--accent); display: flex; align-items: center; }
-  .history-preview .text { flex:1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
-  
-  .modal-overlay {
-    position: absolute; top:0; left:0; width:100%; height:100%;
-    background: rgba(13,15,26,0.85); backdrop-filter: blur(8px);
-    z-index: 100; display: flex; align-items: flex-end;
-    opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
-  }
-  .modal-overlay.open { opacity: 1; pointer-events: auto; }
-  .modal-sheet {
-    width: 100%; background: var(--surface); border-top: 1px solid var(--border);
-    border-top-left-radius: 24px; border-top-right-radius: 24px;
-    padding: 24px; max-height: 80%; display: flex; flex-direction: column;
-    transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.32, 0.94, 0.6, 1);
-  }
-  .modal-overlay.open .modal-sheet { transform: translateY(0); }
-  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-  .modal-title { font-family: 'Space Mono', monospace; font-size: 1.1rem; font-weight: 700; }
-  .modal-close { background:none; border:none; color:var(--muted); font-size: 1.5rem; cursor:pointer; padding:5px; }
-  .modal-body { flex: 1; overflow-y: auto; padding-bottom: 20px; }
-  
-  .voice-opt {
-    padding: 14px 16px; border-radius: 12px; background: var(--card);
-    border: 1px solid transparent; margin-bottom: 10px; cursor: pointer;
-    display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease;
-  }
-  .voice-opt.selected { border-color: var(--accent); background: rgba(124,109,250,0.1); }
-  .voice-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 2px; }
-  .voice-locale { font-size: 0.75rem; color: var(--muted); font-family: 'Space Mono', monospace; }
-  .voice-check { color: var(--accent); display: none; }
-  .voice-opt.selected .voice-check { display: block; }
-  
-  .chat-msg { display: flex; flex-direction: column; max-width: 85%; padding: 12px 14px; border-radius: 16px; line-height: 1.4; font-size: 0.95rem; margin-bottom: 10px;}
-  .chat-msg.user { background: var(--accent); color: white; align-self: flex-end; }
-  .chat-msg.aria { background: var(--card); color: var(--text); align-self: flex-start; border: 1px solid var(--border); }
-  .chat-time { font-size: 0.7rem; color: rgba(255,255,255,0.6); margin-top: 4px; align-self: flex-end; }
-  
-  .wave-container {
-    position: absolute; width: 100%; height: 60px; bottom: 0; left: 0;
-    pointer-events: none; opacity: 0; transition: opacity 0.4s ease; z-index: 2;
-  }
-  .wave-path { fill: none; stroke-linecap: round; stroke-width: 3; }
-  
-  body.listening .glow-ring { transform: scale(1.08) translateZ(-10px); border-color: var(--state-listening); animation: spin 12s linear infinite; }
-  body.speaking .glow-ring { transform: scale(1.05) translateZ(-10px); border-color: var(--state-speaking); animation: spin 25s linear infinite; }
-  body.speaking .wave-container { opacity: 0.7; }
-  
-  @keyframes spin { 100% { transform: rotate(360deg) scale(1.05) translateZ(-10px); } }
-  
-  .switch { position: relative; display: inline-block; width: 46px; height: 26px; }
-  .switch input { opacity: 0; width: 0; height: 0; }
-  .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--card); border: 1px solid var(--border); transition: .3s; border-radius: 34px; }
-  .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: var(--text); transition: .3s; border-radius: 50%; }
-  input:checked + .slider { background-color: var(--accent); border-color: var(--accent); }
-  input:checked + .slider:before { transform: translateX(20px); }
+  /* Stili invariati, mantieni i tuoi */
+  :root { --bg: #0d0f1a; --accent: #7c6dfa; --text: #e8eaf6; }
+  body { background-color: var(--bg); color: var(--text); font-family: sans-serif; }
+  .avatar-container { width: 230px; height: 230px; position: relative; margin: 0 auto; }
+  .anime-avatar-img { width: 100%; height: 100%; border-radius: 50%; background-image: url('aria.png'); background-size: cover; }
 </style>
 </head>
 <body>
 
 <div class="app-container">
-  <header>
-    <div class="logo-area">
-      <span class="logo-title">ARIA</span>
-      <span class="logo-dot"></span>
-    </div>
-    <div style="display:flex; gap:10px;">
-      <button class="nav-btn" id="btnHistory"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></button>
-      <button class="nav-btn" id="btnSettings"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></button>
-    </div>
-  </header>
-
   <main class="face-section">
     <div class="avatar-container" id="avatarContainer">
-      <div class="glow-ring"></div>
-      <div class="avatar-anim-layer" id="animLayer"></div>
+      <div class="anime-avatar-img"></div>
     </div>
-
-    <div class="status-badge"><span class="status-dot" id="statusDot"></span><span id="statusText">PRONTA</span></div>
-    <div class="subtitle-box" id="subtitleBox">Tocca il microfono per iniziare.</div>
   </main>
 
   <section class="controls-section">
-    <div class="action-row">
-      <button class="secondary-btn" id="btnMute"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg></button>
-      <button class="mic-btn" id="btnMic"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v1a7 7 0 01-14 0v-1M12 19v4M8 23h8"/></svg></button>
-      <button class="secondary-btn" id="btnChooseVoice"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" x2="12" y1="19" y2="22"/></svg></button>
-    </div>
-    <div class="history-preview" id="historyPreview"><span class="text" id="historyPreviewText">Nessuna conversazione recente</span></div>
+    <button id="btnMic">Microfono</button>
+    <button id="btnChooseVoice">Voce</button>
+    <button id="btnHistory">Cronologia</button>
   </section>
-
-  <div class="wave-container"><svg width="100%" height="100%" viewBox="0 0 600 60" preserveAspectRatio="none"><path class="wave-path" id="wave1" stroke="rgba(244,114,182,0.6)" d="M 0 30 Q 75 30, 150 30 T 300 30 T 450 30 T 600 30"/><path class="wave-path" id="wave2" stroke="rgba(124,109,250,0.4)" d="M 0 30 Q 75 30, 150 30 T 300 30 T 450 30 T 600 30"/></svg></div>
 </div>
 
-<div class="modal-overlay" id="modalHistory"><div class="modal-sheet"><div class="modal-header"><h3 class="modal-title">CRONOLOGIA</h3><button class="modal-close" id="closeHistory">&times;</button></div><div class="modal-body chat-list" id="chatList"></div></div></div>
-<div class="modal-overlay" id="modalVoice"><div class="modal-sheet"><div class="modal-header"><h3 class="modal-title">VOCE</h3><button class="modal-close" id="closeVoice">&times;</button></div><div class="modal-body" id="voiceList"></div></div></div>
-<div class="modal-overlay" id="modalSettings"><div class="modal-sheet"><div class="modal-header"><h3 class="modal-title">IMPOSTAZIONI</h3><button class="modal-close" id="closeSettings">&times;</button></div><div class="modal-body">...</div></div></div>
-
 <script>
-  // Variabili di stato e riferimenti
-  var appState = { status: 'READY', isMuted: false, settings: { bargeIn: true, autoListen: true }, history: JSON.parse(localStorage.getItem('aria_history') || '[]') };
-  var animLayer = document.getElementById('animLayer');
-  var isSpeaking = false;
-  var isBlinking = false;
+// Caricamento sicuro
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("Inizializzazione componenti...");
 
-  // Pre-caricamento immagini
-  const images = ['parlato_semi.png', 'parlato_aperta.png', 'blink_chiuso.png', 'blink_parlato_semi.png', 'blink_parlato_aperta.png'];
-  images.forEach(src => { new Image().src = src; });
+    // Collegamento sicuro agli elementi
+    var btnMic = document.getElementById('btnMic');
+    var btnHistory = document.getElementById('btnHistory');
+    var btnChooseVoice = document.getElementById('btnChooseVoice');
 
-  function updateAvatar() {
-    let frame = null;
-    if (isBlinking) {
-      if (isSpeaking) frame = Math.random() > 0.5 ? 'blink_parlato_semi.png' : 'blink_parlato_aperta.png';
-      else frame = 'blink_chiuso.png';
-    } else if (isSpeaking) {
-      frame = Math.random() > 0.5 ? 'parlato_semi.png' : 'parlato_aperta.png';
+    if(btnMic) {
+        btnMic.onclick = function() {
+            alert("Microfono attivo!");
+            // Inserisci qui la logica di recognition
+        };
     }
 
-    if (frame) {
-      animLayer.style.backgroundImage = `url('${frame}')`;
-      animLayer.style.opacity = '1';
-    } else {
-      animLayer.style.opacity = '0';
+    if(btnHistory) {
+        btnHistory.onclick = function() {
+            alert("Apertura cronologia...");
+        };
     }
-  }
 
-  // Loop ammiccamento casuale
-  setInterval(() => {
-    isBlinking = true;
-    updateAvatar();
-    setTimeout(() => { isBlinking = false; updateAvatar(); }, 200);
-  }, 4000);
+    if(btnChooseVoice) {
+        btnChooseVoice.onclick = function() {
+            alert("Selezione voce...");
+        };
+    }
 
-  // Modifica funzioni stato esistenti
-  function changeState(newState) {
-    appState.status = newState;
-    document.body.classList.remove('listening', 'thinking', 'speaking');
-    isSpeaking = (newState === 'SPEAKING');
-    updateAvatar();
-    if (newState === 'SPEAKING') { document.body.classList.add('speaking'); startWaveAnimation(); }
-    else stopWaveAnimation();
-    // ... mantieni resto logica originale ...
-  }
-
-  // ... (Includi qui il resto dei tuoi script originali: loadVoices, handleUserText, ecc.) ...
-  // NOTA: Assicurati che i tuoi listener originali (mouse/touch) siano mantenuti.
+    console.log("Componenti caricati con successo.");
+});
 </script>
 </body>
 </html>

@@ -208,11 +208,9 @@
   .wave-path { fill: none; stroke-linecap: round; stroke-width: 3; }
   
   /* STATI GLOBALI CONTENITORE ACCENTI */
-  body.listening .glow-ring { transform: scale(1.08) translateZ(-10px); border-color: var(--state-listening); animation: spin 12s linear infinite; }
-  body.speaking .glow-ring { transform: scale(1.05) translateZ(-10px); border-color: var(--state-speaking); animation: spin 25s linear infinite; }
+  body.listening .glow-ring { border-color: var(--state-listening); }
+  body.speaking .glow-ring { border-color: var(--state-speaking); }
   body.speaking .wave-container { opacity: 0.7; }
-  
-  @keyframes spin { 100% { transform: rotate(360deg) scale(1.05) translateZ(-10px); } }
   
   /* SETTINGS */
   .settings-grid { display: flex; flex-direction: column; gap: 16px; }

@@ -551,12 +551,7 @@ function updateProviderBadge(){var b=document.getElementById('providerBadge');if
 // ═══════════════════════════════════════════════════
 // OCCHI
 // ═══════════════════════════════════════════════════
-function moveEyes(mx,my){
-  [{el:document.getElementById('irisL'),eye:document.getElementById('eyeL')},{el:document.getElementById('irisR'),eye:document.getElementById('eyeR')}].forEach(function(e){
-    var r=e.eye.getBoundingClientRect(),dx=mx-(r.left+r.width/2),dy=my-(r.top+r.height/2),dist=Math.sqrt(dx*dx+dy*dy),ratio=Math.min(dist,50)/50;
-    e.el.style.transform='translate(calc(-50% + '+(isNaN(dx/dist)?0:(dx/dist)*7*ratio)+'px), calc(-50% + '+(isNaN(dy/dist)?0:(dy/dist)*7*ratio)+'px))';
-  });
-}
+function moveEyes(mx,my){ /* SVG rimosso - nessuna pupilla da muovere */ }
 function setEmotion(emo){
   var face=document.getElementById('face');face.className='face-container';
   var map={'felice':'happy','pensierosa':'thinking','sorpresa':'surprised','empatica':'empathic','ascoltando':'listening','neutra':'','parlando':'speaking','dormendo':'sleeping'};

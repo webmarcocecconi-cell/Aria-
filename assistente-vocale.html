@@ -162,7 +162,7 @@
   /* SETTINGS */
   .settings-grid { display: flex; flex-direction: column; gap: 16px; }
   .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(124,109,250,0.1); }
-  .setting-info { display: flex; flex-direction: column; gap: 4px; }
+  .settings-info { display: flex; flex-direction: column; gap: 4px; }
   .setting-label { font-weight: 600; font-size: 0.95rem; }
   .setting-desc { font-size: 0.8rem; color: var(--muted); }
   
@@ -428,7 +428,7 @@ if (SpeechRecognition) {
   subtitleBox.innerText = "Riconoscimento vocale non supportato in questo browser.";
 }
 
-// Caricamento e Gestione Voci (TTS) con filtro per Voce Femminile Predefinita
+// Caricamento e Gestione Voci (TTS) con filtro per Voce Google Italiano Prioritaria
 function loadVoices() {
   if (!synth) return;
   allVoices = synth.getVoices();
@@ -440,27 +440,33 @@ function loadVoices() {
     return v.lang.includes('it-IT') || v.lang.includes('it_IT');
   });
 
-  // Se l'utente non ha mai salvato una preferenza, cerchiamo di default una voce femminile
+  // Se l'utente non ha mai salvato una preferenza, cerchiamo di default "Google Italiano"
   if (!appState.selectedVoiceURI) {
     var selected = null;
     
-    // 1. Cerchiamo nomi noti tipicamente femminili nelle API comuni dei browser
-    var femaleKeywords = ['elsa', 'alice', 'aurora', 'paola', 'female', 'femminile', 'zira', 'hazel', 'cosmo'];
-    for (var i = 0; i < itVoices.length; i++) {
-      var nameLower = itVoices[i].name.toLowerCase();
-      for (var j = 0; j < femaleKeywords.length; j++) {
-        if (nameLower.includes(femaleKeywords[j])) {
-          selected = itVoices[i];
-          break;
+    // 1. Priorità assoluta: Cerca una voce che contiene la stringa "google" nell'elenco italiano
+    selected = itVoices.find(function(v) {
+      return v.name.toLowerCase().includes('google');
+    });
+    
+    // 2. Fallback subordinato: Se non esiste "Google", cerca le altre voci femminili conosciute
+    if (!selected) {
+      var femaleKeywords = ['elsa', 'alice', 'aurora', 'paola', 'female', 'femminile', 'zira', 'hazel', 'cosmo'];
+      for (var i = 0; i < itVoices.length; i++) {
+        var nameLower = itVoices[i].name.toLowerCase();
+        for (var j = 0; j < femaleKeywords.length; j++) {
+          if (nameLower.includes(femaleKeywords[j])) {
+            selected = itVoices[i];
+            break;
+          }
         }
+        if (selected) break;
       }
-      if (selected) break;
     }
     
-    // 2. Fallback sussidiario: Se non trova keyword esplicite, preferiamo "Google" o la seconda voce della lista se presente
+    // 3. Fallback estremo: Se non trova nulla, prendi la prima voce disponibile in lista
     if (!selected && itVoices.length > 0) {
-      var googleVoice = itVoices.find(function(v) { return v.name.toLowerCase().includes('google'); });
-      selected = googleVoice || itVoices[0];
+      selected = itVoices[0];
     }
     
     if (selected) {
@@ -484,7 +490,7 @@ function populateVoiceModal(itVoices) {
   container.innerHTML = '';
   
   if(itVoices.length === 0) {
-    container.innerHTML = '<p style="color:var(--muted); font-size:0.9rem;">Nessuna voce italiana trovata sul dispositivo.</p>';
+    container.innerHTML = '<p style="color:var(--muted); font-size:0.9rem;">Nessuna voce italiana trouvata sul dispositivo.</p>';
     return;
   }
   

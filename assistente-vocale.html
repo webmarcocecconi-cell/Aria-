@@ -41,22 +41,32 @@
   }
   .nav-btn:active { transform: scale(0.92); background: var(--accent); }
   
-  /* SEZIONE AVATAR IMMAGINE CON PARALLASSE */
   .face-section {
     flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
     position: relative; z-index: 1; padding: 20px;
-    perspective: 1000px; /* Abilita l'effetto di profondità 3D */
+    perspective: 1000px;
   }
+
+  /* --- LOGICA AVATAR MODIFICATA --- */
   .avatar-container {
-    width: 230px;
-    height: 230px;
+    width: 400px; height: 374px;
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     transform-style: preserve-3d;
     transition: transform 0.1s ease-out;
+    background-image: url('base_occhi_aperti_bocca_chiusa.png');
+    background-size: cover;
   }
+  
+  .avatar-anim-layer {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-size: cover;
+    transition: opacity 0.1s ease;
+    opacity: 0;
+  }
+  /* ------------------------------- */
+
   .glow-ring {
     position: absolute; width: 102%; height: 102%;
     border-radius: 50%; border: 2px dashed rgba(124,109,250,0.3);
@@ -64,52 +74,6 @@
     z-index: 1;
   }
   
-  /* IL NUOVO CONTENITORE DELL'IMMAGINE ORIGINALE PURI */
-  .anime-avatar-img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background-image: url('aria.png'); /* Carica la tua foto rinominata nella stessa cartella */
-    background-size: cover;
-    background-position: center;
-    border: 3px solid var(--border);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    z-index: 2;
-    transform: translateZ(10px);
-    transition: filter 0.3s ease, border-color 0.3s ease, transform 0.1s ease-out;
-  }
-  
-  /* ANIMAZIONI DI STATO SULL'IMMAGINE */
-  /* 1. Effetto respiro fluttuante quando ascolta */
-  @keyframes ariaBreath {
-    0%, 100% { transform: translateZ(10px) translateY(0); filter: drop-shadow(0 10px 30px rgba(52,211,153,0.2)); }
-    50% { transform: translateZ(10px) translateY(-5px); filter: drop-shadow(0 15px 35px rgba(52,211,153,0.4)); }
-  }
-  body.listening .anime-avatar-img {
-    animation: ariaBreath 2.5s ease-in-out infinite;
-    border-color: var(--state-listening);
-  }
-  
-  /* 2. Effetto pulsazione elastica morbida quando parla */
-  @keyframes ariaSpeakingPulse {
-    0%, 100% { transform: translateZ(10px) scale(1); filter: drop-shadow(0 10px 30px rgba(244,114,182,0.2)); }
-    50% { transform: translateZ(10px) scale(1.03) translateY(-2px); filter: drop-shadow(0 15px 35px rgba(244,114,182,0.5)); }
-  }
-  body.speaking .anime-avatar-img {
-    animation: ariaSpeakingPulse 0.15s ease-in-out infinite;
-    border-color: var(--state-speaking);
-  }
-  
-  /* 3. Stato di elaborazione pensiero */
-  @keyframes ariaThinking {
-    0%, 100% { opacity: 0.8; }
-    50% { opacity: 1; }
-  }
-  body.thinking .anime-avatar-img {
-    animation: ariaThinking 1s ease-in-out infinite;
-    border-color: var(--state-thinking);
-  }
-
   .status-badge {
     margin-top: 25px; padding: 6px 16px; border-radius: 20px;
     background: var(--card); border: 1px solid var(--border);
@@ -138,11 +102,6 @@
     border: none; color: white; display: flex; align-items: center; justify-content: center;
     cursor: pointer; box-shadow: 0 8px 24px rgba(124,109,250,0.4);
     position: relative; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-  .mic-btn::after {
-    content: ''; position: absolute; top: -4px; left: -4px; right: -4px; bottom: -4px;
-    border-radius: 50%; border: 2px solid var(--accent); opacity: 0; transform: scale(0.9);
-    transition: all 0.3s ease;
   }
   .mic-btn:active { transform: scale(0.9); box-shadow: 0 4px 12px rgba(124,109,250,0.2); }
   
@@ -182,24 +141,21 @@
   .modal-close { background:none; border:none; color:var(--muted); font-size: 1.5rem; cursor:pointer; padding:5px; }
   .modal-body { flex: 1; overflow-y: auto; padding-bottom: 20px; }
   
-  .voice-opt, .chat-item {
+  .voice-opt {
     padding: 14px 16px; border-radius: 12px; background: var(--card);
     border: 1px solid transparent; margin-bottom: 10px; cursor: pointer;
     display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease;
   }
-  .voice-opt:active, .chat-item:active { transform: scale(0.98); }
   .voice-opt.selected { border-color: var(--accent); background: rgba(124,109,250,0.1); }
   .voice-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 2px; }
   .voice-locale { font-size: 0.75rem; color: var(--muted); font-family: 'Space Mono', monospace; }
   .voice-check { color: var(--accent); display: none; }
   .voice-opt.selected .voice-check { display: block; }
   
-  .chat-list { display: flex; flex-direction: column; gap: 12px; }
-  .chat-msg { display: flex; flex-direction: column; max-width: 85%; padding: 12px 14px; border-radius: 16px; line-height: 1.4; font-size: 0.95rem; }
-  .chat-msg.user { background: var(--accent); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
-  .chat-msg.aria { background: var(--card); color: var(--text); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid var(--border); }
-  .chat-time { font-size: 0.7rem; color: rgba(255,255,255,0.6); margin-top: 4px; align-self: flex-end; font-family: 'Space Mono', monospace; }
-  .chat-msg.aria .chat-time { color: var(--muted); }
+  .chat-msg { display: flex; flex-direction: column; max-width: 85%; padding: 12px 14px; border-radius: 16px; line-height: 1.4; font-size: 0.95rem; margin-bottom: 10px;}
+  .chat-msg.user { background: var(--accent); color: white; align-self: flex-end; }
+  .chat-msg.aria { background: var(--card); color: var(--text); align-self: flex-start; border: 1px solid var(--border); }
+  .chat-time { font-size: 0.7rem; color: rgba(255,255,255,0.6); margin-top: 4px; align-self: flex-end; }
   
   .wave-container {
     position: absolute; width: 100%; height: 60px; bottom: 0; left: 0;
@@ -207,26 +163,18 @@
   }
   .wave-path { fill: none; stroke-linecap: round; stroke-width: 3; }
   
-  /* STATI GLOBALI CONTENITORE ACCENTI */
   body.listening .glow-ring { transform: scale(1.08) translateZ(-10px); border-color: var(--state-listening); animation: spin 12s linear infinite; }
   body.speaking .glow-ring { transform: scale(1.05) translateZ(-10px); border-color: var(--state-speaking); animation: spin 25s linear infinite; }
   body.speaking .wave-container { opacity: 0.7; }
   
   @keyframes spin { 100% { transform: rotate(360deg) scale(1.05) translateZ(-10px); } }
   
-  /* SETTINGS */
-  .settings-grid { display: flex; flex-direction: column; gap: 16px; }
-  .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(124,109,250,0.1); }
-  .settings-info { display: flex; flex-direction: column; gap: 4px; }
-  .setting-label { font-weight: 600; font-size: 0.95rem; }
-  .setting-desc { font-size: 0.8rem; color: var(--muted); }
-  
   .switch { position: relative; display: inline-block; width: 46px; height: 26px; }
   .switch input { opacity: 0; width: 0; height: 0; }
   .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--card); border: 1px solid var(--border); transition: .3s; border-radius: 34px; }
   .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: var(--text); transition: .3s; border-radius: 50%; }
   input:checked + .slider { background-color: var(--accent); border-color: var(--accent); }
-  input:checked + .slider:before { transform: translateX(20px); background-color: white; }
+  input:checked + .slider:before { transform: translateX(20px); }
 </style>
 </head>
 <body>
@@ -238,468 +186,85 @@
       <span class="logo-dot"></span>
     </div>
     <div style="display:flex; gap:10px;">
-      <button class="nav-btn" id="btnHistory" title="Cronologia dei messaggi">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-      </button>
-      <button class="nav-btn" id="btnSettings" title="Impostazioni">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-      </button>
+      <button class="nav-btn" id="btnHistory"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></button>
+      <button class="nav-btn" id="btnSettings"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></button>
     </div>
   </header>
 
   <main class="face-section">
     <div class="avatar-container" id="avatarContainer">
       <div class="glow-ring"></div>
-      <div class="anime-avatar-img"></div>
+      <div class="avatar-anim-layer" id="animLayer"></div>
     </div>
 
-    <div class="status-badge">
-      <span class="status-dot" id="statusDot"></span>
-      <span id="statusText">PRONTA</span>
-    </div>
-
-    <div class="subtitle-box" id="subtitleBox">
-      Tocca il microfono per iniziare a parlare con me.
-    </div>
+    <div class="status-badge"><span class="status-dot" id="statusDot"></span><span id="statusText">PRONTA</span></div>
+    <div class="subtitle-box" id="subtitleBox">Tocca il microfono per iniziare.</div>
   </main>
 
   <section class="controls-section">
     <div class="action-row">
-      <button class="secondary-btn" id="btnMute" title="Disattiva Voce (Silenzioso)">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>
-      </button>
-      
-      <button class="mic-btn" id="btnMic" title="Ascolta">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
-          <path d="M19 10v1a7 7 0 01-14 0v-1M12 19v4M8 23h8"/>
-        </svg>
-      </button>
-
-      <button class="secondary-btn" id="btnChooseVoice" title="Cambia Voce">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
-      </button>
+      <button class="secondary-btn" id="btnMute"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg></button>
+      <button class="mic-btn" id="btnMic"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v1a7 7 0 01-14 0v-1M12 19v4M8 23h8"/></svg></button>
+      <button class="secondary-btn" id="btnChooseVoice"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" x2="12" y1="19" y2="22"/></svg></button>
     </div>
-
-    <div class="history-preview" id="historyPreview">
-      <span class="icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      </span>
-      <span class="text" id="historyPreviewText">Nessuna conversazione recente</span>
-    </div>
+    <div class="history-preview" id="historyPreview"><span class="text" id="historyPreviewText">Nessuna conversazione recente</span></div>
   </section>
 
-  <div class="wave-container">
-    <svg width="100%" height="100%" viewBox="0 0 600 60" preserveAspectRatio="none">
-      <path class="wave-path" id="wave1" stroke="rgba(244,114,182,0.6)" d="M 0 30 Q 75 30, 150 30 T 300 30 T 450 30 T 600 30"/>
-      <path class="wave-path" id="wave2" stroke="rgba(124,109,250,0.4)" d="M 0 30 Q 75 30, 150 30 T 300 30 T 450 30 T 600 30"/>
-    </svg>
-  </div>
+  <div class="wave-container"><svg width="100%" height="100%" viewBox="0 0 600 60" preserveAspectRatio="none"><path class="wave-path" id="wave1" stroke="rgba(244,114,182,0.6)" d="M 0 30 Q 75 30, 150 30 T 300 30 T 450 30 T 600 30"/><path class="wave-path" id="wave2" stroke="rgba(124,109,250,0.4)" d="M 0 30 Q 75 30, 150 30 T 300 30 T 450 30 T 600 30"/></svg></div>
 </div>
 
-<div class="modal-overlay" id="modalHistory">
-  <div class="modal-sheet">
-    <div class="modal-header">
-      <h3 class="modal-title">CRONOLOGIA CHAT</h3>
-      <button class="modal-close" id="closeHistory">&times;</button>
-    </div>
-    <div class="modal-body chat-list" id="chatList"></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalVoice">
-  <div class="modal-sheet">
-    <div class="modal-header">
-      <h3 class="modal-title">SELEZIONE VOCE SINTESI</h3>
-      <button class="modal-close" id="closeVoice">&times;</button>
-    </div>
-    <div class="modal-body" id="voiceList"></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modalSettings">
-  <div class="modal-sheet">
-    <div class="modal-header">
-      <h3 class="modal-title">IMPOSTAZIONI</h3>
-      <button class="modal-close" id="closeSettings">&times;</button>
-    </div>
-    <div class="modal-body settings-grid">
-      
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-label">Interruzione Vocale</span>
-          <span class="setting-desc">Ferma la riproduzione se tocchi il mic mentre parlo</span>
-        </div>
-        <label class="switch">
-          <input type="checkbox" id="setBargeIn" checked>
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-label">Auto-Ascolto continuo</span>
-          <span class="setting-desc">Riattiva il microfono dopo che ho finito di parlare</span>
-        </div>
-        <label class="switch">
-          <input type="checkbox" id="setAutoListen">
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <div class="setting-row" style="border:none; margin-top:20px; justify-content:center;">
-        <span style="font-size:0.75rem; color:var(--muted); font-family:'Space Mono', monospace;">ARIA Engine v2.5 • Client Web</span>
-      </div>
-
-    </div>
-  </div>
-</div>
+<div class="modal-overlay" id="modalHistory"><div class="modal-sheet"><div class="modal-header"><h3 class="modal-title">CRONOLOGIA</h3><button class="modal-close" id="closeHistory">&times;</button></div><div class="modal-body chat-list" id="chatList"></div></div></div>
+<div class="modal-overlay" id="modalVoice"><div class="modal-sheet"><div class="modal-header"><h3 class="modal-title">VOCE</h3><button class="modal-close" id="closeVoice">&times;</button></div><div class="modal-body" id="voiceList"></div></div></div>
+<div class="modal-overlay" id="modalSettings"><div class="modal-sheet"><div class="modal-header"><h3 class="modal-title">IMPOSTAZIONI</h3><button class="modal-close" id="closeSettings">&times;</button></div><div class="modal-body">...</div></div></div>
 
 <script>
-// Stato Globale dell'applicazione
-var appState = {
-  status: 'READY',
-  isMuted: false,
-  selectedVoiceURI: localStorage.getItem('aria_voice_uri') || '',
-  settings: {
-    bargeIn: true,
-    autoListen: true
-  },
-  history: JSON.parse(localStorage.getItem('aria_history')) || []
-};
+  // Variabili di stato e riferimenti
+  var appState = { status: 'READY', isMuted: false, settings: { bargeIn: true, autoListen: true }, history: JSON.parse(localStorage.getItem('aria_history') || '[]') };
+  var animLayer = document.getElementById('animLayer');
+  var isSpeaking = false;
+  var isBlinking = false;
 
-// Elementi DOM principali
-var body = document.body;
-var btnMic = document.getElementById('btnMic');
-var btnMute = document.getElementById('btnMute');
-var btnHistory = document.getElementById('btnHistory');
-var btnSettings = document.getElementById('btnSettings');
-var btnChooseVoice = document.getElementById('btnChooseVoice');
-var statusDot = document.getElementById('statusDot');
-var statusText = document.getElementById('statusText');
-var subtitleBox = document.getElementById('subtitleBox');
-var historyPreviewText = document.getElementById('historyPreviewText');
+  // Pre-caricamento immagini
+  const images = ['parlato_semi.png', 'parlato_aperta.png', 'blink_chiuso.png', 'blink_parlato_semi.png', 'blink_parlato_aperta.png'];
+  images.forEach(src => { new Image().src = src; });
 
-// Modali references
-var modalHistory = document.getElementById('modalHistory');
-var modalVoice = document.getElementById('modalVoice');
-var modalSettings = document.getElementById('modalSettings');
-
-// Web Speech API references
-var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-var recognition = null;
-var synth = window.speechSynthesis;
-var currentUtterance = null;
-var allVoices = [];
-
-if (SpeechRecognition) {
-  recognition = new SpeechRecognition();
-  recognition.lang = 'it-IT';
-  recognition.continuous = false;
-  recognition.interimResults = false;
-  
-  recognition.onstart = function() {
-    changeState('LISTENING');
-    updateSubtitles("Ti ascolto... parla ora.");
-  };
-  
-  recognition.onerror = function(e) {
-    if(e.error !== 'no-speech') {
-      updateSubtitles("Errore di acquisizione audio: " + e.error);
+  function updateAvatar() {
+    let frame = null;
+    if (isBlinking) {
+      if (isSpeaking) frame = Math.random() > 0.5 ? 'blink_parlato_semi.png' : 'blink_parlato_aperta.png';
+      else frame = 'blink_chiuso.png';
+    } else if (isSpeaking) {
+      frame = Math.random() > 0.5 ? 'parlato_semi.png' : 'parlato_aperta.png';
     }
-    changeState('READY');
-  };
-  
-  recognition.onend = function() {
-    if (appState.status === 'LISTENING') {
-      changeState('READY');
-    }
-  };
-  
-  recognition.onresult = function(event) {
-    var text = event.results[0][0].transcript;
-    if(text.trim() !== "") {
-      handleUserText(text);
-    }
-  };
-}
 
-// Forza e assegna "Google Italiano" come priorità fissa
-function loadVoices() {
-  if (!synth) return;
-  allVoices = synth.getVoices();
-  if (allVoices.length === 0) return;
-
-  var itVoices = allVoices.filter(function(v) {
-    return v.lang.includes('it-IT') || v.lang.includes('it_IT');
-  });
-
-  if (!appState.selectedVoiceURI) {
-    var selected = itVoices.find(function(v) {
-      return v.name.toLowerCase().includes('google');
-    });
-    
-    if (!selected) {
-      var femaleKeywords = ['elsa', 'alice', 'aurora', 'paola', 'female', 'cosmo'];
-      for (var i = 0; i < itVoices.length; i++) {
-        var nameLower = itVoices[i].name.toLowerCase();
-        for (var j = 0; j < femaleKeywords.length; j++) {
-          if (nameLower.includes(femaleKeywords[j])) {
-            selected = itVoices[i];
-            break;
-          }
-        }
-        if (selected) break;
-      }
-    }
-    
-    if (!selected && itVoices.length > 0) selected = itVoices[0];
-    
-    if (selected) {
-      appState.selectedVoiceURI = selected.voiceURI;
-      localStorage.setItem('aria_voice_uri', selected.voiceURI);
+    if (frame) {
+      animLayer.style.backgroundImage = `url('${frame}')`;
+      animLayer.style.opacity = '1';
+    } else {
+      animLayer.style.opacity = '0';
     }
   }
-  populateVoiceModal(itVoices);
-}
 
-if (synth) {
-  loadVoices();
-  if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = loadVoices;
-}
+  // Loop ammiccamento casuale
+  setInterval(() => {
+    isBlinking = true;
+    updateAvatar();
+    setTimeout(() => { isBlinking = false; updateAvatar(); }, 200);
+  }, 4000);
 
-function populateVoiceModal(itVoices) {
-  var container = document.getElementById('voiceList');
-  container.innerHTML = '';
-  itVoices.forEach(function(v) {
-    var opt = document.createElement('div');
-    opt.className = 'voice-opt';
-    if(v.voiceURI === appState.selectedVoiceURI) opt.classList.add('selected');
-    opt.innerHTML = `<div><div class="voice-name">${v.name}</div><div class="voice-locale">Voice Engine</div></div><span class="voice-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span>`;
-    opt.onclick = function() {
-      appState.selectedVoiceURI = v.voiceURI;
-      localStorage.setItem('aria_voice_uri', v.voiceURI);
-      document.querySelectorAll('.voice-opt').forEach(function(el){ el.classList.remove('selected'); });
-      opt.classList.add('selected');
-      setTimeout(function(){ speakWithBrowser("Voce di sintesi vocale attivata."); }, 200);
-    };
-    container.appendChild(opt);
-  });
-}
-
-function changeState(newState) {
-  appState.status = newState;
-  body.classList.remove('listening', 'thinking', 'speaking');
-  
-  if (newState === 'LISTENING') {
-    body.classList.add('listening');
-    statusDot.style.backgroundColor = 'var(--state-listening)';
-    statusText.innerText = 'ASCOLTO';
-  } else if (newState === 'THINKING') {
-    body.classList.add('thinking');
-    statusDot.style.backgroundColor = 'var(--state-thinking)';
-    statusText.innerText = 'ELABORAZIONE';
-  } else if (newState === 'SPEAKING') {
-    body.classList.add('speaking');
-    statusDot.style.backgroundColor = 'var(--state-speaking)';
-    statusText.innerText = 'ARIA PARLA';
-    startWaveAnimation();
-  } else {
-    statusDot.style.backgroundColor = 'var(--accent)';
-    statusText.innerText = 'PRONTA';
-    stopWaveAnimation();
+  // Modifica funzioni stato esistenti
+  function changeState(newState) {
+    appState.status = newState;
+    document.body.classList.remove('listening', 'thinking', 'speaking');
+    isSpeaking = (newState === 'SPEAKING');
+    updateAvatar();
+    if (newState === 'SPEAKING') { document.body.classList.add('speaking'); startWaveAnimation(); }
+    else stopWaveAnimation();
+    // ... mantieni resto logica originale ...
   }
-}
 
-function updateSubtitles(text) {
-  subtitleBox.innerText = text;
-  subtitleBox.scrollTop = subtitleBox.scrollHeight;
-}
-
-function handleUserText(text) {
-  appendChatHistory('user', text);
-  updateSubtitles("Tu: " + text);
-  changeState('THINKING');
-  
-  setTimeout(function() {
-    var reply = generateAriaReply(text);
-    appendChatHistory('aria', reply);
-    updateSubtitles(reply);
-    if(!appState.isMuted) speakWithBrowser(reply); else changeState('READY');
-  }, 1000);
-}
-
-function generateAriaReply(input) {
-  var text = input.toLowerCase();
-  if(text.includes('ciao') || text.includes('salve')) return "Ciao! Sono ARIA. Come posso aiutarti oggi?";
-  if(text.includes('chi sei') || text.includes('tuo nome')) return "Sono ARIA, il tuo assistente virtuale privato.";
-  if(text.includes('come stai')) return "I miei moduli operativi sono al cento per cento, grazie per averlo chiesto!";
-  if(text.includes('ora') || text.includes('ore')) return "In questo momento sono le " + new Date().toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'}) + ".";
-  return "Ho ricevuto il messaggio. La mia interfaccia e le animazioni grafiche rispondono perfettamente.";
-}
-
-function speakWithBrowser(text) {
-  if (!synth) return;
-  if (synth.speaking) synth.cancel();
-  
-  currentUtterance = new SpeechSynthesisUtterance(text);
-  currentUtterance.lang = 'it-IT';
-  
-  if (appState.selectedVoiceURI) {
-    var selected = allVoices.find(function(v) { return v.voiceURI === appState.selectedVoiceURI; });
-    if (selected) currentUtterance.voice = selected;
-  }
-  
-  currentUtterance.onstart = function() { changeState('SPEAKING'); };
-  currentUtterance.onend = function() {
-    changeState('READY');
-    if(appState.settings.autoListen && recognition && appState.status === 'READY') {
-      setTimeout(function(){ recognition.start(); }, 400);
-    }
-  };
-  currentUtterance.onerror = function() { changeState('READY'); };
-  synth.speak(currentUtterance);
-}
-
-function appendChatHistory(role, text) {
-  appState.history.push({ role: role, text: text, time: new Date().toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'}) });
-  if(appState.history.length > 30) appState.history.shift();
-  localStorage.setItem('aria_history', JSON.stringify(appState.history));
-  if(role === 'aria') { historyPreviewText.innerText = text; historyPreviewText.style.color = 'var(--text)'; }
-  renderHistoryModal();
-}
-
-function renderHistoryModal() {
-  var list = document.getElementById('chatList');
-  list.innerHTML = '';
-  if(appState.history.length === 0) {
-    list.innerHTML = '<p style="color:var(--muted); text-align:center; padding:20px;">Nessuna cronologia.</p>';
-    return;
-  }
-  appState.history.forEach(function(m) {
-    var div = document.createElement('div');
-    div.className = 'chat-msg ' + m.role;
-    div.innerHTML = `<div>${m.text}</div><span class="chat-time">${m.time}</span>`;
-    list.appendChild(div);
-  });
-  list.scrollTop = list.scrollHeight;
-}
-
-function loadSettingsAndHistory() {
-  renderHistoryModal();
-  if(appState.history.length > 0) {
-    historyPreviewText.innerText = appState.history[appState.history.length - 1].text;
-    historyPreviewText.style.color = 'var(--text)';
-  }
-}
-
-// LOGICA PARALLASSE INTEGRATA (L'IMMAGINE SI INCLINA E SEGUE IL MOUSE IN 3D)
-var avatarContainer = document.getElementById('avatarContainer');
-document.addEventListener('mousemove', function(event) {
-  var rect = avatarContainer.getBoundingClientRect();
-  var centerX = rect.left + rect.width / 2;
-  var centerY = rect.top + rect.height / 2;
-  
-  // Calcola la distanza del mouse dal centro dell'avatar
-  var deltaX = event.clientX - centerX;
-  var deltaY = event.clientY - centerY;
-  
-  // Limita l'inclinazione a un massimo di 12 gradi per non distorcere
-  var rotateY = Math.min(Math.max((deltaX / window.innerWidth) * 25, -12), 12);
-  var rotateX = Math.min(Math.max((centerY - event.clientY) / window.innerHeight * 25, -12), 12);
-  
-  avatarContainer.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-});
-
-// Resetta la posizione quando il mouse esce dallo schermo
-document.addEventListener('mouseleave', function() {
-  avatarContainer.style.transform = 'rotateX(0deg) rotateY(0deg)';
-});
-
-// Supporto per il Touch (Tracciamento su Telefono)
-document.addEventListener('touchmove', function(event) {
-  var touch = event.touches[0];
-  var rect = avatarContainer.getBoundingClientRect();
-  var centerX = rect.left + rect.width / 2;
-  var centerY = rect.top + rect.height / 2;
-  
-  var rotateY = Math.min(Math.max(((touch.clientX - centerX) / window.innerWidth) * 20, -10), 10);
-  var rotateX = Math.min(Math.max((centerY - touch.clientY) / window.innerHeight * 20, -10), 10);
-  
-  avatarContainer.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-}, { passive: true });
-
-// Event Listeners Pulsanti
-btnMic.onclick = function() {
-  if(!recognition) return;
-  if(appState.status === 'SPEAKING' && appState.settings.bargeIn) {
-    if(synth) synth.cancel();
-    changeState('READY');
-    return;
-  }
-  if(appState.status === 'LISTENING') recognition.stop(); else {
-    if(synth && synth.speaking) synth.cancel();
-    try { recognition.start(); } catch(e){}
-  }
-};
-
-btnMute.onclick = function() {
-  appState.isMuted = !appState.isMuted;
-  if(appState.isMuted) {
-    btnMute.classList.add('active');
-    btnMute.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2V15H6L11 19V5Z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`;
-    if(synth && synth.speaking) { synth.cancel(); changeState('READY'); }
-  } else {
-    btnMute.classList.remove('active');
-    btnMute.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>`;
-  }
-};
-
-function toggleModal(modal, action) { if(action === 'open') modal.classList.add('open'); else modal.classList.remove('open'); }
-
-btnHistory.onclick = function() { toggleModal(modalHistory, 'open'); };
-document.getElementById('historyPreview').onclick = function() { toggleModal(modalHistory, 'open'); };
-document.getElementById('closeHistory').onclick = function() { toggleModal(modalHistory, 'close'); };
-
-btnChooseVoice.onclick = function() { loadVoices(); toggleModal(modalVoice, 'open'); };
-document.getElementById('closeVoice').onclick = function() { toggleModal(modalVoice, 'close'); };
-
-btnSettings.onclick = function() { toggleModal(modalSettings, 'open'); };
-document.getElementById('closeSettings').onclick = function() { toggleModal(modalSettings, 'close'); };
-
-document.getElementById('setBargeIn').onchange = function(e) { appState.settings.bargeIn = e.target.checked; };
-document.getElementById('setAutoListen').onchange = function(e) { appState.settings.autoListen = e.target.checked; };
-
-// Onde Sinusoidali Inferiori
-var waveAnimFrame = null;
-var wave1 = document.getElementById('wave1');
-var wave2 = document.getElementById('wave2');
-var wavePhase = 0;
-
-function startWaveAnimation() {
-  function draw() {
-    if(appState.status !== 'SPEAKING') return;
-    wavePhase += 0.18;
-    var d1 = "M 0 30 ", d2 = "M 0 30 ";
-    for (var x = 0; x <= 600; x += 20) {
-      var y1 = 30 + Math.sin(x * 0.02 + wavePhase) * 14 * Math.sin(wavePhase * 0.5);
-      var y2 = 30 + Math.cos(x * 0.015 + wavePhase) * 10 * Math.sin(wavePhase * 0.3);
-      d1 += `L ${x} ${y1} `; d2 += `L ${x} ${y2} `;
-    }
-    if(wave1) wave1.setAttribute('d', d1);
-    if(wave2) wave2.setAttribute('d', d2);
-    waveAnimFrame = requestAnimationFrame(draw);
-  }
-  draw();
-}
-
-function stopWaveAnimation() {
-  if(waveAnimFrame) cancelAnimationFrame(waveAnimFrame);
-  if(wave1) wave1.setAttribute('d', 'M 0 30 Q 75 30, 150 30 T 300 30 T 450 30 T 600 30');
-  if(wave2) wave2.setAttribute('d', 'M 0 30 Q 75 30, 150 30 T 300 30 T 450 30 T 600 30');
-}
-
-window.onload = function() { loadSettingsAndHistory(); };
+  // ... (Includi qui il resto dei tuoi script originali: loadVoices, handleUserText, ecc.) ...
+  // NOTA: Assicurati che i tuoi listener originali (mouse/touch) siano mantenuti.
 </script>
 </body>
 </html>

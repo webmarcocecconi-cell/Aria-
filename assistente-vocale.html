@@ -188,14 +188,15 @@
     .mouth-wrap { width:96px; height:48px; }
   }
 
-  /* ── AVATAR PNG ── */
-  .anime-avatar-img {
+  /* ── AVATAR PNG double-buffer ── */
+  .avatar-layer {
     position:absolute; inset:0; width:100%; height:100%;
     background-size:cover; background-position:center;
-    background-image:url('base_occhi_aperti_bocca_chiusa.png');
-    transition:opacity 0.06s ease;
+    transition:opacity 0.07s ease-out;
   }
-  .face-container.sleeping .anime-avatar-img { filter:brightness(0.45) saturate(0.2); transition:filter 0.6s; }
+  .avatar-layer.back  { opacity:0; }
+  .avatar-layer.front { opacity:1; }
+  .face-container.sleeping .avatar-layer { filter:brightness(0.45) saturate(0.2); transition:filter 0.6s, opacity 0.07s ease-out; }
 </style>
 </head>
 <body>
@@ -315,7 +316,8 @@
 <div class="face-container" id="face">
   <div class="listen-ring"></div>
   <div class="think-ring"></div>
-  <div class="anime-avatar-img" id="avatarImg"></div>
+  <div class="avatar-layer front" id="avatarLayerA" style="background-image:url('base_occhi_aperti_bocca_chiusa.png');"></div>
+  <div class="avatar-layer back"  id="avatarLayerB"></div>
   <div class="eye left" id="eyeL" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;"></div>
   <div class="eye right" id="eyeR" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;"></div>
 </div>
@@ -1251,9 +1253,11 @@ var accumulatedText='';
 <script>
 var svgSleeping = false;
 // ============================================================
-// MOTORE ANIMAZIONE AVATAR PNG
+// MOTORE ANIMAZIONE AVATAR PNG — double-buffer cross-fade
 // ============================================================
-var avatarImg = document.getElementById('avatarImg');
+var _layerA = document.getElementById('avatarLayerA');
+var _layerB = document.getElementById('avatarLayerB');
+var _frontIsA = true; // A è il layer visibile corrente
 
 var AVATAR_FRAMES = {
   READY:            'base_occhi_aperti_bocca_chiusa.png',
@@ -1270,11 +1274,21 @@ var AVATAR_FRAMES = {
 // Precarica tutte le immagini
 (function(){Object.values(AVATAR_FRAMES).forEach(function(s){var i=new Image();i.src=s;});})();
 
+var _lastFrame = AVATAR_FRAMES.READY;
+
 function setAvatarFrame(src){
-  if(!avatarImg)return;
-  var newUrl='url("'+src+'")';
-  if(avatarImg.style.backgroundImage===newUrl)return;
-  avatarImg.style.backgroundImage=newUrl;
+  if(src === _lastFrame) return;
+  _lastFrame = src;
+
+  // Il layer "back" diventa il nuovo front
+  var back  = _frontIsA ? _layerB : _layerA;
+  var front = _frontIsA ? _layerA : _layerB;
+
+  back.style.backgroundImage = 'url("' + src + '")';
+  // Porta back in primo piano (z-index via opacity swap)
+  back.classList.remove('back');  back.classList.add('front');
+  front.classList.remove('front'); front.classList.add('back');
+  _frontIsA = !_frontIsA;
 }
 
 // ── BOCCA durante il parlato ──
@@ -1289,7 +1303,7 @@ function startMouthTalk(){
     setAvatarFrame(_blinkWhileSpeaking
       ?(open?AVATAR_FRAMES.BLINK_MOUTH_OPEN:AVATAR_FRAMES.BLINK_MOUTH_SEMI)
       :(open?AVATAR_FRAMES.MOUTH_OPEN:AVATAR_FRAMES.MOUTH_SEMI));
-    _mouthTimer=setTimeout(next,80+Math.floor(Math.random()*130));
+    _mouthTimer=setTimeout(next,90+Math.floor(Math.random()*110));
   }
   next();
 }
@@ -1338,11 +1352,10 @@ function moveSvgEyes(){}
 function closeSvgEyes(){
   svgSleeping=true;
   setAvatarFrame(AVATAR_FRAMES.SLEEPING);
-  if(avatarImg)avatarImg.style.transition='filter 0.6s';
 }
 function openSvgEyes(){
   svgSleeping=false;
-  if(avatarImg){avatarImg.style.transition='';avatarImg.style.filter='';}
+  _lastFrame=''; // forza aggiornamento
   setAvatarFrame(AVATAR_FRAMES.READY);
 }
 function doBlinkSvg(){}

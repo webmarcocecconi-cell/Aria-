@@ -256,7 +256,7 @@
 </div>
 
 <!-- MODAL CONFIGURAZIONE -->
-<div class="modal-overlay hidden" id="modalOverlay">
+<div class="modal-overlay hidden" id="modalOverlay" style="z-index:210;">
   <div class="modal-box">
     <div class="modal-title">⚙️ CONFIGURA ARIA</div>
     <div class="modal-sub">Chiavi API — salvate in locale, mai inviate a nessuno</div>
@@ -575,7 +575,7 @@ function openModal(){
   if(sg[0])document.getElementById('modalGroqKey').value=sg[0];if(sg[1])document.getElementById('modalGroqKey2').value=sg[1];
   if(sgm)document.getElementById('modalGeminiKey').value=sgm;
   var yt=localStorage.getItem('aria_youtube_key')||'';if(yt)document.getElementById('modalYoutubeKey').value=yt;
-  document.getElementById('modalOverlay').classList.remove('hidden');
+  var _mo=document.getElementById('modalOverlay');_mo.style.zIndex='210';_mo.classList.remove('hidden');setTimeout(function(){document.getElementById('modalGroqKey').focus();},200);
 }
 function closeModal(){document.getElementById('modalOverlay').classList.add('hidden');}
 function openVoiceModal(){

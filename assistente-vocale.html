@@ -496,6 +496,51 @@ function startAriaAfterOnboarding(isNew){
   playShortTTS(greeting,function(){startListening();});
 }
 
+// ═══════════════════════════════════════════════════
+// BROWSER TTS — FIX VOCE FEMMINILE AL PRIMO SALUTO
+// ═══════════════════════════════════════════════════
+function speakWithBrowser(text, onEnd){
+  if(!window.speechSynthesis){if(onEnd)onEnd();return;}
+  window.speechSynthesis.cancel();
+
+  function doSpeak(){
+    var utter = new SpeechSynthesisUtterance(text);
+    utter.lang  = 'it-IT';
+    utter.rate  = 1.05;
+    utter.pitch = 1.0;
+    var voices = window.speechSynthesis.getVoices();
+    var itVoices = voices.filter(function(v){return v.lang.startsWith('it');});
+    // Priorità: nome femminile noto > Google italiano > voce online > qualsiasi italiana
+    var femaleNames = ['google italiano','alice','elsa','bianca','federica','carla'];
+    var best = itVoices.find(function(v){
+                 var n = v.name.toLowerCase();
+                 return femaleNames.some(function(fn){return n.indexOf(fn)>=0;});
+               })
+      || itVoices.find(function(v){return v.name.toLowerCase().indexOf('google')>=0;})
+      || itVoices.find(function(v){return !v.localService;})
+      || itVoices[0];
+    if(best) utter.voice = best;
+    utter.onend  = function(){if(onEnd)onEnd();};
+    utter.onerror = function(){if(onEnd)onEnd();};
+    window.speechSynthesis.speak(utter);
+  }
+
+  // Se le voci non sono ancora caricate aspetta onvoiceschanged
+  // (questo risolve il race condition al primo saluto su Chrome/Android)
+  if(window.speechSynthesis.getVoices().length > 0){
+    doSpeak();
+  } else {
+    window.speechSynthesis.onvoiceschanged = function(){
+      window.speechSynthesis.onvoiceschanged = null;
+      doSpeak();
+    };
+  }
+}
+
+function stopBrowserTTS(){
+  if(window.speechSynthesis)window.speechSynthesis.cancel();
+}
+
 function unlockAudio(){
   try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();var buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.1,audioCtx.sampleRate);var src=audioCtx.createBufferSource();src.buffer=buf;src.connect(audioCtx.destination);src.start();}catch(e){}
   document.getElementById('audioUnlockOverlay').classList.add('hidden');
@@ -525,8 +570,6 @@ function openModal(){
 }
 function closeModal(){document.getElementById('modalOverlay').classList.add('hidden');}
 function closeVoiceModal(){document.getElementById('voiceModal').classList.add('hidden');}
-
-
 
 function toggleSettingsMenu(){
   var menu=document.getElementById('settingsMenu'),btn=document.getElementById('settingsBtn');
@@ -607,31 +650,6 @@ function _svgStartMouthTalk(){
     if(mi)mi.setAttribute('opacity',f.i);
   },220);
 }
-// ─── BROWSER TTS FALLBACK ───
-function speakWithBrowser(text, onEnd){
-  if(!window.speechSynthesis){if(onEnd)onEnd();return;}
-  window.speechSynthesis.cancel();
-  var utter=new SpeechSynthesisUtterance(text);
-  utter.lang='it-IT';
-  utter.rate=1.05;
-  utter.pitch=1.0;
-  // Cerca la voce italiana migliore disponibile
-  var voices=window.speechSynthesis.getVoices();
-  var itVoices=voices.filter(function(v){return v.lang.startsWith('it');});
-  // Preferenza: Google > Microsoft Neural > qualsiasi altra
-  var best=itVoices.find(function(v){return v.name.toLowerCase().indexOf('google')>=0;})
-    ||itVoices.find(function(v){return v.name.toLowerCase().indexOf('natural')>=0||v.name.toLowerCase().indexOf('neural')>=0;})
-    ||itVoices.find(function(v){return !v.localService;}) // online = migliore qualità
-    ||itVoices[0];
-  if(best)utter.voice=best;
-  utter.onend=function(){if(onEnd)onEnd();};
-  utter.onerror=function(){if(onEnd)onEnd();};
-  window.speechSynthesis.speak(utter);
-}
-
-function stopBrowserTTS(){
-  if(window.speechSynthesis)window.speechSynthesis.cancel();
-}
 
 function _svgStopMouthTalk(){if(mouthTalkInterval){clearInterval(mouthTalkInterval);mouthTalkInterval=null;}}
 
@@ -683,7 +701,8 @@ async function askAria(userMsg){
     var cleanText=fullText.replace(/\[EMO:[^\]]+\]/g,'').trim();
     removeTyping();conversationHistory.push({role:'assistant',content:fullText});setEmotion(emo);
     addBubble('aria',cleanText);showSubtitle('aria',cleanText);
-    setEmotion('parlando');startMouthTalk();
+    // setEmotion('parlando') chiama già startMouthTalk() — nessuna chiamata ridondante
+    setEmotion('parlando');
     document.getElementById('btnStop').style.display='flex';
     speakWithBrowser(cleanText,function(){stopMouthTalk();animateMouth('neutra');document.getElementById('btnStop').style.display='none';goIdleAfterSpeaking();});
 
@@ -704,9 +723,7 @@ function playWavBuffer(wavBuffer,emo,subtitleText){
 }
 async function callGroq(){
   var recentHistory=conversationHistory.slice(-6);
-  // Pulisce EMO tag e filtra messaggi vuoti dalla history
   var cleanHistory=recentHistory.map(function(m){return{role:m.role,content:m.content.replace(/\[EMO:[^\]]+\]/g,'').trim()};}).filter(function(m){return m.content.length>0;});
-  // Garantisce che la history non inizi con 'assistant' (Groq lo rifiuta)
   while(cleanHistory.length>0&&cleanHistory[0].role==='assistant')cleanHistory.shift();
   var messages=[{role:'system',content:buildSystemPrompt()}].concat(cleanHistory);
   var models=['llama-3.3-70b-versatile','llama-3.1-70b-versatile'];
@@ -718,9 +735,7 @@ async function callGroq(){
       if(data.error){
         var emsg=data.error.message||JSON.stringify(data.error);
         if(emsg.indexOf('rate')>=0||data.error.code===429){groqKeyIndex=(idx+1)%GROQ_KEYS.length;continue;}
-        // Modello non disponibile → prova il prossimo modello
         if(emsg.indexOf('decommissioned')>=0||emsg.indexOf('no longer supported')>=0||emsg.indexOf('not found')>=0||data.error.code===404){console.warn('Groq model',models[mi],'non disponibile, provo il prossimo');break;}
-        // Errore 400 su questo modello → prova il prossimo modello
         console.warn('Groq '+models[mi]+' error:',emsg);break;
       }
       groqKeyIndex=(idx+1)%GROQ_KEYS.length;return data.choices[0].message.content;
@@ -744,10 +759,8 @@ var GROUNDING_TRIGGERS=[
 function detectGroundingTrigger(text){return GROUNDING_TRIGGERS.some(function(re){return re.test(text.toLowerCase());});}
 async function callGeminiGrounded(){
   var key=localStorage.getItem('aria_gemini_key')||'';if(!key)throw new Error('Nessuna chiave Gemini');
-  // Pulisce history: EMO tag rimossi, messaggi vuoti esclusi, non può iniziare con 'model'
   var contents=conversationHistory.map(function(m){return{role:m.role==='assistant'?'model':'user',parts:[{text:m.content.replace(/\[EMO:[^\]]+\]/g,'').trim()}]};}).filter(function(c){return c.parts[0].text.length>0;});
   while(contents.length>0&&contents[0].role==='model')contents.shift();
-  // Gemini richiede almeno un elemento in contents
   if(!contents.length)throw new Error('Gemini grounding: history vuota');
   var response=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+key,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system_instruction:{parts:[{text:buildSystemPrompt()}]},contents:contents,tools:[{google_search:{}}],generationConfig:{maxOutputTokens:300,temperature:0.75}})});
   var data=await response.json();if(data.error)throw new Error(data.error.message);
@@ -842,7 +855,7 @@ window.addEventListener('beforeunload',onBeforeUnload);
 // SISTEMA VOCALE — TAP TO TALK
 // ═══════════════════════════════════════════════════
 var VOICE_STATE='idle';
-var commandRecognition=null;  // tenuto per compatibilità stopListening
+var commandRecognition=null;
 var countdownInterval=null;
 var countdownSec=10;
 var speechEndTimer=null;
@@ -855,7 +868,6 @@ function updateStateLabel(){
   var s=map[VOICE_STATE]||map.idle;label.className='state-label'+(s.cls?' '+s.cls:'');text.textContent=s.txt;
 }
 function goSpeaking(){
-  // Blocca il timer sleep mentre ARIA sta parlando
   clearTimeout(silenceTimer);silenceTimer=null;
   setState('speaking');updateMicBtn();
 }
@@ -869,7 +881,7 @@ function toggleMic(){
 }
 
 function startListening(){
-  stopWakeWord(); // ferma wake word se attivo
+  stopWakeWord();
   clearTimeout(silenceTimer);
   if(VOICE_STATE==='listening'){
     silenceTimer=setTimeout(function(){if(VOICE_STATE==='listening'&&!isYoutubeOpen())startCountdown();},20000);return;
@@ -885,19 +897,18 @@ function isYoutubeOpen(){var p=document.getElementById('ytPlayer');return p&&p.c
 
 // ═══════════════════════════════════════════════════
 // SISTEMA ASCOLTO — MEDIARECORDER + ANALISI VOLUME
-// Nessun Web Speech API = nessun beep su Android
 // ═══════════════════════════════════════════════════
-var mrStream=null;          // stream microfono attivo
-var mrRecorder=null;        // MediaRecorder attivo
-var mrChunks=[];            // chunk audio raccolti
-var mrAnalyser=null;        // AnalyserNode per rilevare volume
-var mrAnalyserCtx=null;     // AudioContext dedicato all'analisi
-var mrSilenceTimer=null;    // timer silenzio → invia
-var mrWasSpeaking=false;    // l'utente ha parlato almeno una volta
-var mrAnalyserInterval=null;// interval per lettura volume
-var SILENCE_THRESHOLD=8;   // volume sotto questa soglia = silenzio (0-255)
-var SILENCE_DURATION=1500;  // ms di silenzio continuo → invia
-var MIN_SPEECH_MS=300;      // ms minimi di parlato per evitare invii accidentali
+var mrStream=null;
+var mrRecorder=null;
+var mrChunks=[];
+var mrAnalyser=null;
+var mrAnalyserCtx=null;
+var mrSilenceTimer=null;
+var mrWasSpeaking=false;
+var mrAnalyserInterval=null;
+var SILENCE_THRESHOLD=8;
+var SILENCE_DURATION=1500;
+var MIN_SPEECH_MS=300;
 
 function startListeningAttempt(){
   if(VOICE_STATE!=='listening')return;
@@ -911,19 +922,16 @@ function startListeningAttempt(){
     mrWasSpeaking=false;
     var mrRecordingStart=Date.now();
 
-    // Analizzatore volume
     mrAnalyserCtx=new(window.AudioContext||window.webkitAudioContext)();
     var source=mrAnalyserCtx.createMediaStreamSource(stream);
     mrAnalyser=mrAnalyserCtx.createAnalyser();
     mrAnalyser.fftSize=512;
     source.connect(mrAnalyser);
 
-    // MediaRecorder
     var mimeType=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm';
     mrRecorder=new MediaRecorder(stream,{mimeType:mimeType});
     mrRecorder.ondataavailable=function(e){if(e.data&&e.data.size>0)mrChunks.push(e.data);};
     mrRecorder.onstop=function(){
-      // Pulisci stream e analyser
       if(mrStream){mrStream.getTracks().forEach(function(t){t.stop();});mrStream=null;}
       if(mrAnalyserCtx){try{mrAnalyserCtx.close();}catch(e){}mrAnalyserCtx=null;}
       mrAnalyser=null;
@@ -938,18 +946,15 @@ function startListeningAttempt(){
       mrChunks=[];
       if(VOICE_STATE==='listening'||VOICE_STATE==='countdown')goThinkingFromAudio(blob);
     };
-    mrRecorder.start(100); // chunk ogni 100ms
+    mrRecorder.start(100);
 
-    // Avvia loop analisi volume SOLO dopo che l'AudioContext è attivo
     function startAnalyserLoop(){
-      _micVizBars=null; // reset cache barre per sicurezza
+      _micVizBars=null;
       var dataArray=new Uint8Array(mrAnalyser.frequencyBinCount);
       var speechStartTime=null;
       mrAnalyserInterval=setInterval(function(){
       if(!mrAnalyser){clearInterval(mrAnalyserInterval);mrAnalyserInterval=null;return;}
       if(VOICE_STATE!=='listening'){
-        // Se non siamo in listening, ferma l'interval ma non chiamare stopListening
-        // (potrebbe interrompere countdown/sleeping/speaking in corso)
         clearInterval(mrAnalyserInterval);mrAnalyserInterval=null;
         if(mrRecorder&&mrRecorder.state==='recording'){try{mrRecorder.stop();}catch(e){}}
         return;
@@ -960,15 +965,12 @@ function startListeningAttempt(){
       updateMicViz(dataArray,avg);
 
       if(avg>SILENCE_THRESHOLD){
-        // Sta parlando
         if(!speechStartTime)speechStartTime=Date.now();
         if(Date.now()-speechStartTime>MIN_SPEECH_MS)mrWasSpeaking=true;
         clearTimeout(mrSilenceTimer);mrSilenceTimer=null;
-        // Resetta anche il silence timer globale (countdown sleep)
         clearTimeout(silenceTimer);
         silenceTimer=setTimeout(function(){if(VOICE_STATE==='listening'&&!isYoutubeOpen())startCountdown();},20000);
       }else{
-        // Silenzio
         speechStartTime=null;
         if(mrWasSpeaking&&!mrSilenceTimer){
           mrSilenceTimer=setTimeout(function(){
@@ -977,9 +979,8 @@ function startListeningAttempt(){
         }
       }
     },100);
-    } // fine startAnalyserLoop
+    }
 
-    // Avvia loop SOLO dopo che AudioContext è running — garantisce dati reali
     if(mrAnalyserCtx.state==='suspended'){
       mrAnalyserCtx.resume().then(startAnalyserLoop).catch(startAnalyserLoop);
     }else{
@@ -992,7 +993,6 @@ function startListeningAttempt(){
   });
 }
 
-
 // ── MIC VISUALIZER ──
 var _micVizBars=null;
 function updateMicViz(dataArray,avg){
@@ -1001,13 +1001,11 @@ function updateMicViz(dataArray,avg){
     for(var i=0;i<14;i++){var b=document.getElementById('mvb'+i);if(b)_micVizBars.push(b);}
   }
   var N=_micVizBars.length;if(!N)return;
-  // Campiona N bande distribuite sullo spettro (focus sulle frequenze vocali)
-  var step=Math.floor(dataArray.length*0.6/N); // usa il 60% basso dello spettro (voce umana)
-  var maxH=33; // px max barra
+  var step=Math.floor(dataArray.length*0.6/N);
+  var maxH=33;
   var hot=avg>SILENCE_THRESHOLD;
   for(var j=0;j<N;j++){
     var val=dataArray[j*step]||0;
-    // Simmetria: le barre centrali più alte (forma a campana leggera)
     var center=Math.abs(j-(N-1)/2)/((N-1)/2);
     val=val*(1-center*0.25);
     var h=Math.max(3,Math.round((val/255)*maxH));
@@ -1021,7 +1019,6 @@ function stopListening(){
   clearInterval(mrAnalyserInterval);mrAnalyserInterval=null;
   if(mrRecorder&&mrRecorder.state==='recording'){try{mrRecorder.stop();}catch(e){}mrRecorder=null;}
   else{
-    // Se il recorder non è attivo, pulisci stream manualmente
     if(mrStream){mrStream.getTracks().forEach(function(t){t.stop();});mrStream=null;}
     if(mrAnalyserCtx){try{mrAnalyserCtx.close();}catch(e){}mrAnalyserCtx=null;}
     mrAnalyser=null;
@@ -1030,19 +1027,16 @@ function stopListening(){
 }
 
 function goThinkingFromAudio(blob){
-  // Imposta thinking direttamente — stopListening è già stato chiamato da mrSilenceTimer
   clearTimeout(silenceTimer);silenceTimer=null;
   setState('thinking');updateMicBtn();addTyping();setEmotion('pensierosa');
-  // Usa Groq Whisper per la trascrizione — più veloce di Gemini (~300ms)
   var key=GROQ_KEYS[groqKeyIndex%GROQ_KEYS.length]||'';
   if(!key){setState('idle');updateMicBtn();startListening();return;}
   try{
     var formData=new FormData();
-    // Groq Whisper accetta webm/ogg/mp4/wav — usiamo il blob direttamente
     var filename='audio.'+(blob.type.includes('ogg')?'ogg':blob.type.includes('mp4')?'mp4':blob.type.includes('wav')?'wav':'webm');
     formData.append('file',blob,filename);
-    formData.append('model','whisper-large-v3-turbo'); // più veloce di whisper-large-v3, stessa qualità
-    formData.append('language','it'); // forza italiano — più veloce e accurato
+    formData.append('model','whisper-large-v3-turbo');
+    formData.append('language','it');
     formData.append('response_format','json');
     fetch('https://api.groq.com/openai/v1/audio/transcriptions',{
       method:'POST',
@@ -1050,20 +1044,17 @@ function goThinkingFromAudio(blob){
       body:formData
     }).then(function(res){return res.json();}).then(function(data){
       if(data.error){
-        // Fallback a Gemini se Groq fallisce
         goThinkingFromAudioGemini(blob);return;
       }
       var t=(data.text||'').trim();
       if(t){addBubble('user',t);showSubtitle('user',t);conversationHistory.push({role:'user',content:t});askAriaFromTranscript(t);}
       else{setState('idle');updateMicBtn();startListening();}
     }).catch(function(){
-      // Fallback a Gemini
       goThinkingFromAudioGemini(blob);
     });
   }catch(e){goThinkingFromAudioGemini(blob);}
 }
 
-// Fallback trascrizione Gemini (usato se Groq non disponibile)
 function goThinkingFromAudioGemini(blob){
   var reader=new FileReader();
   reader.onloadend=async function(){
@@ -1090,7 +1081,6 @@ function goThinkingFromAudioGemini(blob){
   reader.readAsDataURL(blob);
 }
 
-// goThinking: versione testuale (input da tastiera)
 function goThinking(transcript){
   stopListening();
   clearTimeout(speechEndTimer);
@@ -1100,11 +1090,9 @@ function goThinking(transcript){
   if(transcript)askAria(transcript);
 }
 
-// askAriaFromTranscript: chiamato dopo trascrizione audio — bolla utente già aggiunta
+// askAriaFromTranscript: bolla utente già aggiunta — nessuna startMouthTalk ridondante
 async function askAriaFromTranscript(userMsg){
-  // Controlla chiavi disponibili (robusto: usa GROQ_KEYS array, non GROQ_KEY statica)
   if(!GROQ_KEYS||!GROQ_KEYS.length){openModal();return;}
-  // Gestisci richieste YouTube anche da voce
   if(detectYoutubeTrigger(userMsg)){await handleYoutubeRequest(userMsg);return;}
   setState('thinking');addTyping();setEmotion('pensierosa');
   try{
@@ -1123,28 +1111,26 @@ async function askAriaFromTranscript(userMsg){
     var cleanText=fullText.replace(/\[EMO:[^\]]+\]/g,'').trim();
     removeTyping();conversationHistory.push({role:'assistant',content:fullText});setEmotion(emo);
     addBubble('aria',cleanText);showSubtitle('aria',cleanText);
-    setEmotion('parlando');startMouthTalk();
+    // setEmotion('parlando') chiama già startMouthTalk() — nessuna chiamata ridondante
+    setEmotion('parlando');
     document.getElementById('btnStop').style.display='flex';
     speakWithBrowser(cleanText,function(){stopMouthTalk();animateMouth('neutra');document.getElementById('btnStop').style.display='none';goIdleAfterSpeaking();});
 
   }catch(err){removeTyping();showSubtitle('aria','⚠️ '+(err.message||'Errore connessione.'));setEmotion('neutra');setState('idle');updateMicBtn();}
 }
 
-// goIdleAfterSpeaking: delay 300ms + check stato
-// evita di avviare l'ascolto se nel frattempo è arrivata una nuova richiesta
 function goIdleAfterSpeaking(){
   if(conversationHistory.length>0){
     setState('idle');
     setTimeout(function(){
       if(VOICE_STATE==='thinking'||VOICE_STATE==='speaking')return;
-      // Riavvia listening con timer esteso a 40s (l'utente ha appena sentito la risposta)
       clearTimeout(silenceTimer);
       setState('listening');accumulatedText='';updateMicBtn();setEmotion('ascoltando');
       var _mv2=document.getElementById('micViz');if(_mv2)_mv2.classList.add('active');
       startListeningAttempt();
       silenceTimer=setTimeout(function(){
         if(VOICE_STATE==='listening'&&!isYoutubeOpen())startCountdown();
-      },40000); // 40s invece di 20s dopo che ARIA risponde
+      },40000);
     },300);
   }else{setState('idle');updateMicBtn();}
 }
@@ -1168,7 +1154,6 @@ var wakeRecognition=null;
 var wakeWordActive=false;
 
 function startWakeWord(){
-  // Silenzia beep Android: mantieni AudioContext sospeso durante wake word
   try { if(window.audioCtx && audioCtx.state==='running') audioCtx.suspend(); } catch(e){}
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR||wakeWordActive)return;
@@ -1184,7 +1169,6 @@ function startWakeWord(){
       if(t.indexOf('aria')>=0){wakeUp(true);}
     };
     wakeRecognition.onend=function(){
-      // Riavvia silenziosamente — in sleeping i beep non danno fastidio
       if(wakeWordActive)setTimeout(attempt,500);
     };
     wakeRecognition.onerror=function(){
@@ -1214,13 +1198,13 @@ function goSleeping(){
   svgSleeping=true; closeSvgEyes();
   setState('idle');updateMicBtn();setEmotion('dormendo');hideSubtitle();
   var b=document.getElementById('wakeBanner');if(b)b.classList.add('visible');
-  startWakeWord(); // ascolta "aria" in background
+  startWakeWord();
 }
 
 function wakeUp(fromWakeWord){
   svgSleeping=false; openSvgEyes();
   try { if(window.audioCtx && audioCtx.state!=="running") audioCtx.resume(); } catch(e){}
-  stopWakeWord(); // spegne Web Speech
+  stopWakeWord();
   var b=document.getElementById('wakeBanner');if(b)b.classList.remove('visible');
   setEmotion('felice');
   if(isYoutubeOpen()){setState('idle');updateMicBtn();return;}
@@ -1245,25 +1229,23 @@ async function playShortTTS(text,callback){
 function sendText(){var input=document.getElementById('textInput'),msg=input.value.trim();if(!msg)return;input.value='';askAria(msg);}
 
 window.onload=function(){
-  // Precarica voci browser per ridurre latenza primo utilizzo
-  if(window.speechSynthesis){
-    window.speechSynthesis.getVoices();
-    window.speechSynthesis.onvoiceschanged=function(){window.speechSynthesis.getVoices();};
-  }
+  // Le voci vengono gestite direttamente da speakWithBrowser con onvoiceschanged
+  // Rimosso il precaricamento ridondante da onload
   document.addEventListener('touchmove',function(e){moveEyes(e.touches[0].clientX,e.touches[0].clientY);});
   document.addEventListener('mousemove',function(e){moveEyes(e.clientX,e.clientY);});
   document.getElementById('textInput').addEventListener('keydown',function(e){if(e.key==='Enter')sendText();});
   document.getElementById('audioUnlockOverlay').classList.remove('hidden');
 };
 
-// Chiamata dopo unlock audio — avvia wake word se onboarding completato e ARIA è in idle
 function onAudioUnlocked(){
   if(localStorage.getItem('aria_onboarding_done')==='true'&&VOICE_STATE==='idle'){
-    // Se ARIA è già dormendo (wakeBanner visibile) avvia wake word
     var b=document.getElementById('wakeBanner');
     if(b&&b.classList.contains('visible'))startWakeWord();
   }
 }
+
+// variabile globale necessaria per accumulazione testo (usata in startListening)
+var accumulatedText='';
 </script>
 <script>
 var svgSleeping = false;
@@ -1350,7 +1332,7 @@ setEmotion=function(emo){
 };
 
 // ── Sostituisci le funzioni SVG occhi con versioni PNG ──
-function moveSvgEyes(){}  // nessun movimento occhi su PNG
+function moveSvgEyes(){}
 
 function closeSvgEyes(){
   svgSleeping=true;
@@ -1362,7 +1344,7 @@ function openSvgEyes(){
   if(avatarImg){avatarImg.style.transition='';avatarImg.style.filter='';}
   setAvatarFrame(AVATAR_FRAMES.READY);
 }
-function doBlinkSvg(){} // sostituito da doBlink sopra
+function doBlinkSvg(){}
 
 // ── Fine motore PNG ──
 </script>

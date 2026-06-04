@@ -188,15 +188,13 @@
     .mouth-wrap { width:96px; height:48px; }
   }
 
-  /* ── AVATAR PNG double-buffer ── */
+  /* ── AVATAR PNG single-layer, swap on decode ── */
   .avatar-layer {
     position:absolute; inset:0; width:100%; height:100%;
     background-size:cover; background-position:center;
-    transition:opacity 0.07s ease-out;
   }
-  .avatar-layer.back  { opacity:0; }
-  .avatar-layer.front { opacity:1; }
-  .face-container.sleeping .avatar-layer { filter:brightness(0.45) saturate(0.2); transition:filter 0.6s, opacity 0.07s ease-out; }
+  #avatarLayerB { display:none; }
+  .face-container.sleeping .avatar-layer { filter:brightness(0.45) saturate(0.2); transition:filter 0.6s; }
 </style>
 </head>
 <body>
@@ -1253,11 +1251,9 @@ var accumulatedText='';
 <script>
 var svgSleeping = false;
 // ============================================================
-// MOTORE ANIMAZIONE AVATAR PNG — double-buffer cross-fade
+// MOTORE ANIMAZIONE AVATAR PNG — swap-on-decode (no flash)
 // ============================================================
-var _layerA = document.getElementById('avatarLayerA');
-var _layerB = document.getElementById('avatarLayerB');
-var _frontIsA = true; // A è il layer visibile corrente
+var _avatarLayer = document.getElementById('avatarLayerA');
 
 var AVATAR_FRAMES = {
   READY:            'base_occhi_aperti_bocca_chiusa.png',
@@ -1271,24 +1267,41 @@ var AVATAR_FRAMES = {
   SLEEPING:         'blink_chiuso.png'
 };
 
-// Precarica tutte le immagini
-(function(){Object.values(AVATAR_FRAMES).forEach(function(s){var i=new Image();i.src=s;});})();
+// Precarica e decodifica tutte le immagini in cache browser
+var _imgCache = {};
+(function(){
+  Object.values(AVATAR_FRAMES).forEach(function(src){
+    var img = new Image();
+    img.src = src;
+    if(img.decode) img.decode().catch(function(){});
+    _imgCache[src] = img;
+  });
+})();
 
 var _lastFrame = AVATAR_FRAMES.READY;
+var _pendingFrame = null;
 
 function setAvatarFrame(src){
   if(src === _lastFrame) return;
-  _lastFrame = src;
+  _pendingFrame = src;
+  var img = _imgCache[src];
+  if(!img){ img = new Image(); img.src = src; _imgCache[src] = img; }
 
-  // Il layer "back" diventa il nuovo front
-  var back  = _frontIsA ? _layerB : _layerA;
-  var front = _frontIsA ? _layerA : _layerB;
+  function doSwap(){
+    if(_pendingFrame !== src) return; // superato da frame più nuovo
+    _lastFrame = src;
+    _avatarLayer.style.backgroundImage = 'url("' + src + '")';
+  }
 
-  back.style.backgroundImage = 'url("' + src + '")';
-  // Porta back in primo piano (z-index via opacity swap)
-  back.classList.remove('back');  back.classList.add('front');
-  front.classList.remove('front'); front.classList.add('back');
-  _frontIsA = !_frontIsA;
+  // Se l'immagine è già decodificata in memoria (caso normale dopo preload),
+  // decode() risolve quasi istantaneamente — nessun flash
+  if(img.decode){
+    img.decode().then(doSwap).catch(doSwap);
+  } else if(img.complete){
+    doSwap();
+  } else {
+    img.onload = doSwap;
+  }
 }
 
 // ── BOCCA durante il parlato ──

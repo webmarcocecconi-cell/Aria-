@@ -491,8 +491,8 @@ function startAriaAfterOnboarding(isNew){
   updateProviderBadge();
   var name=userProfile.name||'amica',pronoun=userProfile.gender==='F'?'a':'o';
   var greeting=isNew?'Ciao '+name+'! Sono ARIA, sono felice di conoscerti! 💜':'Bentornat'+pronoun+' '+name+'! 💜';
-  addBubble('aria',greeting);setEmotion('felice');showSubtitle('aria',greeting);
-  initSpeechRecognition();updateStateLabel();setState('speaking');
+  addBubble('aria',greeting);showSubtitle('aria',greeting);
+  initSpeechRecognition();updateStateLabel();setState('speaking');setEmotion('parlando');
   playShortTTS(greeting,function(){startListening();});
 }
 
@@ -701,7 +701,7 @@ async function askAria(userMsg){
     var cleanText=fullText.replace(/\[EMO:[^\]]+\]/g,'').trim();
     removeTyping();conversationHistory.push({role:'assistant',content:fullText});setEmotion(emo);
     addBubble('aria',cleanText);showSubtitle('aria',cleanText);
-    // setEmotion('parlando') chiama già startMouthTalk() — nessuna chiamata ridondante
+    setState('speaking');
     setEmotion('parlando');
     document.getElementById('btnStop').style.display='flex';
     speakWithBrowser(cleanText,function(){stopMouthTalk();animateMouth('neutra');document.getElementById('btnStop').style.display='none';goIdleAfterSpeaking();});
@@ -801,7 +801,7 @@ function closeYoutube(){
   if(wasVisible&&VOICE_STATE!=='speaking'){
     var frasi=["Com'era? Ti è piaciuta?","Bella, no? Vuoi sentire altro?","Finita! Vuoi un'altra canzone?"];
     var frase=frasi[Math.floor(Math.random()*frasi.length)];
-    clearTimeout(silenceTimer);setState('speaking');addBubble('aria',frase);setEmotion('felice');
+    clearTimeout(silenceTimer);setState('speaking');addBubble('aria',frase);setEmotion('parlando');
     playShortTTS(frase,function(){goIdleAfterSpeaking();});
   }
 }
@@ -1111,7 +1111,7 @@ async function askAriaFromTranscript(userMsg){
     var cleanText=fullText.replace(/\[EMO:[^\]]+\]/g,'').trim();
     removeTyping();conversationHistory.push({role:'assistant',content:fullText});setEmotion(emo);
     addBubble('aria',cleanText);showSubtitle('aria',cleanText);
-    // setEmotion('parlando') chiama già startMouthTalk() — nessuna chiamata ridondante
+    setState('speaking');
     setEmotion('parlando');
     document.getElementById('btnStop').style.display='flex';
     speakWithBrowser(cleanText,function(){stopMouthTalk();animateMouth('neutra');document.getElementById('btnStop').style.display='none';goIdleAfterSpeaking();});
@@ -1190,7 +1190,7 @@ function sayGoodbye(){
   if(isYoutubeOpen()){goSleeping();return;}
   var frasi=['Sono qui, chiamami quando hai bisogno.','Mi fermo un attimo, svegliami quando vuoi!','A presto! Dimmi pure il mio nome per ricominciare.','Vado a riposare, ma sono qui se mi chiami.'];
   var frase=frasi[Math.floor(Math.random()*frasi.length)];
-  showSubtitle('aria',frase);setEmotion('empatica');
+  showSubtitle('aria',frase);setState('speaking');setEmotion('empatica');
   playShortTTS(frase,function(){goSleeping();});
 }
 
@@ -1213,6 +1213,7 @@ function wakeUp(fromWakeWord){
     :['Eccomi! Di cosa vuoi parlare?','Sono sveglia! Come posso aiutarti?','Ci sono! Dimmi pure.'];
   var frase=frasi[Math.floor(Math.random()*frasi.length)];
   showSubtitle('aria',frase);
+  setState('speaking');setEmotion('parlando');
   playShortTTS(frase,function(){hideSubtitle();startListening();});
 }
 

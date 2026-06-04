@@ -510,15 +510,24 @@ function speakWithBrowser(text, onEnd){
     utter.pitch = 1.0;
     var voices = window.speechSynthesis.getVoices();
     var itVoices = voices.filter(function(v){return v.lang.startsWith('it');});
-    // Priorità: nome femminile noto > Google italiano > voce online > qualsiasi italiana
-    var femaleNames = ['google italiano','alice','elsa','bianca','federica','carla'];
-    var best = itVoices.find(function(v){
-                 var n = v.name.toLowerCase();
-                 return femaleNames.some(function(fn){return n.indexOf(fn)>=0;});
-               })
-      || itVoices.find(function(v){return v.name.toLowerCase().indexOf('google')>=0;})
-      || itVoices.find(function(v){return !v.localService;})
-      || itVoices[0];
+    // Se l'utente ha scelto una voce manualmente, usala
+    var best = null;
+    if(window.ARIA_VOICE_NAME){
+      best = voices.find(function(v){return v.name===window.ARIA_VOICE_NAME;});
+    }
+    if(!best){
+      // Priorità: Google it > nome femminile noto > voce online > qualsiasi italiana
+      var femaleNames = ['alice','elsa','bianca','federica','carla','isabella'];
+      best = itVoices.find(function(v){
+               return v.name.toLowerCase().indexOf('google')>=0;
+             })
+        || itVoices.find(function(v){
+               var n=v.name.toLowerCase();
+               return femaleNames.some(function(fn){return n.indexOf(fn)>=0;});
+             })
+        || itVoices.find(function(v){return !v.localService;})
+        || itVoices[0];
+    }
     if(best) utter.voice = best;
     utter.onend  = function(){if(onEnd)onEnd();};
     utter.onerror = function(){if(onEnd)onEnd();};
@@ -569,7 +578,69 @@ function openModal(){
   document.getElementById('modalOverlay').classList.remove('hidden');
 }
 function closeModal(){document.getElementById('modalOverlay').classList.add('hidden');}
-function closeVoiceModal(){document.getElementById('voiceModal').classList.add('hidden');}
+function openVoiceModal(){
+  var list=document.getElementById('voiceList');
+  list.innerHTML='<div style="color:var(--muted);font-size:0.8rem;text-align:center;padding:10px;">Caricamento voci…</div>';
+  document.getElementById('voiceModal').classList.remove('hidden');
+
+  function render(voices){
+    var itVoices=voices.filter(function(v){return v.lang.startsWith('it');});
+    if(!itVoices.length){list.innerHTML='<div style="color:var(--muted);font-size:0.8rem;text-align:center;padding:10px;">Nessuna voce italiana trovata nel browser.</div>';return;}
+    var saved=window.ARIA_VOICE_NAME||'';
+    // Metti Google in cima
+    itVoices.sort(function(a,b){
+      var ag=a.name.toLowerCase().indexOf('google')>=0?0:1;
+      var bg=b.name.toLowerCase().indexOf('google')>=0?0:1;
+      return ag-bg||a.name.localeCompare(b.name);
+    });
+    list.innerHTML=itVoices.map(function(v){
+      var isSelected=saved?v.name===saved:v.name.toLowerCase().indexOf('google')>=0;
+      var isGoogle=v.name.toLowerCase().indexOf('google')>=0;
+      return '<div onclick="selectVoiceItem(this,''+v.name.replace(/'/g,"\'")+'')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;border:1px solid '+(isSelected?'var(--accent)':'rgba(255,255,255,0.06)')+';background:'+(isSelected?'rgba(124,109,250,0.12)':'var(--surface)')+';transition:all .15s;" class="vitem">'
+        +'<div style="flex:1;">'
+        +'<div style="font-size:0.82rem;font-weight:600;color:var(--text);">'+v.name+'</div>'
+        +'<div style="font-size:0.68rem;color:var(--muted);margin-top:2px;">'+v.lang+(v.localService?' · locale':' · online')+(isGoogle?' · ⭐ consigliata':'')+' </div>'
+        +'</div>'
+        +'<button onclick="event.stopPropagation();previewVoice(''+v.name.replace(/'/g,"\'")+'')" style="background:rgba(124,109,250,0.15);border:1px solid rgba(124,109,250,0.3);border-radius:7px;color:var(--accent);font-size:11px;padding:4px 10px;cursor:pointer;">▶</button>'
+        +'</div>';
+    }).join('');
+  }
+
+  var voices=window.speechSynthesis.getVoices();
+  if(voices.length>0){render(voices);}
+  else{window.speechSynthesis.onvoiceschanged=function(){render(window.speechSynthesis.getVoices());};}
+}
+
+function selectVoiceItem(el,name){
+  document.querySelectorAll('.vitem').forEach(function(e){
+    e.style.border='1px solid rgba(255,255,255,0.06)';
+    e.style.background='var(--surface)';
+  });
+  el.style.border='1px solid var(--accent)';
+  el.style.background='rgba(124,109,250,0.12)';
+  window.ARIA_VOICE_NAME=name;
+  localStorage.setItem('aria_voice_name',name);
+}
+
+function previewVoice(name){
+  window.speechSynthesis.cancel();
+  var v=window.speechSynthesis.getVoices().find(function(x){return x.name===name;});
+  if(!v)return;
+  var u=new SpeechSynthesisUtterance('Ciao! Sono Aria, il tuo assistente vocale.');
+  u.voice=v; u.lang=v.lang; u.rate=1.05;
+  window.speechSynthesis.speak(u);
+}
+
+function closeVoiceModal(){
+  window.speechSynthesis.cancel();
+  document.getElementById('voiceModal').classList.add('hidden');
+}
+
+// Carica voce salvata
+(function(){
+  var saved=localStorage.getItem('aria_voice_name');
+  if(saved) window.ARIA_VOICE_NAME=saved;
+})();
 
 function toggleSettingsMenu(){
   var menu=document.getElementById('settingsMenu'),btn=document.getElementById('settingsBtn');
